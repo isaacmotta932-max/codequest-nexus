@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2,
   XCircle,
@@ -14,6 +14,7 @@ import {
   Terminal,
   ArrowRight,
   ArrowLeft,
+  Lock,
 } from 'lucide-react';
 
 import { dbGetPublishedCourses, isSupabaseConfigured } from '@/lib/database';
@@ -161,7 +162,7 @@ function downloadDataUrl(dataUrl: string, fileName: string) {
 }
 
 // ============================================================================
-// COMPONENTE: QUIZ INTERATIVO
+// COMPONENTE: QUIZ INTERATIVO (SEM ENTREGAR RESPOSTA, COM DICAS)
 // ============================================================================
 function InteractiveQuiz({
   quiz,
@@ -215,12 +216,15 @@ function InteractiveQuiz({
             textColor = '#00D4FF';
           }
 
+          // Se enviou:
+          // Se ACERTOU, destaca em verde apenas a opção correta.
+          // Se ERROU, destaca em vermelho APENAS a opção incorreta que o aluno marcou (NÃO ENTREGA A RESPOSTA CERTA!)
           if (submitted) {
-            if (index === quiz.correctIndex) {
+            if (isCorrect && index === quiz.correctIndex) {
               buttonBg = 'rgba(0, 255, 136, 0.15)';
               borderColor = '#00FF88';
               textColor = '#00FF88';
-            } else if (isThisSelected && !isCorrect) {
+            } else if (!isCorrect && isThisSelected) {
               buttonBg = 'rgba(255, 75, 75, 0.15)';
               borderColor = '#FF4B4B';
               textColor = '#FF4B4B';
@@ -247,10 +251,10 @@ function InteractiveQuiz({
               <span style={{ flex: 1, textAlign: 'left', lineHeight: 1.5 }}>
                 {option}
               </span>
-              {submitted && index === quiz.correctIndex && (
+              {submitted && isCorrect && index === quiz.correctIndex && (
                 <CheckCircle2 size={20} color="#00FF88" />
               )}
-              {submitted && isThisSelected && !isCorrect && (
+              {submitted && !isCorrect && isThisSelected && (
                 <XCircle size={20} color="#FF4B4B" />
               )}
             </button>
@@ -279,7 +283,7 @@ function InteractiveQuiz({
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <CheckCircle2 size={20} color="#00FF88" />
                   <strong style={{ color: '#00FF88', fontSize: 15 }}>
-                    Resposta Correta! +XP Concedido!
+                    Resposta Correta! Desafio cumprido!
                   </strong>
                 </div>
                 <p style={exerciseStyles.explanationText}>{quiz.explanation}</p>
@@ -289,11 +293,11 @@ function InteractiveQuiz({
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <XCircle size={20} color="#FF4B4B" />
                   <strong style={{ color: '#FF4B4B', fontSize: 15 }}>
-                    Não foi dessa vez!
+                    Resposta Incorreta!
                   </strong>
                 </div>
                 <p style={exerciseStyles.explanationText}>
-                  Revise a resposta e tente novamente para fixar o aprendizado.
+                  💡 <strong>Dica da Academia:</strong> Não desanime! Pense na função primária do elemento e revise com atenção os conceitos explicados acima na lição.
                 </p>
                 <button onClick={handleReset} style={exerciseStyles.retryButton}>
                   <RotateCcw size={14} /> Tentar Novamente
@@ -308,7 +312,7 @@ function InteractiveQuiz({
 }
 
 // ============================================================================
-// COMPONENTE: DESAFIO PRÁTICO COM LIVE PREVIEW
+// COMPONENTE: DESAFIO PRÁTICO COM LIVE PREVIEW (SEM ENTREGAR RESPOSTA)
 // ============================================================================
 function InteractiveCodeChallenge({
   challenge,
@@ -323,7 +327,6 @@ function InteractiveCodeChallenge({
   const [showHint, setShowHint] = useState(false);
 
   const handleValidate = () => {
-    // Normaliza código para comparação
     const normalized = code.replace(/\s+/g, ' ');
     const allPresent = challenge.expectedKeywords.every((kw) =>
       code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
@@ -335,7 +338,9 @@ function InteractiveCodeChallenge({
       onComplete();
     } else {
       setValidated(false);
-      setErrorMessage(challenge.hint || 'Verifique se todas as tags e textos foram escritos corretamente.');
+      setErrorMessage(
+        'Seu código ainda não possui todos os elementos solicitados. Revise a sintaxe e consulte a dica se precisar!'
+      );
     }
   };
 
@@ -363,7 +368,7 @@ function InteractiveCodeChallenge({
       </div>
 
       <div style={exerciseStyles.editorPreviewGrid}>
-        {/* Lado Esquerdo: Editor */}
+        {/* Editor */}
         <div style={exerciseStyles.pane}>
           <div style={exerciseStyles.paneHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -375,7 +380,7 @@ function InteractiveCodeChallenge({
               </span>
             </div>
             <button onClick={handleReset} style={exerciseStyles.smallButton} title="Restaurar código original">
-              <RotateCcw size={13} /> Resetar
+              <RotateCcw size={13} /> Limpar
             </button>
           </div>
 
@@ -391,7 +396,7 @@ function InteractiveCodeChallenge({
           />
         </div>
 
-        {/* Lado Direito: Live Preview */}
+        {/* Live Preview */}
         <div style={exerciseStyles.pane}>
           <div style={exerciseStyles.paneHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#00D4FF' }}>
@@ -453,7 +458,7 @@ function InteractiveCodeChallenge({
 
         {showHint && (
           <div style={exerciseStyles.hintBox}>
-            💡 <strong>Dica da Academia:</strong> {challenge.hint}
+            💡 <strong>Dica Pedagógica:</strong> {challenge.hint}
           </div>
         )}
 
@@ -476,7 +481,7 @@ function InteractiveCodeChallenge({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <XCircle size={22} color="#FF4B4B" />
               <div>
-                <strong style={{ color: '#FF4B4B', fontSize: 15 }}>Quase lá! Faltou algum detalhe.</strong>
+                <strong style={{ color: '#FF4B4B', fontSize: 15 }}>Ainda falta algo no seu código.</strong>
                 <p style={{ margin: 0, fontSize: 13, color: '#FECACA' }}>{errorMessage}</p>
               </div>
             </div>
@@ -491,6 +496,7 @@ function InteractiveCodeChallenge({
 // PÁGINA PRINCIPAL DA LIÇÃO
 // ============================================================================
 export function Lesson() {
+  const navigate = useNavigate();
   const { courseSlug, lessonId } = useParams<{
     courseSlug: string;
     lessonId: string;
@@ -500,9 +506,11 @@ export function Lesson() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [completedExerciseIndexes, setCompletedExerciseIndexes] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
+    setCompletedExerciseIndexes(new Set());
 
     async function loadCourse() {
       if (!courseSlug) {
@@ -517,7 +525,32 @@ export function Lesson() {
       try {
         let selectedCourse: Course | null = null;
 
-        if (isSupabaseConfigured) {
+        // Prioriza os cursos locais oficiais para garantir que tenham todo o currículo de lições e exercícios
+        const localCourse = getCourseBySlug(courseSlug);
+        if (localCourse) {
+          selectedCourse = {
+            id: localCourse.id,
+            slug: localCourse.slug,
+            name: localCourse.name,
+            description: localCourse.description,
+            icon: localCourse.icon,
+            color: localCourse.color,
+            planetName: localCourse.planetName,
+            teacherId: '',
+            lessons: localCourse.lessons.map((l) => ({
+              id: l.id,
+              title: l.title,
+              description: l.description,
+              type: 'pdf',
+              content: l.content,
+              codeExample: l.codeExample,
+              language: l.language,
+              duration: l.duration,
+              xpReward: l.xpReward,
+              exercises: l.exercises,
+            })),
+          };
+        } else if (isSupabaseConfigured) {
           try {
             const rawCourses = await dbGetPublishedCourses();
             for (const item of rawCourses) {
@@ -533,34 +566,6 @@ export function Lesson() {
             }
           } catch (dbErr) {
             console.warn('Falha ao buscar cursos do Supabase:', dbErr);
-          }
-        }
-
-        if (!selectedCourse) {
-          const localCourse = getCourseBySlug(courseSlug);
-          if (localCourse) {
-            selectedCourse = {
-              id: localCourse.id,
-              slug: localCourse.slug,
-              name: localCourse.name,
-              description: localCourse.description,
-              icon: localCourse.icon,
-              color: localCourse.color,
-              planetName: localCourse.planetName,
-              teacherId: '',
-              lessons: localCourse.lessons.map((l) => ({
-                id: l.id,
-                title: l.title,
-                description: l.description,
-                type: 'pdf',
-                content: l.content,
-                codeExample: l.codeExample,
-                language: l.language,
-                duration: l.duration,
-                xpReward: l.xpReward,
-                exercises: l.exercises,
-              })),
-            };
           }
         }
 
@@ -583,40 +588,8 @@ export function Lesson() {
       } catch (error) {
         console.error('Erro ao carregar curso:', error);
         if (!cancelled) {
-          const localCourse = getCourseBySlug(courseSlug);
-          if (localCourse) {
-            const fallbackCourse: Course = {
-              id: localCourse.id,
-              slug: localCourse.slug,
-              name: localCourse.name,
-              description: localCourse.description,
-              icon: localCourse.icon,
-              color: localCourse.color,
-              planetName: localCourse.planetName,
-              teacherId: '',
-              lessons: localCourse.lessons.map((l) => ({
-                id: l.id,
-                title: l.title,
-                description: l.description,
-                type: 'pdf',
-                content: l.content,
-                codeExample: l.codeExample,
-                language: l.language,
-                duration: l.duration,
-                xpReward: l.xpReward,
-                exercises: l.exercises,
-              })),
-            };
-            setCourse(fallbackCourse);
-            setLesson(
-              fallbackCourse.lessons.find((item) => item.id === lessonId) ||
-                fallbackCourse.lessons[0] ||
-                null
-            );
-          } else {
-            setCourse(null);
-            setLesson(null);
-          }
+          setCourse(null);
+          setLesson(null);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -633,7 +606,6 @@ export function Lesson() {
 
   const {
     completeLesson,
-    uncompleteLesson,
     markAsDownloaded,
     isLessonCompleted,
     isLessonDownloaded,
@@ -641,6 +613,21 @@ export function Lesson() {
 
   const completed = lesson?.id ? isLessonCompleted(lesson.id) : false;
   const downloaded = lesson?.id ? isLessonDownloaded(lesson.id) : false;
+
+  const totalExercises = lesson?.exercises?.length || 0;
+  // A lição só é considerada concluída se o aluno já concluiu ou se resolveu TODOS os exercícios presentes
+  const isLessonDone = completed || (totalExercises > 0 && completedExerciseIndexes.size >= totalExercises);
+
+  const handleExerciseCompleted = (index: number) => {
+    setCompletedExerciseIndexes((prev) => {
+      const next = new Set(prev);
+      next.add(index);
+      if (next.size >= totalExercises && lesson?.id && !completed) {
+        completeLesson(lesson.id, lesson.xpReward || 0);
+      }
+      return next;
+    });
+  };
 
   if (loading) {
     return <div style={styles.center}>Carregando curso...</div>;
@@ -670,15 +657,6 @@ export function Lesson() {
   const videoUrl = lesson.fileUrl?.trim() || '';
   const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
   const iframeVideoUrl = youtubeEmbedUrl || videoUrl;
-
-  const handleComplete = async () => {
-    if (completed) {
-      await uncompleteLesson(lesson.id, lesson.xpReward || 0);
-      return;
-    }
-
-    await completeLesson(lesson.id, lesson.xpReward || 0);
-  };
 
   const handleDownload = async () => {
     try {
@@ -788,8 +766,8 @@ export function Lesson() {
       <div
         style={{
           ...styles.hero,
-          borderColor: courseColor,
-          boxShadow: `0 0 30px ${courseColor}30`,
+          borderColor: isLessonDone ? '#00FF88' : courseColor,
+          boxShadow: isLessonDone ? '0 0 30px rgba(0, 255, 136, 0.25)' : `0 0 30px ${courseColor}30`,
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
@@ -816,17 +794,26 @@ export function Lesson() {
           </span>
         </div>
 
+        {/* Status de Conclusão: Não pode ser marcado livremente sem fazer os exercícios */}
         <div style={styles.actions}>
-          <button
-            onClick={handleComplete}
-            style={{
-              ...styles.completeButton,
-              background: completed ? '#00FF88' : courseColor,
-              color: completed ? '#000000' : '#000000',
-            }}
-          >
-            {completed ? '✓ CONCLUÍDA (clique para desmarcar)' : '✓ Marcar como Concluída'}
-          </button>
+          {isLessonDone ? (
+            <div style={exerciseStyles.completedHeroBadge}>
+              <CheckCircle2 size={18} color="#000000" />
+              <span>✓ LIÇÃO CONCLUÍDA (+{lesson.xpReward || 0} XP)</span>
+            </div>
+          ) : totalExercises > 0 ? (
+            <div style={exerciseStyles.lockedHeroBadge}>
+              <Lock size={16} color="#F59E0B" />
+              <span>
+                BLOQUEADA: Resolva os desafios práticos abaixo ({completedExerciseIndexes.size}/{totalExercises} concluídos)
+              </span>
+            </div>
+          ) : (
+            <div style={exerciseStyles.lockedHeroBadge}>
+              <CheckCircle2 size={16} color="#00D4FF" />
+              <span>Leia o conteúdo para absorver os conceitos</span>
+            </div>
+          )}
 
           {(lesson.type === 'pdf' || lesson.type === 'word') && lesson.fileUrl && (
             <button onClick={handleDownload} style={styles.downloadButton}>
@@ -904,7 +891,7 @@ export function Lesson() {
             <div>
               <h2 style={exerciseStyles.sectionTitle}>🎯 Desafios Práticos da Lição</h2>
               <p style={exerciseStyles.sectionSubtitle}>
-                Resolva os exercícios abaixo para fixar o conteúdo e validar seu aprendizado no Nexus!
+                Você precisa resolver os desafios abaixo para validar seu aprendizado e desbloquear a conclusão desta aula!
               </p>
             </div>
           </div>
@@ -916,9 +903,7 @@ export function Lesson() {
                   <InteractiveQuiz
                     key={index}
                     quiz={exercise}
-                    onComplete={() => {
-                      if (!completed) handleComplete();
-                    }}
+                    onComplete={() => handleExerciseCompleted(index)}
                   />
                 );
               }
@@ -928,9 +913,7 @@ export function Lesson() {
                   <InteractiveCodeChallenge
                     key={index}
                     challenge={exercise}
-                    onComplete={() => {
-                      if (!completed) handleComplete();
-                    }}
+                    onComplete={() => handleExerciseCompleted(index)}
                   />
                 );
               }
@@ -955,29 +938,48 @@ export function Lesson() {
         )}
 
         {nextLesson ? (
-          <Link
-            to={`/lesson/${course.slug}/${nextLesson.id}`}
+          <button
+            onClick={() => {
+              if (!isLessonDone && totalExercises > 0) {
+                alert(
+                  `⚠️ Atenção Cadete!\n\nVocê precisa resolver todos os ${totalExercises} desafios práticos desta aula (${completedExerciseIndexes.size}/${totalExercises} concluídos) para desbloquear a próxima etapa.`
+                );
+                return;
+              }
+              navigate(`/lesson/${course.slug}/${nextLesson.id}`);
+            }}
             style={{
               ...styles.navButton,
-              background: courseColor,
-              color: '#000000',
+              background: isLessonDone ? courseColor : '#1E293B',
+              color: isLessonDone ? '#000000' : '#94A3B8',
               fontWeight: 'bold',
+              cursor: isLessonDone ? 'pointer' : 'not-allowed',
+              opacity: isLessonDone ? 1 : 0.6,
             }}
           >
+            {!isLessonDone && totalExercises > 0 && <Lock size={15} style={{ marginRight: 4 }} />}
             Próxima Aula: {nextLesson.title} <ArrowRight size={16} />
-          </Link>
+          </button>
         ) : (
-          <Link
-            to="/galaxy"
+          <button
+            onClick={() => {
+              if (!isLessonDone && totalExercises > 0) {
+                alert(
+                  `⚠️ Conclua todos os desafios práticos desta aula antes de finalizar o curso!`
+                );
+                return;
+              }
+              navigate('/galaxy');
+            }}
             style={{
               ...styles.navButton,
-              background: '#FFD700',
-              color: '#000000',
+              background: isLessonDone ? '#FFD700' : '#1E293B',
+              color: isLessonDone ? '#000000' : '#94A3B8',
               fontWeight: 'bold',
             }}
           >
             🎉 Finalizar Curso na Galáxia
-          </Link>
+          </button>
         )}
       </div>
     </div>
@@ -1066,6 +1068,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
     marginTop: 22,
     flexWrap: 'wrap',
+    alignItems: 'center',
   },
   completeButton: {
     padding: '10px 20px',
@@ -1185,6 +1188,30 @@ const styles: Record<string, React.CSSProperties> = {
 // ESTILOS ESPECÍFICOS DOS EXERCÍCIOS
 // ============================================================================
 const exerciseStyles: Record<string, React.CSSProperties> = {
+  completedHeroBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '10px 18px',
+    borderRadius: 8,
+    background: '#00FF88',
+    color: '#000000',
+    fontWeight: 'bold',
+    fontSize: 13.5,
+    boxShadow: '0 0 20px rgba(0, 255, 136, 0.4)',
+  },
+  lockedHeroBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '10px 18px',
+    borderRadius: 8,
+    background: 'rgba(245, 158, 11, 0.12)',
+    border: '1px solid rgba(245, 158, 11, 0.4)',
+    color: '#FBBF24',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
   sectionTitleContainer: {
     display: 'flex',
     alignItems: 'center',
