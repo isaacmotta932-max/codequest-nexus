@@ -1,0 +1,12 @@
+# Configuração Netlify para CodeQuest Nexus (Vite + React SPA)
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Redirecionamento essencial para SPA (Single Page Application)
+# Garante que rotas diretas (/dashboard, /auth/login, /teacher, /admin, etc.) não dêem erro 404
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
