@@ -141,6 +141,27 @@ export interface TeacherApplication {
   rejectionReason?: string;
 }
 
+export interface QuizExercise {
+  id?: string;
+  type: 'quiz';
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface CodeExercise {
+  id?: string;
+  type: 'code';
+  instruction: string;
+  initialCode: string;
+  expectedKeywords: string[];
+  hint: string;
+  solution: string;
+}
+
+export type LessonExercise = QuizExercise | CodeExercise;
+
 export interface Lesson {
   id: string;
 
@@ -161,6 +182,8 @@ export interface Lesson {
   duration: number;
 
   xpReward: number;
+
+  exercises?: LessonExercise[];
 }
 
 export interface Course {

@@ -1,11 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import {
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  Sparkles,
+  RotateCcw,
+  Eye,
+  Zap,
+  Copy,
+  Check,
+  Award,
+  Terminal,
+  ArrowRight,
+  ArrowLeft,
+} from 'lucide-react';
 
 import { dbGetPublishedCourses, isSupabaseConfigured } from '@/lib/database';
 import { getCourseBySlug } from '@/data/courses';
 import { downloadLessonPDF } from '@/utils/pdfGenerator';
 import { useProgress } from '@/hooks/useProgress';
-
+import type { LessonExercise, QuizExercise, CodeExercise } from '@/types';
 
 type LessonType = 'pdf' | 'word' | 'video' | 'quiz';
 
@@ -24,6 +39,7 @@ interface Lesson {
   fileSize?: number;
   fileType?: string;
   uploadedAt?: unknown;
+  exercises?: LessonExercise[];
 }
 
 interface Course {
@@ -54,10 +70,11 @@ function convertLesson(value: unknown): Lesson {
   }
 
   let type: LessonType = 'pdf';
-
   if (value.type === 'word') type = 'word';
   else if (value.type === 'video') type = 'video';
   else if (value.type === 'quiz') type = 'quiz';
+
+  const rawExercises = Array.isArray(value.exercises) ? (value.exercises as LessonExercise[]) : undefined;
 
   return {
     id: typeof value.id === 'string' ? value.id : '',
@@ -74,6 +91,7 @@ function convertLesson(value: unknown): Lesson {
     fileSize: typeof value.fileSize === 'number' ? value.fileSize : undefined,
     fileType: typeof value.fileType === 'string' ? value.fileType : undefined,
     uploadedAt: value.uploadedAt,
+    exercises: rawExercises,
   };
 }
 
@@ -142,6 +160,336 @@ function downloadDataUrl(dataUrl: string, fileName: string) {
   document.body.removeChild(link);
 }
 
+// ============================================================================
+// COMPONENTE: QUIZ INTERATIVO
+// ============================================================================
+function InteractiveQuiz({
+  quiz,
+  onComplete,
+}: {
+  quiz: QuizExercise;
+  onComplete: () => void;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  const isCorrect = selected === quiz.correctIndex;
+
+  const handleVerify = () => {
+    if (selected === null) return;
+    setSubmitted(true);
+    if (selected === quiz.correctIndex) {
+      onComplete();
+    }
+  };
+
+  const handleReset = () => {
+    setSelected(null);
+    setSubmitted(false);
+  };
+
+  return (
+    <div style={exerciseStyles.card}>
+      <div style={exerciseStyles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={exerciseStyles.badgeIcon}>
+            <HelpCircle size={18} color="#00D4FF" />
+          </div>
+          <div>
+            <span style={exerciseStyles.badgeLabel}>DESAFIO DE CONHECIMENTO</span>
+            <h3 style={exerciseStyles.quizTitle}>{quiz.question}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div style={exerciseStyles.optionsGrid}>
+        {quiz.options.map((option, index) => {
+          const isThisSelected = selected === index;
+          let buttonBg = '#111827';
+          let borderColor = '#1F2937';
+          let textColor = '#E5E7EB';
+
+          if (isThisSelected) {
+            buttonBg = '#1E293B';
+            borderColor = '#00D4FF';
+            textColor = '#00D4FF';
+          }
+
+          if (submitted) {
+            if (index === quiz.correctIndex) {
+              buttonBg = 'rgba(0, 255, 136, 0.15)';
+              borderColor = '#00FF88';
+              textColor = '#00FF88';
+            } else if (isThisSelected && !isCorrect) {
+              buttonBg = 'rgba(255, 75, 75, 0.15)';
+              borderColor = '#FF4B4B';
+              textColor = '#FF4B4B';
+            }
+          }
+
+          return (
+            <button
+              key={index}
+              onClick={() => {
+                if (!submitted) setSelected(index);
+              }}
+              disabled={submitted}
+              style={{
+                ...exerciseStyles.optionButton,
+                backgroundColor: buttonBg,
+                borderColor,
+                color: textColor,
+              }}
+            >
+              <span style={exerciseStyles.optionLetter}>
+                {String.fromCharCode(65 + index)}
+              </span>
+              <span style={{ flex: 1, textAlign: 'left', lineHeight: 1.5 }}>
+                {option}
+              </span>
+              {submitted && index === quiz.correctIndex && (
+                <CheckCircle2 size={20} color="#00FF88" />
+              )}
+              {submitted && isThisSelected && !isCorrect && (
+                <XCircle size={20} color="#FF4B4B" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={exerciseStyles.footer}>
+        {!submitted ? (
+          <button
+            onClick={handleVerify}
+            disabled={selected === null}
+            style={{
+              ...exerciseStyles.actionButton,
+              opacity: selected === null ? 0.5 : 1,
+              cursor: selected === null ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <Sparkles size={16} />
+            Verificar Resposta
+          </button>
+        ) : (
+          <div style={{ width: '100%' }}>
+            {isCorrect ? (
+              <div style={exerciseStyles.successBox}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <CheckCircle2 size={20} color="#00FF88" />
+                  <strong style={{ color: '#00FF88', fontSize: 15 }}>
+                    Resposta Correta! +XP Concedido!
+                  </strong>
+                </div>
+                <p style={exerciseStyles.explanationText}>{quiz.explanation}</p>
+              </div>
+            ) : (
+              <div style={exerciseStyles.errorBox}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <XCircle size={20} color="#FF4B4B" />
+                  <strong style={{ color: '#FF4B4B', fontSize: 15 }}>
+                    Não foi dessa vez!
+                  </strong>
+                </div>
+                <p style={exerciseStyles.explanationText}>
+                  Revise a resposta e tente novamente para fixar o aprendizado.
+                </p>
+                <button onClick={handleReset} style={exerciseStyles.retryButton}>
+                  <RotateCcw size={14} /> Tentar Novamente
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// COMPONENTE: DESAFIO PRÁTICO COM LIVE PREVIEW
+// ============================================================================
+function InteractiveCodeChallenge({
+  challenge,
+  onComplete,
+}: {
+  challenge: CodeExercise;
+  onComplete: () => void;
+}) {
+  const [code, setCode] = useState(challenge.initialCode);
+  const [validated, setValidated] = useState<boolean | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showHint, setShowHint] = useState(false);
+
+  const handleValidate = () => {
+    // Normaliza código para comparação
+    const normalized = code.replace(/\s+/g, ' ');
+    const allPresent = challenge.expectedKeywords.every((kw) =>
+      code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
+    );
+
+    if (allPresent) {
+      setValidated(true);
+      setErrorMessage('');
+      onComplete();
+    } else {
+      setValidated(false);
+      setErrorMessage(challenge.hint || 'Verifique se todas as tags e textos foram escritos corretamente.');
+    }
+  };
+
+  const handleReset = () => {
+    setCode(challenge.initialCode);
+    setValidated(null);
+    setErrorMessage('');
+    setShowHint(false);
+  };
+
+  return (
+    <div style={exerciseStyles.card}>
+      <div style={exerciseStyles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ ...exerciseStyles.badgeIcon, background: 'rgba(139, 92, 246, 0.2)' }}>
+            <Terminal size={18} color="#8B5CF6" />
+          </div>
+          <div>
+            <span style={{ ...exerciseStyles.badgeLabel, color: '#8B5CF6' }}>
+              LABORATÓRIO DE CÓDIGO AO VIVO
+            </span>
+            <h3 style={exerciseStyles.quizTitle}>{challenge.instruction}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div style={exerciseStyles.editorPreviewGrid}>
+        {/* Lado Esquerdo: Editor */}
+        <div style={exerciseStyles.pane}>
+          <div style={exerciseStyles.paneHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F56' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#27C93F' }} />
+              <span style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'monospace', marginLeft: 8 }}>
+                editor.html
+              </span>
+            </div>
+            <button onClick={handleReset} style={exerciseStyles.smallButton} title="Restaurar código original">
+              <RotateCcw size={13} /> Resetar
+            </button>
+          </div>
+
+          <textarea
+            value={code}
+            onChange={(e) => {
+              setCode(e.target.value);
+              if (validated !== null) setValidated(null);
+            }}
+            placeholder="Digite seu código HTML aqui..."
+            spellCheck={false}
+            style={exerciseStyles.editorTextarea}
+          />
+        </div>
+
+        {/* Lado Direito: Live Preview */}
+        <div style={exerciseStyles.pane}>
+          <div style={exerciseStyles.paneHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#00D4FF' }}>
+              <Eye size={14} />
+              <span style={{ fontSize: 12, fontWeight: 'bold' }}>Pré-visualização (Live Preview)</span>
+            </div>
+            <span style={{ fontSize: 11, color: '#9CA3AF' }}>Tempo Real</span>
+          </div>
+
+          <div style={exerciseStyles.previewContainer}>
+            <iframe
+              srcDoc={`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <meta charset="utf-8">
+                    <style>
+                      body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        color: #111827;
+                        margin: 16px;
+                        line-height: 1.6;
+                        background: #ffffff;
+                      }
+                      h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+                      h2 { color: #1e293b; }
+                      a { color: #0284c7; text-decoration: underline; }
+                      img { max-width: 100%; height: auto; border-radius: 6px; }
+                    </style>
+                  </head>
+                  <body>${code}</body>
+                </html>
+              `}
+              title="Pré-visualização ao vivo"
+              sandbox="allow-scripts"
+              style={exerciseStyles.previewIframe}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div style={exerciseStyles.footer}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', width: '100%', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => setShowHint(!showHint)}
+              style={exerciseStyles.secondaryButton}
+            >
+              <HelpCircle size={15} />
+              {showHint ? 'Ocultar Dica' : 'Ver Dica'}
+            </button>
+          </div>
+
+          <button onClick={handleValidate} style={exerciseStyles.actionButton}>
+            <Zap size={16} />
+            Validar & Concluir Desafio
+          </button>
+        </div>
+
+        {showHint && (
+          <div style={exerciseStyles.hintBox}>
+            💡 <strong>Dica da Academia:</strong> {challenge.hint}
+          </div>
+        )}
+
+        {validated === true && (
+          <div style={{ ...exerciseStyles.successBox, marginTop: 12, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CheckCircle2 size={22} color="#00FF88" />
+              <div>
+                <strong style={{ color: '#00FF88', fontSize: 15 }}>Excelente trabalho! Desafio superado!</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#A7F3D0' }}>
+                  Seu código cumpriu todos os critérios da missão com louvor.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {validated === false && (
+          <div style={{ ...exerciseStyles.errorBox, marginTop: 12, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <XCircle size={22} color="#FF4B4B" />
+              <div>
+                <strong style={{ color: '#FF4B4B', fontSize: 15 }}>Quase lá! Faltou algum detalhe.</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#FECACA' }}>{errorMessage}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// PÁGINA PRINCIPAL DA LIÇÃO
+// ============================================================================
 export function Lesson() {
   const { courseSlug, lessonId } = useParams<{
     courseSlug: string;
@@ -151,6 +499,7 @@ export function Lesson() {
   const [course, setCourse] = useState<Course | null>(null);
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -209,6 +558,7 @@ export function Lesson() {
                 language: l.language,
                 duration: l.duration,
                 xpReward: l.xpReward,
+                exercises: l.exercises,
               })),
             };
           }
@@ -254,6 +604,7 @@ export function Lesson() {
                 language: l.language,
                 duration: l.duration,
                 xpReward: l.xpReward,
+                exercises: l.exercises,
               })),
             };
             setCourse(fallbackCourse);
@@ -292,17 +643,17 @@ export function Lesson() {
   const downloaded = lesson?.id ? isLessonDownloaded(lesson.id) : false;
 
   if (loading) {
-    return (
-      <div style={styles.center}>Carregando curso...</div>
-    );
+    return <div style={styles.center}>Carregando curso...</div>;
   }
 
   if (!course || !lesson) {
     return (
       <div style={styles.notFound}>
         <h2>Lição não encontrada</h2>
-        <p>O curso ou a aula não foi encontrado no Firebase.</p>
-        <Link to="/galaxy" style={styles.simpleLink}>Voltar à Galáxia</Link>
+        <p>O curso ou a aula não foi encontrado.</p>
+        <Link to="/galaxy" style={styles.simpleLink}>
+          Voltar à Galáxia
+        </Link>
       </div>
     );
   }
@@ -314,7 +665,7 @@ export function Lesson() {
       ? course.lessons[currentIndex + 1]
       : null;
 
-  const courseColor = course.color || '#6366F1';
+  const courseColor = course.color || '#00D4FF';
   const lessonContent = lesson.content || '';
   const videoUrl = lesson.fileUrl?.trim() || '';
   const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
@@ -347,45 +698,115 @@ export function Lesson() {
     }
   };
 
+  const copyCodeExample = () => {
+    if (!lesson.codeExample) return;
+    navigator.clipboard.writeText(lesson.codeExample);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  // Renderizador de Markdown aprimorado com estilos Cyberpunk
   const renderContent = (markdown: string): string => {
     return markdown
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/^\- (.*$)/gim, '<li>$1</li>')
-      .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+      // Callouts / Quotes
+      .replace(
+        /^>\s*(\*\*💡[^*]+\*\*)\s*\n>([^\n]+)/gim,
+        '<div style="background: rgba(0, 212, 255, 0.08); border-left: 4px solid #00D4FF; border-radius: 8px; padding: 14px 18px; margin: 20px 0;"><strong style="color: #00D4FF; display: block; font-size: 15px; margin-bottom: 4px;">$1</strong><span style="color: #E2E8F0; font-size: 14px; line-height: 1.6;">$2</span></div>'
+      )
+      .replace(
+        /^>\s*(\*\*⚠️[^*]+\*\*)\s*\n>([^\n]+)/gim,
+        '<div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #F59E0B; border-radius: 8px; padding: 14px 18px; margin: 20px 0;"><strong style="color: #F59E0B; display: block; font-size: 15px; margin-bottom: 4px;">$1</strong><span style="color: #E2E8F0; font-size: 14px; line-height: 1.6;">$2</span></div>'
+      )
+      .replace(
+        /^>\s*(\*\*🛡️[^*]+\*\*)\s*\n>([^\n]+)/gim,
+        '<div style="background: rgba(139, 92, 246, 0.1); border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 14px 18px; margin: 20px 0;"><strong style="color: #8B5CF6; display: block; font-size: 15px; margin-bottom: 4px;">$1</strong><span style="color: #E2E8F0; font-size: 14px; line-height: 1.6;">$2</span></div>'
+      )
+      .replace(
+        /^>\s*(\*\*❤️[^*]+\*\*)\s*\n>([^\n]+)/gim,
+        '<div style="background: rgba(236, 72, 153, 0.1); border-left: 4px solid #EC4899; border-radius: 8px; padding: 14px 18px; margin: 20px 0;"><strong style="color: #EC4899; display: block; font-size: 15px; margin-bottom: 4px;">$1</strong><span style="color: #E2E8F0; font-size: 14px; line-height: 1.6;">$2</span></div>'
+      )
+      // Headers
+      .replace(
+        /^# (.*$)/gim,
+        '<h1 style="color: #FFFFFF; font-size: 26px; font-weight: 800; margin: 24px 0 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">$1</h1>'
+      )
+      .replace(
+        /^### (.*$)/gim,
+        '<h3 style="color: #00D4FF; font-size: 19px; font-weight: 700; margin: 22px 0 10px;">$1</h3>'
+      )
+      .replace(
+        /^## (.*$)/gim,
+        '<h2 style="color: #E2E8F0; font-size: 22px; font-weight: 700; margin: 24px 0 12px;">$1</h2>'
+      )
+      // Code blocks
+      .replace(
+        /```(\w+)?\n([\s\S]*?)```/g,
+        '<div style="background: #090E1A; border: 1px solid #1E293B; border-radius: 8px; margin: 18px 0; overflow: hidden;"><div style="background: #111827; padding: 6px 14px; font-size: 12px; color: #94A3B8; font-family: monospace; border-bottom: 1px solid #1E293B;">Exemplo de Código ($1)</div><pre style="margin: 0; padding: 16px; overflow-x: auto; font-family: monospace; font-size: 13px; color: #38BDF8; line-height: 1.6;"><code>$2</code></pre></div>'
+      )
+      // Inline code
+      .replace(
+        /`([^`]+)`/g,
+        '<code style="background: rgba(0, 212, 255, 0.12); color: #38BDF8; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.92em;">$1</code>'
+      )
+      // Bold and italics
+      .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #FFFFFF;">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em style="color: #CBD5E1;">$1</em>')
+      // Horizontal rule
+      .replace(/^---$/gim, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 26px 0;" />')
+      // Lists
+      .replace(/^\- (.*$)/gim, '<li style="margin-bottom: 6px; color: #D1D5DB;">$1</li>')
+      .replace(/(<li>.*<\/li>)/s, '<ul style="padding-left: 20px; margin: 14px 0;">$1</ul>')
+      // Paragraphs
       .split('\n\n')
       .map((block) => {
-        if (block.startsWith('<h') || block.startsWith('<pre') || block.startsWith('<ul')) {
+        if (
+          block.startsWith('<h') ||
+          block.startsWith('<div') ||
+          block.startsWith('<ul') ||
+          block.startsWith('<hr')
+        ) {
           return block;
         }
-        return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+        return `<p style="margin: 12px 0; color: #CBD5E1; font-size: 15px; line-height: 1.75;">${block.replace(/\n/g, '<br>')}</p>`;
       })
       .join('\n');
   };
 
   return (
-    <div style={{ ...styles.page, maxWidth: 900 }}>
+    <div style={{ ...styles.page, maxWidth: 940 }}>
+      {/* Barra superior de navegação */}
       <div style={styles.topBar}>
-        <Link to="/galaxy" style={styles.simpleLink}>← Galáxia</Link>
-        <span style={{ color: courseColor, fontWeight: 'bold' }}>
-          {course.icon} {course.name}
+        <Link to="/galaxy" style={styles.simpleLink}>
+          <ArrowLeft size={16} /> Voltar à Galáxia
+        </Link>
+        <span style={{ color: courseColor, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>{course.icon}</span> {course.name}
         </span>
       </div>
 
-      <div style={{ ...styles.hero, borderColor: courseColor, boxShadow: `0 0 30px ${courseColor}40` }}>
-        <p style={{ ...styles.eyebrow, color: courseColor }}>
-          {course.planetName} • Lição {currentIndex + 1} de {course.lessons.length}
-        </p>
-        <h1 style={styles.title}>{lesson.title}</h1>
-        <p style={styles.description}>{lesson.description}</p>
+      {/* Hero da Aula */}
+      <div
+        style={{
+          ...styles.hero,
+          borderColor: courseColor,
+          boxShadow: `0 0 30px ${courseColor}30`,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <p style={{ ...styles.eyebrow, color: courseColor }}>
+              {course.planetName} • Lição {currentIndex + 1} de {course.lessons.length}
+            </p>
+            <h1 style={styles.title}>{lesson.title}</h1>
+            <p style={styles.description}>{lesson.description}</p>
+          </div>
+        </div>
 
         <div style={styles.meta}>
           {lesson.duration !== undefined && <span>⏱ {lesson.duration} min</span>}
-          <span style={{ color: '#FFD700', fontWeight: 'bold' }}>⚡ +{lesson.xpReward || 0} XP</span>
+          <span style={{ color: '#FFD700', fontWeight: 'bold' }}>
+            ⚡ +{lesson.xpReward || 0} XP
+          </span>
           {lesson.language && <span>💻 {lesson.language}</span>}
           <span>
             {lesson.type === 'pdf' && '📄 PDF'}
@@ -396,8 +817,15 @@ export function Lesson() {
         </div>
 
         <div style={styles.actions}>
-          <button onClick={handleComplete} style={{ ...styles.completeButton, background: completed ? '#00FF88' : courseColor }}>
-            {completed ? '✓ COMPLETA (clique para desmarcar)' : '✓ Marcar como Completa'}
+          <button
+            onClick={handleComplete}
+            style={{
+              ...styles.completeButton,
+              background: completed ? '#00FF88' : courseColor,
+              color: completed ? '#000000' : '#000000',
+            }}
+          >
+            {completed ? '✓ CONCLUÍDA (clique para desmarcar)' : '✓ Marcar como Concluída'}
           </button>
 
           {(lesson.type === 'pdf' || lesson.type === 'word') && lesson.fileUrl && (
@@ -414,38 +842,7 @@ export function Lesson() {
         </div>
       </div>
 
-      {lesson.type === 'pdf' && lesson.fileUrl && (
-        <div style={styles.materialCard}>
-          <h2>📄 Material PDF</h2>
-          <iframe src={lesson.fileUrl} title={lesson.fileName || lesson.title} style={styles.pdfFrame} />
-        </div>
-      )}
-
-      {lesson.type === 'word' && lessonContent && (
-        <div style={styles.wordMaterialCard}>
-          <div style={styles.wordPageHeader}>
-            <span style={styles.wordBadge}>📝 MINI WORD</span>
-            <span style={styles.muted}>Conteúdo formatado pelo professor</span>
-          </div>
-          <div
-            style={styles.wordPage}
-            dangerouslySetInnerHTML={{ __html: lessonContent }}
-          />
-        </div>
-      )}
-
-      {lesson.type === 'word' && !lessonContent && (
-        <div style={styles.materialCard}>
-          <h2>📝 Material Word</h2>
-          <p style={styles.muted}>Esta aula ainda não possui conteúdo.</p>
-          {lesson.fileUrl && (
-            <button onClick={handleDownload} style={{ ...styles.downloadButton, marginTop: 8 }}>
-              📝 Baixar documento Word antigo
-            </button>
-          )}
-        </div>
-      )}
-
+      {/* Material em Vídeo (se houver) */}
       {lesson.type === 'video' && lesson.fileUrl && (
         <div style={styles.materialCard}>
           <h2>🎥 Vídeo da aula</h2>
@@ -461,47 +858,140 @@ export function Lesson() {
             ) : null}
           </div>
           {!youtubeEmbedUrl && (
-            <a href={lesson.fileUrl} target="_blank" rel="noreferrer" style={{ ...styles.simpleLink, display: 'inline-block', marginTop: 12 }}>
+            <a
+              href={lesson.fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ ...styles.simpleLink, display: 'inline-block', marginTop: 12 }}
+            >
               ▶️ Abrir vídeo em outra aba
             </a>
           )}
         </div>
       )}
 
+      {/* Conteúdo Pedagógico da Lição */}
       {lessonContent && lesson.type !== 'word' && (
-        <div style={styles.content} dangerouslySetInnerHTML={{ __html: renderContent(lessonContent) }} />
+        <div
+          style={styles.content}
+          dangerouslySetInnerHTML={{ __html: renderContent(lessonContent) }}
+        />
       )}
 
+      {/* Bloco de Código Exemplo */}
       {lesson.codeExample && (
         <div style={styles.codeCard}>
           <div style={styles.codeHeader}>
-            <span style={styles.codeLanguage}>exemplo.{lesson.language || 'txt'}</span>
-            <span style={styles.codeBadge}>💻 CÓDIGO</span>
+            <span style={styles.codeLanguage}>exemplo.{lesson.language || 'html'}</span>
+            <button onClick={copyCodeExample} style={styles.copyButton}>
+              {copiedCode ? <Check size={14} color="#00FF88" /> : <Copy size={14} />}
+              {copiedCode ? 'Copiado!' : 'Copiar'}
+            </button>
           </div>
-          <pre style={styles.code}><code>{lesson.codeExample}</code></pre>
+          <pre style={styles.code}>
+            <code>{lesson.codeExample}</code>
+          </pre>
         </div>
       )}
 
+      {/* SEÇÃO DE EXERCÍCIOS & DESAFIOS INTERATIVOS */}
+      {lesson.exercises && lesson.exercises.length > 0 && (
+        <div style={{ marginTop: 35, marginBottom: 35 }}>
+          <div style={exerciseStyles.sectionTitleContainer}>
+            <div style={exerciseStyles.sectionTitleIcon}>
+              <Award size={22} color="#00D4FF" />
+            </div>
+            <div>
+              <h2 style={exerciseStyles.sectionTitle}>🎯 Desafios Práticos da Lição</h2>
+              <p style={exerciseStyles.sectionSubtitle}>
+                Resolva os exercícios abaixo para fixar o conteúdo e validar seu aprendizado no Nexus!
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {lesson.exercises.map((exercise, index) => {
+              if (exercise.type === 'quiz') {
+                return (
+                  <InteractiveQuiz
+                    key={index}
+                    quiz={exercise}
+                    onComplete={() => {
+                      if (!completed) handleComplete();
+                    }}
+                  />
+                );
+              }
+
+              if (exercise.type === 'code') {
+                return (
+                  <InteractiveCodeChallenge
+                    key={index}
+                    challenge={exercise}
+                    onComplete={() => {
+                      if (!completed) handleComplete();
+                    }}
+                  />
+                );
+              }
+
+              return null;
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Navegação entre Aulas */}
       <div style={styles.navigation}>
         {previousLesson ? (
-          <Link to={`/lesson/${course.slug}/${previousLesson.id}`} style={styles.navButton}>← Anterior</Link>
-        ) : <div />}
+          <Link
+            to={`/lesson/${course.slug}/${previousLesson.id}`}
+            style={styles.navButton}
+          >
+            <ArrowLeft size={16} /> Anterior: {previousLesson.title}
+          </Link>
+        ) : (
+          <div />
+        )}
 
         {nextLesson ? (
-          <Link to={`/lesson/${course.slug}/${nextLesson.id}`} style={{ ...styles.navButton, background: courseColor, color: '#000' }}>Próxima →</Link>
+          <Link
+            to={`/lesson/${course.slug}/${nextLesson.id}`}
+            style={{
+              ...styles.navButton,
+              background: courseColor,
+              color: '#000000',
+              fontWeight: 'bold',
+            }}
+          >
+            Próxima Aula: {nextLesson.title} <ArrowRight size={16} />
+          </Link>
         ) : (
-          <Link to="/galaxy" style={{ ...styles.navButton, background: '#FFD700', color: '#000' }}>🎉 Finalizar Curso</Link>
+          <Link
+            to="/galaxy"
+            style={{
+              ...styles.navButton,
+              background: '#FFD700',
+              color: '#000000',
+              fontWeight: 'bold',
+            }}
+          >
+            🎉 Finalizar Curso na Galáxia
+          </Link>
         )}
       </div>
     </div>
   );
 }
 
+// ============================================================================
+// ESTILOS GERAIS DA PÁGINA
+// ============================================================================
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    padding: 20,
+    padding: '24px 20px',
     color: 'white',
-    fontFamily: 'sans-serif',
+    fontFamily: 'Inter, sans-serif',
     margin: '0 auto',
     minHeight: '100vh',
   },
@@ -522,6 +1012,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#00D4FF',
     textDecoration: 'none',
     fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    fontSize: 14,
   },
   topBar: {
     display: 'flex',
@@ -529,79 +1023,145 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 20,
     gap: 15,
     flexWrap: 'wrap',
+    alignItems: 'center',
   },
   hero: {
-    background: '#111827',
-    border: '2px solid',
-    borderRadius: 10,
-    padding: 30,
-    marginBottom: 20,
+    background: '#0B1120',
+    border: '1px solid',
+    borderRadius: 14,
+    padding: '28px 32px',
+    marginBottom: 24,
   },
   eyebrow: {
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 2,
     fontWeight: 'bold',
+    marginBottom: 6,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginTop: 10,
+    fontSize: 30,
+    fontWeight: 900,
+    marginTop: 4,
+    marginBottom: 8,
+    color: '#FFFFFF',
+    fontFamily: 'Orbitron, sans-serif',
   },
   description: {
-    color: '#9CA3AF',
-    marginTop: 10,
+    fontSize: 15,
+    color: '#94A3B8',
+    lineHeight: 1.6,
+    maxWidth: 720,
   },
   meta: {
     display: 'flex',
-    gap: 20,
-    marginTop: 15,
-    fontSize: 13,
-    color: '#9CA3AF',
+    gap: 16,
     flexWrap: 'wrap',
+    marginTop: 18,
+    fontSize: 13,
+    color: '#94A3B8',
   },
   actions: {
     display: 'flex',
-    gap: 10,
-    marginTop: 20,
+    gap: 12,
+    marginTop: 22,
     flexWrap: 'wrap',
   },
   completeButton: {
-    padding: '12px 24px',
-    color: 'black',
+    padding: '10px 20px',
+    borderRadius: 8,
     border: 'none',
-    borderRadius: 5,
     fontWeight: 'bold',
-    cursor: 'pointer',
     fontSize: 14,
+    cursor: 'pointer',
+    transition: 'transform 0.15s ease',
   },
   downloadButton: {
-    padding: '12px 24px',
-    background: 'transparent',
+    padding: '10px 20px',
+    borderRadius: 8,
+    background: '#1E293B',
     color: 'white',
-    border: '1px solid #8B5CF6',
-    borderRadius: 5,
+    border: '1px solid #334155',
     fontWeight: 'bold',
-    cursor: 'pointer',
     fontSize: 14,
+    cursor: 'pointer',
   },
-  materialCard: {
+  content: {
+    background: '#0B1120',
+    border: '1px solid #1E293B',
+    borderRadius: 14,
+    padding: '32px 36px',
+    marginBottom: 24,
+    lineHeight: 1.8,
+  },
+  codeCard: {
+    background: '#090E1A',
+    border: '1px solid #1E293B',
+    borderLeft: '4px solid #00D4FF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 24,
+  },
+  codeHeader: {
     background: '#111827',
-    border: '1px solid #1F2937',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 20,
+    padding: '10px 20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottom: '1px solid #1E293B',
   },
-  muted: {
+  codeLanguage: {
+    fontFamily: 'monospace',
+    fontSize: 13,
     color: '#9CA3AF',
+  },
+  copyButton: {
+    background: 'transparent',
+    border: '1px solid #334155',
+    color: '#CBD5E1',
+    borderRadius: 6,
+    padding: '4px 10px',
+    fontSize: 12,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+  },
+  code: {
+    padding: 20,
+    margin: 0,
+    overflow: 'auto',
+    fontSize: 13.5,
+    color: '#38BDF8',
+    fontFamily: 'JetBrains Mono, monospace',
     lineHeight: 1.6,
   },
-  pdfFrame: {
-    width: '100%',
-    height: 700,
-    border: 'none',
+  navigation: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 16,
+    marginTop: 40,
+    marginBottom: 50,
+    flexWrap: 'wrap',
+  },
+  navButton: {
+    padding: '12px 22px',
+    background: '#1E293B',
+    color: 'white',
     borderRadius: 8,
-    background: 'white',
+    textDecoration: 'none',
+    fontSize: 14,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    border: '1px solid #334155',
+  },
+  materialCard: {
+    background: '#0B1120',
+    border: '1px solid #1E293B',
+    borderRadius: 12,
+    padding: 24,
+    marginBottom: 24,
   },
   videoWrapper: {
     position: 'relative',
@@ -609,6 +1169,7 @@ const styles: Record<string, React.CSSProperties> = {
     paddingTop: '56.25%',
     overflow: 'hidden',
     borderRadius: 8,
+    marginTop: 12,
   },
   videoFrame: {
     position: 'absolute',
@@ -618,92 +1179,236 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100%',
     border: 'none',
   },
-  content: {
-    background: '#111827',
-    border: '1px solid #1F2937',
-    borderRadius: 10,
-    padding: 30,
-    marginBottom: 20,
-    lineHeight: 1.8,
-  },
-  codeCard: {
-    background: '#0A1020',
-    border: '1px solid #1F2937',
-    borderLeft: '4px solid #6366F1',
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-  codeHeader: {
-    background: '#1F2937',
-    padding: '10px 20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  codeLanguage: {
-    fontFamily: 'monospace',
-    fontSize: 13,
-    color: '#9CA3AF',
-  },
-  codeBadge: {
-    color: '#00FF88',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  code: {
-    padding: 20,
-    margin: 0,
-    overflow: 'auto',
-    fontSize: 13,
-    color: '#E5E7EB',
-  },
-  navigation: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: 40,
-  },
-  navButton: {
-    padding: '12px 24px',
-    background: '#1F2937',
-    color: 'white',
-    borderRadius: 5,
-    textDecoration: 'none',
-    fontWeight: 'bold',
-  },
-  wordMaterialCard: {
-    background: '#D1D5DB',
-    border: '1px solid #374151',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 20,
-  },
-  wordPageHeader: {
+};
+
+// ============================================================================
+// ESTILOS ESPECÍFICOS DOS EXERCÍCIOS
+// ============================================================================
+const exerciseStyles: Record<string, React.CSSProperties> = {
+  sectionTitleContainer: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    flexWrap: 'wrap',
-    padding: '0 4px 12px',
+    gap: 14,
+    marginBottom: 20,
   },
-  wordBadge: {
-    background: '#111827',
+  sectionTitleIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    background: 'rgba(0, 212, 255, 0.12)',
+    border: '1px solid rgba(0, 212, 255, 0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 800,
     color: '#FFFFFF',
-    borderRadius: 999,
-    padding: '6px 10px',
+    margin: 0,
+    fontFamily: 'Orbitron, sans-serif',
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#94A3B8',
+    margin: '4px 0 0',
+  },
+  card: {
+    background: '#0B1120',
+    border: '1px solid #1E293B',
+    borderRadius: 14,
+    padding: '24px 28px',
+    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
+  },
+  header: {
+    marginBottom: 18,
+  },
+  badgeIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    background: 'rgba(0, 212, 255, 0.12)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeLabel: {
     fontSize: 11,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    color: '#00D4FF',
+    textTransform: 'uppercase',
   },
-  wordPage: {
-    background: '#FFFFFF',
-    color: '#111827',
-    minHeight: 420,
-    padding: '42px 48px',
+  quizTitle: {
+    fontSize: 17,
+    fontWeight: 700,
+    color: '#FFFFFF',
+    marginTop: 4,
+    margin: 0,
+    lineHeight: 1.5,
+  },
+  optionsGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+    marginBottom: 20,
+  },
+  optionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    padding: '14px 18px',
+    borderRadius: 10,
+    border: '1px solid',
+    fontSize: 14.5,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  optionLetter: {
+    width: 28,
+    height: 28,
     borderRadius: 6,
-    boxShadow: '0 8px 30px rgba(0,0,0,0.16)',
-    lineHeight: 1.7,
-    overflowX: 'auto',
+    background: 'rgba(255, 255, 255, 0.08)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  footer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  actionButton: {
+    background: 'linear-gradient(135deg, #00D4FF, #0284C7)',
+    color: '#000000',
+    border: 'none',
+    borderRadius: 8,
+    padding: '11px 22px',
+    fontWeight: 'bold',
+    fontSize: 14,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    cursor: 'pointer',
+    boxShadow: '0 0 15px rgba(0, 212, 255, 0.3)',
+  },
+  secondaryButton: {
+    background: '#1E293B',
+    color: '#E2E8F0',
+    border: '1px solid #334155',
+    borderRadius: 8,
+    padding: '9px 16px',
+    fontSize: 13,
+    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    cursor: 'pointer',
+  },
+  retryButton: {
+    background: 'transparent',
+    color: '#FF4B4B',
+    border: '1px solid #FF4B4B',
+    borderRadius: 6,
+    padding: '6px 14px',
+    fontSize: 12,
+    fontWeight: 'bold',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    cursor: 'pointer',
+  },
+  successBox: {
+    background: 'rgba(0, 255, 136, 0.1)',
+    border: '1px solid #00FF88',
+    borderRadius: 10,
+    padding: '14px 18px',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  errorBox: {
+    background: 'rgba(255, 75, 75, 0.1)',
+    border: '1px solid #FF4B4B',
+    borderRadius: 10,
+    padding: '14px 18px',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  explanationText: {
+    fontSize: 13.5,
+    color: '#E2E8F0',
+    margin: 0,
+    lineHeight: 1.6,
+  },
+  editorPreviewGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: 16,
+    marginBottom: 18,
+  },
+  pane: {
+    background: '#090E1A',
+    border: '1px solid #1E293B',
+    borderRadius: 10,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  paneHeader: {
+    background: '#111827',
+    padding: '8px 14px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottom: '1px solid #1E293B',
+  },
+  smallButton: {
+    background: 'transparent',
+    border: 'none',
+    color: '#9CA3AF',
+    fontSize: 12,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+  },
+  editorTextarea: {
+    background: '#090E1A',
+    color: '#38BDF8',
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: 13.5,
+    lineHeight: 1.6,
+    padding: 16,
+    border: 'none',
+    outline: 'none',
+    resize: 'vertical',
+    minHeight: 180,
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  previewContainer: {
+    background: '#FFFFFF',
+    flex: 1,
+    minHeight: 180,
+  },
+  previewIframe: {
+    width: '100%',
+    height: '100%',
+    minHeight: 180,
+    border: 'none',
+  },
+  hintBox: {
+    background: 'rgba(255, 215, 0, 0.08)',
+    border: '1px solid rgba(255, 215, 0, 0.3)',
+    borderRadius: 8,
+    padding: '12px 16px',
+    fontSize: 13.5,
+    color: '#FEF08A',
+    width: '100%',
+    boxSizing: 'border-box',
   },
 };
