@@ -15,13 +15,21 @@ import {
   ArrowRight,
   ArrowLeft,
   Lock,
+  Bug,
+  Code2,
 } from 'lucide-react';
 
 import { dbGetPublishedCourses, isSupabaseConfigured } from '@/lib/database';
 import { getCourseBySlug } from '@/data/courses';
 import { downloadLessonPDF } from '@/utils/pdfGenerator';
 import { useProgress } from '@/hooks/useProgress';
-import type { LessonExercise, QuizExercise, CodeExercise } from '@/types';
+import type {
+  LessonExercise,
+  QuizExercise,
+  CodeExercise,
+  BugHuntExercise,
+  FillBlankExercise,
+} from '@/types';
 
 type LessonType = 'pdf' | 'word' | 'video' | 'quiz';
 
@@ -493,6 +501,393 @@ function InteractiveCodeChallenge({
 }
 
 // ============================================================================
+// COMPONENTE: CAÇA AOS BUGS (BUG HUNT / DEBUGGING DE MISSÃO)
+// ============================================================================
+function InteractiveBugHunt({
+  challenge,
+  onComplete,
+}: {
+  challenge: BugHuntExercise;
+  onComplete: () => void;
+}) {
+  const [code, setCode] = useState(challenge.buggyCode);
+  const [validated, setValidated] = useState<boolean | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showHint, setShowHint] = useState(false);
+
+  const handleValidate = () => {
+    const normalized = code.replace(/\s+/g, ' ');
+    const allKeywordsPresent = challenge.expectedKeywords.every((kw) =>
+      code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
+    );
+
+    const hasForbidden = challenge.forbiddenKeywords?.some((kw) =>
+      code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
+    );
+
+    if (allKeywordsPresent && !hasForbidden) {
+      setValidated(true);
+      setErrorMessage('');
+      onComplete();
+    } else {
+      setValidated(false);
+      setErrorMessage(
+        hasForbidden
+          ? 'O bug ou trecho incorreto ainda está presente no código! Encontre e remova/corrija a linha falha.'
+          : 'A correção ainda não satisfaz todos os critérios. Revise a sintaxe e consulte a dica!'
+      );
+    }
+  };
+
+  const handleReset = () => {
+    setCode(challenge.buggyCode);
+    setValidated(null);
+    setErrorMessage('');
+    setShowHint(false);
+  };
+
+  return (
+    <div style={exerciseStyles.card}>
+      <div style={exerciseStyles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ ...exerciseStyles.badgeIcon, background: 'rgba(239, 68, 68, 0.15)' }}>
+            <Bug size={18} color="#EF4444" />
+          </div>
+          <div>
+            <span style={{ ...exerciseStyles.badgeLabel, color: '#EF4444' }}>
+              MISSÃO: CAÇA AOS BUGS
+            </span>
+            <h3 style={exerciseStyles.quizTitle}>{challenge.title}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: 'rgba(239, 68, 68, 0.08)',
+          borderLeft: '4px solid #EF4444',
+          borderRadius: 8,
+          padding: '12px 16px',
+          marginBottom: 16,
+          fontSize: 14,
+          color: '#FECACA',
+          lineHeight: 1.5,
+        }}
+      >
+        <strong style={{ display: 'block', color: '#F87171', marginBottom: 4 }}>
+          🚨 Chamado de Suporte / Falha Relatada:
+        </strong>
+        {challenge.scenario}
+      </div>
+
+      <div style={exerciseStyles.editorPreviewGrid}>
+        <div style={exerciseStyles.pane}>
+          <div style={exerciseStyles.paneHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#EF4444' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F59E0B' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10B981' }} />
+              <span style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'monospace', marginLeft: 8 }}>
+                depurar_arquivo
+              </span>
+            </div>
+            <button onClick={handleReset} style={exerciseStyles.smallButton} title="Restaurar código com bug">
+              <RotateCcw size={13} /> Resetar Bug
+            </button>
+          </div>
+
+          <textarea
+            value={code}
+            onChange={(e) => {
+              setCode(e.target.value);
+              if (validated !== null) setValidated(null);
+            }}
+            placeholder="Corrija o bug no código aqui..."
+            spellCheck={false}
+            style={exerciseStyles.editorTextarea}
+          />
+        </div>
+
+        <div style={exerciseStyles.pane}>
+          <div style={exerciseStyles.paneHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#EF4444' }}>
+              <Eye size={14} />
+              <span style={{ fontSize: 12, fontWeight: 'bold' }}>Resultado da Execução</span>
+            </div>
+            <span style={{ fontSize: 11, color: '#9CA3AF' }}>Tempo Real</span>
+          </div>
+
+          <div style={exerciseStyles.previewContainer}>
+            <iframe
+              srcDoc={`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <meta charset="utf-8">
+                    <style>
+                      body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        color: #111827;
+                        margin: 16px;
+                        line-height: 1.6;
+                        background: #ffffff;
+                      }
+                      h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+                      h2 { color: #1e293b; }
+                      a { color: #0284c7; text-decoration: underline; }
+                      img { max-width: 100%; height: auto; border-radius: 6px; }
+                    </style>
+                  </head>
+                  <body>${code}</body>
+                </html>
+              `}
+              title="Pré-visualização do bug"
+              sandbox="allow-scripts"
+              style={exerciseStyles.previewIframe}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div style={exerciseStyles.footer}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', width: '100%', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => setShowHint(!showHint)}
+              style={exerciseStyles.secondaryButton}
+            >
+              <HelpCircle size={15} />
+              {showHint ? 'Ocultar Dica' : 'Ver Dica de Depuração'}
+            </button>
+          </div>
+
+          <button
+            onClick={handleValidate}
+            style={exerciseStyles.actionButton}
+          >
+            <Sparkles size={16} />
+            Eliminar Bug & Validar
+          </button>
+        </div>
+
+        {showHint && (
+          <div style={exerciseStyles.hintBox}>
+            <p style={{ margin: 0 }}>
+              💡 <strong>Dica de Depuração:</strong> {challenge.hint}
+            </p>
+          </div>
+        )}
+
+        {validated === true && (
+          <div style={{ ...exerciseStyles.successBox, marginTop: 12, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CheckCircle2 size={22} color="#00FF88" />
+              <div>
+                <strong style={{ color: '#00FF88', fontSize: 15 }}>Bug Neutralizado com Sucesso!</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#A7F3D0' }}>
+                  {challenge.solutionExplanation}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {validated === false && (
+          <div style={{ ...exerciseStyles.errorBox, marginTop: 12, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <XCircle size={22} color="#FF4B4B" />
+              <div>
+                <strong style={{ color: '#FF4B4B', fontSize: 15 }}>Falha na Depuração</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#FECACA' }}>{errorMessage}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// COMPONENTE: PREENCHIMENTO DE LACUNAS (FILL-IN-THE-BLANKS)
+// ============================================================================
+function InteractiveFillBlank({
+  exercise,
+  onComplete,
+}: {
+  exercise: FillBlankExercise;
+  onComplete: () => void;
+}) {
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [validated, setValidated] = useState<boolean | null>(null);
+  const [activeHintIndex, setActiveHintIndex] = useState<number | null>(null);
+
+  const handleInputChange = (fieldId: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [fieldId]: value }));
+    if (validated !== null) setValidated(null);
+  };
+
+  const handleValidate = () => {
+    const allCorrect = exercise.blanks.every((blank) => {
+      const userVal = (answers[blank.id] || '').trim().toLowerCase();
+      return blank.expectedValues.some((exp) => exp.trim().toLowerCase() === userVal);
+    });
+
+    if (allCorrect) {
+      setValidated(true);
+      onComplete();
+    } else {
+      setValidated(false);
+    }
+  };
+
+  const handleReset = () => {
+    setAnswers({});
+    setValidated(null);
+    setActiveHintIndex(null);
+  };
+
+  return (
+    <div style={exerciseStyles.card}>
+      <div style={exerciseStyles.header}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ ...exerciseStyles.badgeIcon, background: 'rgba(236, 72, 153, 0.15)' }}>
+            <Code2 size={18} color="#EC4899" />
+          </div>
+          <div>
+            <span style={{ ...exerciseStyles.badgeLabel, color: '#EC4899' }}>
+              PREENCHA AS LACUNAS
+            </span>
+            <h3 style={exerciseStyles.quizTitle}>{exercise.title}</h3>
+          </div>
+        </div>
+      </div>
+
+      <p style={{ color: '#CBD5E1', fontSize: 14.5, marginBottom: 16 }}>
+        {exercise.instruction}
+      </p>
+
+      <div
+        style={{
+          background: '#090E1A',
+          border: '1px solid #1E293B',
+          borderRadius: 10,
+          padding: '18px 20px',
+          marginBottom: 18,
+          fontFamily: 'monospace',
+          fontSize: 14,
+          color: '#E2E8F0',
+          lineHeight: 2.2,
+          overflowX: 'auto',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {(() => {
+          const parts: React.ReactNode[] = [];
+          let remaining = exercise.codeSnippet;
+
+          exercise.blanks.forEach((blank, idx) => {
+            const token = `{{${blank.id}}}`;
+            const tokenPos = remaining.indexOf(token);
+            if (tokenPos !== -1) {
+              const before = remaining.substring(0, tokenPos);
+              parts.push(<span key={`text-${idx}`}>{before}</span>);
+              parts.push(
+                <input
+                  key={blank.id}
+                  type="text"
+                  placeholder={blank.placeholder}
+                  value={answers[blank.id] || ''}
+                  onChange={(e) => handleInputChange(blank.id, e.target.value)}
+                  style={{
+                    background: '#1E293B',
+                    border: '1px solid #38BDF8',
+                    borderRadius: 4,
+                    color: '#38BDF8',
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    padding: '2px 8px',
+                    margin: '0 4px',
+                    outline: 'none',
+                    minWidth: Math.max(90, (blank.placeholder.length + 3) * 8),
+                  }}
+                />
+              );
+              remaining = remaining.substring(tokenPos + token.length);
+            }
+          });
+          parts.push(<span key="text-end">{remaining}</span>);
+          return parts;
+        })()}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        {exercise.blanks.map((b, idx) => (
+          <button
+            key={b.id}
+            onClick={() => setActiveHintIndex(activeHintIndex === idx ? null : idx)}
+            style={{
+              ...exerciseStyles.secondaryButton,
+              fontSize: 12,
+              padding: '6px 12px',
+            }}
+          >
+            <HelpCircle size={13} />
+            Dica [{b.placeholder}]
+          </button>
+        ))}
+      </div>
+
+      {activeHintIndex !== null && exercise.blanks[activeHintIndex] && (
+        <div style={{ ...exerciseStyles.hintBox, marginBottom: 16 }}>
+          💡 <strong>Dica ({exercise.blanks[activeHintIndex].placeholder}):</strong>{' '}
+          {exercise.blanks[activeHintIndex].hint}
+        </div>
+      )}
+
+      <div style={exerciseStyles.footer}>
+        <div style={{ display: 'flex', gap: 10, width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button onClick={handleReset} style={exerciseStyles.secondaryButton}>
+            <RotateCcw size={14} /> Limpar
+          </button>
+          <button onClick={handleValidate} style={exerciseStyles.actionButton}>
+            <Sparkles size={16} /> Verificar Lacunas
+          </button>
+        </div>
+
+        {validated === true && (
+          <div style={{ ...exerciseStyles.successBox, marginTop: 12, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CheckCircle2 size={22} color="#00FF88" />
+              <div>
+                <strong style={{ color: '#00FF88', fontSize: 15 }}>Todas as lacunas corretas!</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#A7F3D0' }}>
+                  {exercise.explanation}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {validated === false && (
+          <div style={{ ...exerciseStyles.errorBox, marginTop: 12, width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <XCircle size={22} color="#FF4B4B" />
+              <div>
+                <strong style={{ color: '#FF4B4B', fontSize: 15 }}>Alguma lacuna não está correta</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#FECACA' }}>
+                  Revise a sintaxe, consulte as dicas das caixas e tente novamente!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // PÁGINA PRINCIPAL DA LIÇÃO
 // ============================================================================
 export function Lesson() {
@@ -924,6 +1319,26 @@ export function Lesson() {
                   <InteractiveCodeChallenge
                     key={index}
                     challenge={exercise}
+                    onComplete={() => handleExerciseCompleted(index)}
+                  />
+                );
+              }
+
+              if (exercise.type === 'bughunt') {
+                return (
+                  <InteractiveBugHunt
+                    key={index}
+                    challenge={exercise}
+                    onComplete={() => handleExerciseCompleted(index)}
+                  />
+                );
+              }
+
+              if (exercise.type === 'fillblank') {
+                return (
+                  <InteractiveFillBlank
+                    key={index}
+                    exercise={exercise}
                     onComplete={() => handleExerciseCompleted(index)}
                   />
                 );

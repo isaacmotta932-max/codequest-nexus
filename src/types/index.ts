@@ -160,7 +160,40 @@ export interface CodeExercise {
   solution: string;
 }
 
-export type LessonExercise = QuizExercise | CodeExercise;
+export interface BugHuntExercise {
+  id?: string;
+  type: 'bughunt';
+  title: string;
+  scenario: string;
+  buggyCode: string;
+  expectedKeywords: string[];
+  forbiddenKeywords?: string[];
+  hint: string;
+  solutionExplanation: string;
+}
+
+export interface BlankField {
+  id: string;
+  placeholder: string;
+  expectedValues: string[];
+  hint: string;
+}
+
+export interface FillBlankExercise {
+  id?: string;
+  type: 'fillblank';
+  title: string;
+  instruction: string;
+  codeSnippet: string;
+  blanks: BlankField[];
+  explanation: string;
+}
+
+export type LessonExercise =
+  | QuizExercise
+  | CodeExercise
+  | BugHuntExercise
+  | FillBlankExercise;
 
 export interface Lesson {
   id: string;
