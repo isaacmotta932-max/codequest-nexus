@@ -427,7 +427,7 @@ Você pode especificar a largura (\`width\`) e altura (\`height\`) em pixels par
             instruction: 'Adicione uma tag <img> com src="https://picsum.photos/300/200" e o atributo alt="Robô astronauta navegando no espaço".',
             initialCode: '<!-- Adicione a tag de imagem abaixo -->\n',
             expectedKeywords: ['<img', 'src=', 'https://picsum.photos/300/200', 'alt=', 'Robô astronauta navegando no espaço'],
-            hint: 'Escreva: <img src="https://picsum.photos/300/200" alt="Robô astronauta navegando no espaço" />',
+            hint: 'Utilize a tag de imagem informando a URL na propriedade src e uma descrição textual acessível no atributo alt.',
             solution: '<img src="https://picsum.photos/300/200" alt="Robô astronauta navegando no espaço" />',
           },
         ],
@@ -437,65 +437,362 @@ Você pode especificar a largura (\`width\`) e altura (\`height\`) em pixels par
   {
     id: 'css',
     slug: 'css',
-    name: 'CSS',
+    name: 'CSS3',
     planetName: 'Neon City',
-    description: 'Estilize suas paginas com cores e layouts.',
+    description: 'Transforme esqueletos cinzentos em interfaces futuristas com estilos e layout.',
     icon: '🎨',
     color: '#8B5CF6',
     language: 'css',
     level: 'Iniciante',
-    totalXp: 100,
+    totalXp: 190,
     lessons: [
       {
         id: 'css-1',
-        title: 'Introducao ao CSS',
-        description: 'O que e CSS e como aplica-lo.',
-        content: `# Introducao ao CSS
+        title: '1. O que é CSS & Sintaxe Estelar',
+        description: 'Aprenda a conectar folhas de estilo, seletores de classe e propriedades visuais.',
+        duration: 14,
+        xpReward: 60,
+        language: 'css',
+        content: `# 🎨 O que é CSS & Sintaxe Neon
 
-CSS (Cascading Style Sheets) estiliza documentos HTML.
+Bem-vindo a **Neon City**, cadete! Se o HTML é a estrutura óssea do seu habitat espacial, o **CSS** (*Cascading Style Sheets*) é a pele, os circuitos iluminados e a atmosfera que dão vida ao universo digital.
 
-## Como aplicar CSS
-1. Inline: \`<p style="color: red">\`
-2. Interno: tag \`<style>\`
-3. Externo: arquivo \`.css\`
+> **💡 O Papel do CSS:**
+> O CSS separa o conteúdo visual da marcação lógica. Com ele, você controla cores, tipografia, espaçamentos, animações e a adaptação do site para qualquer tamanho de tela (de relógios inteligentes a telas espaciais ultrawide).
 
-## Sintaxe Basica
+---
+
+### 🧩 Anatomia de uma Regra CSS
+
+Uma regra CSS é composta por um **seletor** e um bloco de **declarações**:
+
 \`\`\`css
 seletor {
   propriedade: valor;
 }
-\`\`\``,
-        codeExample: `body {
-  background-color: #050816;
-  color: white;
+\`\`\`
+
+- **Seletor:** Indica qual elemento HTML receberá o estilo (ex: \`h1\`, \`.card\`, \`#menu\`).
+- **Propriedade:** O aspecto que você deseja alterar (ex: \`color\`, \`background-color\`, \`font-size\`).
+- **Valor:** A definição aplicada (ex: \`#00D4FF\`, \`16px\`, \`bold\`).
+- **Ponto e vírgula (\`;\`):** Obrigatório ao final de cada declaração para evitar falhas em cadeia!
+
+---
+
+### 🎯 Tipos de Seletores Mais Comuns
+
+1. **Seletor de Elemento:** Afeta todas as tags daquele tipo:
+   \`\`\`css
+   p {
+     color: #E2E8F0;
+   }
+   \`\`\`
+2. **Seletor de Classe (\`.\`):** Reutilizável em múltiplos elementos. É o padrão da indústria:
+   \`\`\`css
+   .card-cyber {
+     background-color: #0B1120;
+     border: 1px solid #8B5CF6;
+   }
+   \`\`\`
+3. **Seletor de ID (\`#\`):** Específico para um único elemento único na página:
+   \`\`\`css
+   #painel-mestre {
+     padding: 24px;
+   }
+   \`\`\`
+
+> **⚠️ Armadilha Comum:**
+> Esquecer o ponto (\`.\`) ao estilizar uma classe no arquivo \`.css\` faz o navegador achar que você está estilizando uma tag HTML com aquele nome! Se sua classe é \`class="botao"\`, no CSS você deve escrever obrigatoriamente \`.botao\`.
+
+> **🛡️ Boa Prática:**
+> Prefira seletores de classe a IDs para estilização visual. Classes têm especificidade balanceada e facilitam a criação de componentes reutilizáveis.`,
+        codeExample: `/* Estilo do Terminal de Neon City */
+.card-missao {
+  background: #090E1A;
+  border: 1px solid #8B5CF6;
+  border-radius: 8px;
+  padding: 20px;
+  color: #F8FAFC;
+}
+
+.card-missao h2 {
+  color: #00D4FF;
+  margin-top: 0;
 }`,
-        language: 'css',
-        duration: 12,
-        xpReward: 35,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Se você criou no HTML uma tag com class="status-alerta", como essa classe deve ser referenciada dentro do arquivo CSS?',
+            options: [
+              'status-alerta { color: red; }',
+              '#status-alerta { color: red; }',
+              '.status-alerta { color: red; }',
+              '*status-alerta { color: red; }'
+            ],
+            correctIndex: 2,
+            explanation: 'Classes no CSS são obrigatoriamente precedidas por um ponto (.) como .status-alerta, enquanto a cerquilha (#) é reservada exclusivamente para IDs.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Construindo o Cartão Neon',
+            instruction: 'Complete a regra CSS para definir a classe, a cor de fundo e a borda do cartão.',
+            codeSnippet: `{{seletor_classe}} {
+  background-color: {{fundo}};
+  color: #FFFFFF;
+  border: 1px solid #8B5CF6;
+}`,
+            blanks: [
+              {
+                id: 'seletor_classe',
+                placeholder: 'seletor de classe',
+                expectedValues: ['.card-neon', '.card'],
+                hint: 'Lembre-se de iniciar com o ponto (.) seguido do nome da classe (ex: .card-neon).'
+              },
+              {
+                id: 'fundo',
+                placeholder: 'cor de fundo hexadecimal',
+                expectedValues: ['#0b1120', '#000000', '#090e1a'],
+                hint: 'Pense em um tom escuro cyberpunk como #0b1120 ou #000000.'
+              }
+            ],
+            explanation: 'Perfeito! A sintaxe CSS está impecável com o seletor de classe prefixado por ponto e o código de cor hexadecimal válido.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Sintaxe Corrompida no Painel de Bordo',
+            scenario: 'O desenvolvedor novato tentou criar a classe do botão de lançamento, mas a cor do texto e a borda não estão sendo aplicadas.',
+            buggyCode: `botao-ignicao {
+  color #00D4FF;
+  border: 1px solid #00D4FF;
+}`,
+            expectedKeywords: ['.botao-ignicao', 'color:', ';'],
+            forbiddenKeywords: ['botao-ignicao {', 'color #'],
+            hint: 'Verifique se falta o caractere de classe no nome do seletor e se há dois pontos separando a propriedade do valor da cor.',
+            solutionExplanation: 'Bug neutralizado! A classe agora possui o ponto inicial (.botao-ignicao) e a propriedade color possui os dois pontos obrigatórios.'
+          }
+        ]
       },
       {
         id: 'css-2',
-        title: 'Cores e Fundos',
-        description: 'Trabalhe com cores e gradientes.',
-        content: `# Cores e Fundos
-
-## Formas de definir cores
-- Nome: \`red\`, \`blue\`
-- Hex: \`#FF0000\`
-- RGB: \`rgb(255, 0, 0)\`
-
-## Gradientes
-\`\`\`css
-background: linear-gradient(90deg, #00D4FF, #8B5CF6);
-\`\`\``,
-        codeExample: `.caixa {
-  background: linear-gradient(135deg, #00D4FF, #8B5CF6);
-  padding: 20px;
-}`,
+        title: '2. O Modelo de Caixa (Box Model)',
+        description: 'Domine Content, Padding, Border, Margin e a propriedade box-sizing.',
+        duration: 15,
+        xpReward: 65,
         language: 'css',
-        duration: 10,
-        xpReward: 35,
+        content: `# 📦 O Modelo de Caixa (Box Model)
+
+No CSS, **absolutamente tudo é uma caixa retangular**! Entender o Modelo de Caixa é o divisor de águas entre quem briga com o layout e quem tem controle cirúrgico sobre a tela.
+
+---
+
+### 🧱 As 4 Camadas da Caixa
+
+De dentro para fora, toda caixa possui 4 camadas fundamentais:
+
+1. **Content (Conteúdo):** Onde o texto ou imagem realmente vive. Controlado por \`width\` e \`height\`.
+2. **Padding (Preenchimento Interno):** O espaço respirável entre o conteúdo e a borda. Fica **dentro** da caixa.
+3. **Border (Borda):** A moldura ao redor do padding e do conteúdo.
+4. **Margin (Margem Externa):** O espaço entre esta caixa e as outras caixas vizinhas na página.
+
+\`\`\`
++---------------------------+
+|          Margin           |
+|  +---------------------+  |
+|  |       Border        |  |
+|  |  +---------------+  |  |
+|  |  |    Padding    |  |  |
+|  |  |  +---------+  |  |  |
+|  |  |  | Content |  |  |  |
+|  |  |  +---------+  |  |  |
+|  |  +---------------+  |  |
+|  +---------------------+  |
++---------------------------+
+\`\`\`
+
+---
+
+### 🛡️ O Salvador de Vidas: \`box-sizing: border-box\`
+
+Por padrão no CSS antigo (\`content-box\`), se você definir \`width: 200px\` e adicionar \`padding: 20px\`, o navegador soma tudo: a caixa fica com **240px de largura real**! Isso quebrava layouts e causava rolagem horizontal indesejada.
+
+Com \`box-sizing: border-box\`, a largura que você define é a largura total final:
+
+\`\`\`css
+* {
+  box-sizing: border-box;
+}
+\`\`\`
+
+> **💡 Dica Pro:**
+> Praticamente todo projeto moderno no mundo real adiciona um "CSS Reset" no início do arquivo aplicando \`box-sizing: border-box\` em todos os elementos. Isso impede que espaçamentos internos aumentem o tamanho total dos componentes.
+
+> **⚠️ Armadilha Comum:**
+> Margens verticais contíguas podem sofrer de "colapso de margens" (*margin collapse*), onde duas margens de 20px se sobrepõem resultando em apenas 20px de distância em vez de 40px.`,
+        codeExample: `/* Configuração ideal do Modelo de Caixa */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.painel-cyber {
+  width: 320px;
+  padding: 24px;
+  border: 2px solid #00D4FF;
+  margin: 20px auto;
+  background: #0F172A;
+  border-radius: 12px;
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual é o efeito de aplicar "box-sizing: border-box" em um elemento?',
+            options: [
+              'Remove completamente as bordas e preenchimentos do elemento.',
+              'Faz com que o padding e a borda sejam incluídos dentro da largura (width) total especificada.',
+              'Aumenta automaticamente a margem externa para afastar elementos vizinhos.',
+              'Torna o elemento invisível até que o mouse passe sobre ele.'
+            ],
+            correctIndex: 1,
+            explanation: 'Com border-box, a largura e altura declaradas passam a ser o tamanho total definitivo do elemento, evitando que padding ou bordas façam a caixa estourar o layout.'
+          },
+          {
+            type: 'code',
+            instruction: 'Crie uma classe .escudo-energia com padding de 20px, borda sólida ciano (#00D4FF) de 2px e fundo escuro (#0B1120).',
+            initialCode: `/* Digite a regra CSS abaixo */\n`,
+            expectedKeywords: ['.escudo-energia', 'padding:', '20px', 'border:', '#00D4FF', 'background'],
+            hint: 'Declare a classe .escudo-energia abrindo chaves. Dentro dela, configure padding: 20px;, border: 2px solid #00D4FF; e background-color: #0B1120;.',
+            solution: `.escudo-energia {
+  padding: 20px;
+  border: 2px solid #00D4FF;
+  background-color: #0B1120;
+}`
+          }
+        ]
       },
+      {
+        id: 'css-3',
+        title: '3. Flexbox & Alinhamento Espacial',
+        description: 'Posicione elementos em uma dimensão com display flex, justify-content e align-items.',
+        duration: 16,
+        xpReward: 65,
+        language: 'css',
+        content: `# 🌌 Flexbox & Alinhamento Espacial
+
+No passado, alinhar elementos no centro de uma tela era uma dor de cabeça que exigia hacks com tabelas ou floats. O **Flexbox** (*Flexible Box Layout*) chegou para revolucionar a forma como distribuímos espaços e alinhamos itens.
+
+---
+
+### 🚀 Ativando o Contêiner Flexível
+
+Para usar Flexbox, você aplica \`display: flex\` no elemento pai (**Flex Container**). Automaticamente, todos os seus filhos diretos tornam-se **Flex Items**:
+
+\`\`\`css
+.barra-navegacao {
+  display: flex;
+}
+\`\`\`
+
+---
+
+### 🧭 Os Dois Eixos Fundamentais
+
+O Flexbox opera com dois eixos ortogonais:
+
+1. **Main Axis (Eixo Principal):** A direção em que os itens fluem (padrão: horizontal/linha).
+   - Controlado por: \`justify-content\`
+   - Opções: \`flex-start\`, \`center\`, \`flex-end\`, \`space-between\`, \`space-around\`.
+2. **Cross Axis (Eixo Transversal):** Perpendicular ao eixo principal (padrão: vertical).
+   - Controlado por: \`align-items\`
+   - Opções: \`stretch\` (padrão), \`center\`, \`flex-start\`, \`flex-end\`.
+
+---
+
+### 🎯 A Fórmula Mágica da Centralização Total
+
+Para centralizar qualquer elemento perfeitamente no meio da tela:
+
+\`\`\`css
+.centralizador {
+  display: flex;
+  justify-content: center; /* Centro no eixo horizontal */
+  align-items: center;     /* Centro no eixo vertical */
+}
+\`\`\`
+
+> **💡 Dica Pro:**
+> Use a propriedade \`gap: 16px;\` no contêiner flexível. Ela cria espaçamento automático entre os itens sem precisar adicionar margens em cada elemento filho!
+
+> **⚠️ Armadilha Comum:**
+> Esquecer de aplicar \`display: flex\` no elemento pai. As propriedades \`justify-content\` e \`align-items\` só têm efeito em elementos que são contêineres flexíveis.`,
+        codeExample: `/* Barra de Navegação Futurista com Flexbox */
+.navbar-nexus {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #0B1120;
+  border-bottom: 1px solid #1E293B;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual propriedade Flexbox é responsável por alinhar os elementos ao longo do EIXO TRANSVERSAL (vertical por padrão)?',
+            options: [
+              'justify-content',
+              'flex-direction',
+              'align-items',
+              'gap-alignment'
+            ],
+            correctIndex: 2,
+            explanation: 'align-items controla o alinhamento no eixo transversal (cross-axis), enquanto justify-content controla o eixo principal (main-axis).'
+          },
+          {
+            type: 'fillblank',
+            title: 'Configurando a Estação Flex',
+            instruction: 'Complete as propriedades para transformar a barra em um contêiner flexível distribuindo os itens com espaço entre eles.',
+            codeSnippet: `.menu-navegacao {
+  display: {{tipo_display}};
+  justify-content: {{alinhamento_principal}};
+  align-items: center;
+  gap: 16px;
+}`,
+            blanks: [
+              {
+                id: 'tipo_display',
+                placeholder: 'tipo de display',
+                expectedValues: ['flex'],
+                hint: 'Digite o valor que ativa o Flexible Box Layout.'
+              },
+              {
+                id: 'alinhamento_principal',
+                placeholder: 'distribuição espacial',
+                expectedValues: ['space-between', 'center', 'space-around'],
+                hint: 'Pense na propriedade que empurra um item para cada extremidade (space-between).'
+              }
+            ],
+            explanation: 'Excelente! Com display: flex e justify-content: space-between, os itens do menu se organizam harmoniosamente pelas extremidades da interface.'
+          },
+          {
+            type: 'code',
+            instruction: 'Defina a classe .painel-central com display flex, itens centralizados em ambos os eixos e gap de 12px.',
+            initialCode: `/* Digite seu código Flexbox abaixo */\n`,
+            expectedKeywords: ['.painel-central', 'display: flex', 'justify-content: center', 'align-items: center', 'gap: 12px'],
+            hint: 'Declare .painel-central com display: flex;, justify-content: center;, align-items: center; e gap: 12px;.',
+            solution: `.painel-central {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}`
+          }
+        ]
+      }
     ],
   },
   {
@@ -503,64 +800,351 @@ background: linear-gradient(90deg, #00D4FF, #8B5CF6);
     slug: 'javascript',
     name: 'JavaScript',
     planetName: 'Cyber Core',
-    description: 'De vida as suas paginas com programacao.',
+    description: 'Dê vida, dinamismo e inteligência computacional às suas aplicações.',
     icon: '⚡',
     color: '#FFD700',
     language: 'javascript',
     level: 'Intermediário',
-    totalXp: 120,
+    totalXp: 190,
     lessons: [
       {
         id: 'js-1',
-        title: 'Introducao ao JavaScript',
-        description: 'Variaveis, tipos de dados e operadores.',
-        content: `# Introducao ao JavaScript
-
-JavaScript e a **linguagem de programacao** da web.
-
-## Variaveis
-\`\`\`javascript
-let nome = "Coder";
-const idade = 25;
-\`\`\`
-
-## Tipos de Dados
-- \`string\` — texto
-- \`number\` — numeros
-- \`boolean\` — true/false
-- \`array\` — listas
-- \`object\` — objetos`,
-        codeExample: `let nome = "CodeQuest";
-let xp = 100;
-console.log("Jogador: " + nome);`,
-        language: 'javascript',
+        title: '1. O Reator de Energia: Variáveis, Tipos & Operadores',
+        description: 'Domine const, let, tipos de dados primitivos e a lógica do motor de execução.',
         duration: 15,
-        xpReward: 40,
+        xpReward: 60,
+        language: 'javascript',
+        content: `# ⚡ O Reator de Energia: Variáveis & Tipos
+
+Bem-vindo ao **Cyber Core**, o coração pulsar da Galáxia de Código! Se o HTML é a estrutura e o CSS é o design, o **JavaScript** é o sistema nervoso autônomo que processa dados, responde a cliques e toma decisões inteligentes.
+
+> **💡 O que é JavaScript?**
+> Criado em 1995 por Brendan Eich em apenas 10 dias, o JavaScript evoluiu para se tornar a linguagem mais utilizada do planeta. Hoje ela roda nos navegadores, nos servidores (Node.js), em satélites e em robôs de inteligência artificial.
+
+---
+
+### 📦 Declarando Dados: \`const\` vs \`let\`
+
+No JavaScript moderno (ES6+), abandonamos a antiga palavra-chave \`var\` devido a problemas de escopo global e vazamento de variáveis. Hoje seguimos esta regra de ouro:
+
+1. **\`const\` (Constante):** Use por padrão para quase tudo! Garante que o identificador não pode ser reatribuído:
+   \`\`\`javascript
+   const nomeNave = "Nexus One";
+   const velocidadeDobra = 9.8;
+   \`\`\`
+2. **\`let\` (Variável Reatribuível):** Use apenas quando o valor for comprovadamente mudar ao longo do tempo (como contadores ou placares):
+   \`\`\`javascript
+   let escudos = 100;
+   escudos = 85; // Permitido com let!
+   \`\`\`
+
+---
+
+### 🧬 Os Tipos Primitivos do Nexus
+
+- **String:** Textos delimitados por aspas simples, duplas ou crases (Template Literals):
+  \`\`\`javascript
+  const piloto = "Capitã Sarah";
+  const status = \`Piloto ativo: \${piloto}\`;
+  \`\`\`
+- **Number:** Números inteiros ou decimais: \`const xp = 250;\`
+- **Boolean:** Verdadeiro ou falso: \`const sistemaOnline = true;\`
+- **Undefined:** Variável declarada que ainda não recebeu valor.
+- **Null:** Ausência intencional de valor: \`let alvoAtual = null;\`
+
+> **⚠️ Armadilha Comum:**
+> Tentar reatribuir uma variável declarada com \`const\` dispara um erro fatal \`TypeError: Assignment to constant variable\`. Se a variável precisa variar, declare-a com \`let\`!
+
+> **🛡️ Boa Prática:**
+> Sempre prefira comparações estritas com três iguais (\`===\`). O operador duplo (\`==\`) faz coerções de tipo bizarras (ex: \`0 == false\` é verdadeiro, mas \`0 === false\` é falso como esperado).`,
+        codeExample: `// Painel de Telemetria do Cyber Core
+const nomeAgente = "Neo";
+let nivelAcesso = 1;
+const sistemaOperacional = "NexusOS v4";
+
+// Subindo de nível na academia
+nivelAcesso += 1;
+
+console.log(\`Agente: \${nomeAgente} | Nível: \${nivelAcesso}\`);`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Por que o padrão da indústria moderna recomenda declarar variáveis com "const" por padrão em vez de "let"?',
+            options: [
+              'Porque variáveis "const" rodam 10 vezes mais rápido na CPU.',
+              'Porque "const" previne reatribuições acidentais de valor, tornando o código mais previsível e seguro.',
+              'Porque "let" não funciona em navegadores modernos.',
+              'Porque "const" permite criar variáveis sem nenhum valor inicial.'
+            ],
+            correctIndex: 1,
+            explanation: 'Usar const por padrão expressa intenção clara de que aquele valor é estável, prevenindo bugs onde uma variável é sobrescrita acidentalmente em outra parte do código.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Cálculo de Energia da Estação',
+            instruction: 'Complete a declaração da constante do piloto e a variável reatribuível de nível de energia.',
+            codeSnippet: `{{declarador_imutavel}} comandante = "Aria";
+{{declarador_mutavel}} nivelBateria = 100;
+nivelBateria = 90;`,
+            blanks: [
+              {
+                id: 'declarador_imutavel',
+                placeholder: 'palavra-chave imutável',
+                expectedValues: ['const'],
+                hint: 'Palavra-chave usada para variáveis que nunca serão reatribuídas.'
+              },
+              {
+                id: 'declarador_mutavel',
+                placeholder: 'palavra-chave mutável',
+                expectedValues: ['let'],
+                hint: 'Palavra-chave usada quando a variável precisa ter seu valor alterado depois.'
+              }
+            ],
+            explanation: 'Perfeito! Usar const para o comandante e let para a bateria reflete as melhores práticas de JavaScript moderno.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Sobrecarga no Gerador Quântico',
+            scenario: 'O robô de telemetria tentou incrementar a pontuação de XP do jogador, mas o console acusou "TypeError: Assignment to constant variable".',
+            buggyCode: `const xpJogador = 50;
+xpJogador = xpJogador + 25;
+console.log(xpJogador);`,
+            expectedKeywords: ['let xpJogador = 50;', 'xpJogador = xpJogador + 25;'],
+            forbiddenKeywords: ['const xpJogador = 50;'],
+            hint: 'A variável xpJogador está sendo reatribuída na linha seguinte. Qual palavra-chave permite que o valor mude?',
+            solutionExplanation: 'Excelente depuração! Trocando const por let na declaração inicial, a variável agora pode receber novos valores sem estourar erros de runtime.'
+          }
+        ]
       },
       {
         id: 'js-2',
-        title: 'Funcoes',
-        description: 'Crie blocos de codigo reutilizaveis.',
-        content: `# Funcoes
+        title: '2. Funções Quânticas & Lógica de Decisão',
+        description: 'Construa blocos de código reutilizáveis com funções, arrow functions e operadores lógicos.',
+        duration: 16,
+        xpReward: 65,
+        language: 'javascript',
+        content: `# 🧠 Funções & Lógica de Decisão
 
-## Declaracao de Funcao
+Funções são os motores de ação do JavaScript. Em vez de repetir linhas de cálculo dez vezes, você encapsula a lógica dentro de uma função e a executa sempre que necessário.
+
+---
+
+### ⚙️ Declarando Funções no JavaScript
+
+Existem duas formas principais de escrever funções:
+
+1. **Função Tradicional (\`function\`):**
+   \`\`\`javascript
+   function calcularDano(ataque, defesa) {
+     return ataque - defesa;
+   }
+   \`\`\`
+2. **Arrow Function (\`=>\`):** A sintaxe mais enxuta introduzida no ES6:
+   \`\`\`javascript
+   const calcularDano = (ataque, defesa) => {
+     return ataque - defesa;
+   };
+   \`\`\`
+   Se a função tiver apenas uma instrução de retorno, você pode omitir as chaves e a palavra \`return\`:
+   \`\`\`javascript
+   const dobrar = (n) => n * 2;
+   \`\`\`
+
+---
+
+### 🔀 Tomada de Decisão: \`if\`, \`else\` & Operador Ternário
+
+O computador decide caminhos com base em condições booleanas:
+
 \`\`\`javascript
-function saudacao(nome) {
-  return "Ola, " + nome;
+if (energia >= 50) {
+  ativarPropulsores();
+} else if (energia > 10) {
+  ativarModoEconomia();
+} else {
+  ativarSinalSocorro();
 }
 \`\`\`
 
-## Arrow Function
+Para decisões simples de atribuição, use o **operador ternário**:
+
 \`\`\`javascript
-const saudacao = (nome) => "Ola, " + nome;
-\`\`\``,
-        codeExample: `function calcularXp(nivel) {
-  return 100 * nivel;
-}`,
-        language: 'javascript',
-        duration: 12,
-        xpReward: 45,
+const status = energia > 20 ? "Operacional" : "Crítico";
+\`\`\`
+
+> **💡 Dica Pro:**
+> Funções puras (que recebem argumentos e retornam um resultado sem modificar variáveis externas) são muito mais fáceis de testar e debugar. Sempre que puder, faça suas funções retornarem valores com \`return\` em vez de alterar o mundo lá fora.
+
+> **⚠️ Armadilha Comum:**
+> Esquecer a palavra \`return\` dentro de uma função que usa chaves faz com que ela retorne \`undefined\` por padrão!`,
+        codeExample: `// Sistema de Autorização de Salto Hiperespacial
+const verificarAutorizacao = (credencial, nivelEnergia) => {
+  if (credencial === "OFICIAL" && nivelEnergia >= 80) {
+    return "SALTO_AUTORIZADO";
+  }
+  return "SALTO_NEGADO";
+};
+
+const resultado = verificarAutorizacao("OFICIAL", 95);
+console.log(resultado); // "SALTO_AUTORIZADO"`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'O que uma função JavaScript retorna por padrão se o corpo da função terminar sem executar nenhum comando "return"?',
+            options: [
+              'Retorna o número 0.',
+              'Retorna uma string vazia "".',
+              'Retorna o valor especial undefined.',
+              'Dispara um erro fatal de compilação.'
+            ],
+            correctIndex: 2,
+            explanation: 'No JavaScript, qualquer função que não especifique explicitamente um valor de retorno devolve undefined por definição da linguagem.'
+          },
+          {
+            type: 'code',
+            instruction: 'Crie uma função chamada calcularBonus que recebe um parâmetro pontuacao. Se pontuacao for maior ou igual a 100, retorne 50. Caso contrário, retorne 10.',
+            initialCode: `// Escreva a função calcularBonus abaixo\n`,
+            expectedKeywords: ['function calcularBonus', 'pontuacao', 'return', '50', '10'],
+            hint: 'Declare a função com function calcularBonus(pontuacao) {. Use if (pontuacao >= 100) return 50; else return 10;.',
+            solution: `function calcularBonus(pontuacao) {
+  if (pontuacao >= 100) {
+    return 50;
+  }
+  return 10;
+}`
+          },
+          {
+            type: 'bughunt',
+            title: 'O Scanner Sem Retorno',
+            scenario: 'O scanner de radar deveria devolver a distância calculada, mas quem chama a função sempre recebe undefined.',
+            buggyCode: `function escanearAlvo(coordenadaX, coordenadaY) {
+  const distancia = Math.sqrt(coordenadaX ** 2 + coordenadaY ** 2);
+  // O valor foi calculado, mas nunca devolvido!
+}
+
+const resultado = escanearAlvo(3, 4);
+console.log(resultado);`,
+            expectedKeywords: ['return distancia;'],
+            forbiddenKeywords: ['// O valor foi calculado, mas nunca devolvido!'],
+            hint: 'Adicione a palavra-chave de retorno na última linha da função para enviar a variável distancia de volta a quem a chamou.',
+            solutionExplanation: 'Perfeito! Com return distancia;, a função agora entrega o resultado do cálculo para a variável que a invocou.'
+          }
+        ]
       },
+      {
+        id: 'js-3',
+        title: '3. Interatividade Viva: O DOM & Eventos',
+        description: 'Aprenda a selecionar elementos HTML e responder a cliques e ações do usuário.',
+        duration: 17,
+        xpReward: 65,
+        language: 'javascript',
+        content: `# ⚡ Interatividade Viva: O DOM & Eventos
+
+Até agora seu código executou cálculos internos. Chegou o momento mais empolgante: **fazer o JavaScript controlar os elementos visuais na tela**!
+
+---
+
+### 🌲 O que é o DOM (Document Object Model)?
+
+O **DOM** é a representação em árvore que o navegador cria para cada tag HTML da sua página. No JavaScript, você pode acessar e manipular essa árvore usando o objeto global \`document\`.
+
+Para encontrar qualquer elemento usando a mesma sintaxe de seletores do CSS:
+
+\`\`\`javascript
+const botao = document.querySelector("#btn-lancar");
+const titulo = document.querySelector(".titulo-missao");
+\`\`\`
+
+---
+
+### 👂 Escutando Ações com \`addEventListener\`
+
+Para responder a um clique do mouse, pressionamento de tecla ou envio de formulário, registramos um ouvinte de eventos:
+
+\`\`\`javascript
+const botao = document.querySelector("#btn-lancar");
+
+botao.addEventListener("click", () => {
+  console.log("Foguete lançado!");
+  titulo.textContent = "Missão em Andamento!";
+});
+\`\`\`
+
+---
+
+### 🎨 Alterando Textos e Estilos Dinamicamente
+
+Com o elemento em mãos, você tem superpoderes:
+
+- **Alterar texto:** \`elemento.textContent = "Novo texto seguro";\`
+- **Adicionar classe CSS:** \`elemento.classList.add("ativo");\`
+- **Remover classe CSS:** \`elemento.classList.remove("oculto");\`
+- **Alternar classe CSS:** \`elemento.classList.toggle("modo-escuro");\`
+
+> **💡 Dica Pro:**
+> Sempre prefira alterar classes CSS via \`classList.add()\` ou \`toggle()\` em vez de alterar estilos inline com \`style.color\`. Isso mantém o CSS responsável pelo visual e o JavaScript responsável pelo comportamento.
+
+> **⚠️ Armadilha Comum:**
+> Tentar buscar um elemento com \`querySelector\` antes do HTML ser carregado pelo navegador resulta em \`null\`. Coloque suas tags \`<script>\` antes de fechar o \`</body>\` ou use o atributo \`defer\`.`,
+        codeExample: `// Interceptando a Ignição do Reator
+const botaoIgnicao = document.querySelector("#botao-ignicao");
+const statusLuz = document.querySelector(".status-luz");
+
+botaoIgnicao.addEventListener("click", () => {
+  statusLuz.textContent = "REATOR ONLINE";
+  statusLuz.classList.add("ativo");
+});`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual método moderno da API DOM é o mais flexível e recomendado para capturar o primeiro elemento que coincida com um seletor CSS?',
+            options: [
+              'document.getElementByIdName()',
+              'document.querySelector()',
+              'document.captureElement()',
+              'document.findCss()'
+            ],
+            correctIndex: 1,
+            explanation: 'document.querySelector() permite usar qualquer seletor CSS válido (.classe, #id, tag[attr], etc.) para capturar elementos na página com máxima flexibilidade.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Ativando o Alarme da Estação',
+            instruction: 'Preencha os métodos para capturar o botão por ID e registrar o ouvinte de evento de clique.',
+            codeSnippet: `const botaoAlarme = document.{{metodo_selecao}}("#btn-alarme");
+
+botaoAlarme.{{metodo_ouvinte}}("click", () => {
+  alert("Alerta vermelho ativado!");
+});`,
+            blanks: [
+              {
+                id: 'metodo_selecao',
+                placeholder: 'método seletor',
+                expectedValues: ['querySelector'],
+                hint: 'Método padrão do objeto document que aceita seletores CSS.'
+              },
+              {
+                id: 'metodo_ouvinte',
+                placeholder: 'método ouvinte',
+                expectedValues: ['addEventListener'],
+                hint: 'Método chamado no elemento para escutar eventos.'
+              }
+            ],
+            explanation: 'Magnífico! document.querySelector e addEventListener são a dupla dinâmica do desenvolvimento web moderno!'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva o código para adicionar um ouvinte de clique ao elemento botao, mudando a propriedade textContent do elemento status para "SISTEMA ATIVO".',
+            initialCode: `// Considere que as variáveis "botao" e "status" já existem
+// Adicione o addEventListener abaixo\n`,
+            expectedKeywords: ['botao.addEventListener', 'click', 'status.textContent', 'SISTEMA ATIVO'],
+            hint: 'Faça botao.addEventListener("click", () => { status.textContent = "SISTEMA ATIVO"; });',
+            solution: `botao.addEventListener("click", () => {
+  status.textContent = "SISTEMA ATIVO";
+});`
+          }
+        ]
+      }
     ],
   },
   {
@@ -568,39 +1152,231 @@ const saudacao = (nome) => "Ola, " + nome;
     slug: 'typescript',
     name: 'TypeScript',
     planetName: 'Quantum Station',
-    description: 'JavaScript com superpoderes: tipos e seguranca.',
+    description: 'Adicione blindagem estática de tipos e segurança corporativa ao JavaScript.',
     icon: '🔷',
     color: '#3178C6',
     language: 'typescript',
     level: 'Intermediário',
-    totalXp: 80,
+    totalXp: 125,
     lessons: [
       {
         id: 'ts-1',
-        title: 'Tipos Basicos',
-        description: 'Aprenda os tipos primitivos do TypeScript.',
-        content: `# Tipos Basicos
+        title: '1. O Escudo dos Tipos: Primitivos & Funções',
+        description: 'Elimine bugs antes mesmo de rodar o código com tipagem estática e inferência.',
+        duration: 15,
+        xpReward: 60,
+        language: 'typescript',
+        content: `# 🔷 O Escudo dos Tipos: Primitivos & Funções
 
-TypeScript adiciona **tipagem estatica** ao JavaScript.
+Bem-vindo à **Quantum Station**, cadete! No vasto cosmos do software, um dos maiores causadores de catástrofes em produção é o famoso \`TypeError: undefined is not a function\`.
+
+O **TypeScript** é um superset do JavaScript desenvolvido pela Microsoft que adiciona uma camada de **blindagem estática de tipos**.
+
+> **💡 O que é TypeScript?**
+> O TypeScript não substitui o JavaScript — ele o envolve com um sistema de checagem em tempo de desenvolvimento. Antes do seu código ir para o ar, o compilador verifica cada variável, função e objeto. Se houver incompatibilidade, você descobre no editor, não na frente do usuário!
+
+---
+
+### 🛡️ Tipagem Primitiva Explícita
 
 \`\`\`typescript
-let nome: string = "Coder";
-let nivel: number = 10;
-let ativo: boolean = true;
-\`\`\``,
-        codeExample: `interface Jogador {
-  nome: string;
-  nivel: number;
+const nomeNave: string = "USS Voyager";
+let tripulantes: number = 140;
+let escudosAtivos: boolean = true;
+\`\`\`
+
+---
+
+### ⚙️ Tipando Funções: Parâmetros & Retorno
+
+No TypeScript, você define os tipos dos argumentos que entram e o tipo do valor que sai da função:
+
+\`\`\`typescript
+function calcularPropulsao(velocidade: number, fatorDobra: number): number {
+  return velocidade * fatorDobra;
+}
+\`\`\`
+
+Se a função apenas executa uma ação e não retorna nenhum valor, o tipo de retorno é \`void\`:
+
+\`\`\`typescript
+function emitirAlerta(mensagem: string): void {
+  console.warn(\`ALERTA: \${mensagem}\`);
+}
+\`\`\`
+
+> **⚠️ Armadilha Comum:**
+> Usar o tipo \`any\` desliga completamente a checagem do TypeScript! É como voar no espaço sem capacete. Evite \`any\` sempre que possível; prefira tipos explícitos ou \`unknown\`.
+
+> **🛡️ Boa Prática:**
+> O TypeScript possui **inferência de tipos**. Se você declarar \`let pontuacao = 100;\`, ele já sabe automaticamente que a variável é do tipo \`number\`. Não é necessário tipar o que é óbvio!`,
+        codeExample: `// Sistema de Calibração da Quantum Station
+function autenticarOficial(id: string, nivelSeguranca: number): boolean {
+  if (nivelSeguranca >= 4) {
+    return true;
+  }
+  return false;
 }
 
-const jogador: Jogador = {
-  nome: "Neo",
-  nivel: 42
-};`,
-        language: 'typescript',
-        duration: 12,
-        xpReward: 40,
+const autorizado: boolean = autenticarOficial("CADETE-99", 5);
+console.log("Acesso concedido:", autorizado);`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'O que acontece com as anotações de tipo do TypeScript quando o código é compilado para ser executado em produção no navegador?',
+            options: [
+              'São convertidas em funções de validação em tempo de execução que deixam a página mais lenta.',
+              'São completamente removidas durante o processo de build, gerando JavaScript puro e limpo.',
+              'São enviadas para um servidor remoto da Microsoft que valida cada requisição.',
+              'São mantidas dentro de comentários invisíveis no HTML.'
+            ],
+            correctIndex: 1,
+            explanation: 'O TypeScript é uma ferramenta de tempo de desenvolvimento. Na compilação (transpilação), todos os tipos são eliminados ("type erasure"), resultando em JavaScript padrão compatível com qualquer navegador.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Tipando a Missão Espacial',
+            instruction: 'Preencha os tipos do parâmetro nivel (número) e do retorno da função (texto).',
+            codeSnippet: `function classificarPiloto(nivel: {{tipo_numero}}): {{tipo_retorno}} {
+  if (nivel >= 50) return "Comandante";
+  return "Cadete";
+}`,
+            blanks: [
+              {
+                id: 'tipo_numero',
+                placeholder: 'tipo numérico',
+                expectedValues: ['number'],
+                hint: 'Palavra-chave em minúsculas que representa números no TypeScript.'
+              },
+              {
+                id: 'tipo_retorno',
+                placeholder: 'tipo textual',
+                expectedValues: ['string'],
+                hint: 'Palavra-chave que representa textos no TypeScript.'
+              }
+            ],
+            explanation: 'Excelente! A função agora tem contrato rígido: recebe um number e promete devolver uma string.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Incompatibilidade na Matriz de Coordenadas',
+            scenario: 'O compilador acusou erro porque alguém passou uma string entre aspas onde a função esperava estritamente um número.',
+            buggyCode: `function ajustarOrbita(graus: number): void {
+  console.log("Órbita ajustada em", graus, "graus.");
+}
+
+// Erro de tipo na chamada abaixo:
+ajustarOrbita("45");`,
+            expectedKeywords: ['ajustarOrbita(45);'],
+            forbiddenKeywords: ['ajustarOrbita("45");'],
+            hint: 'Remova as aspas ao redor do número 45 para que ele seja tratado como um número literal válido.',
+            solutionExplanation: 'Perfeito! O valor 45 sem aspas é do tipo number, satisfazendo a assinatura exigida pela função.'
+          }
+        ]
       },
+      {
+        id: 'ts-2',
+        title: '2. Interfaces & Modelagem Quântica',
+        description: 'Defina a forma dos seus objetos com interfaces, propriedades opcionais e Union Types.',
+        duration: 16,
+        xpReward: 65,
+        language: 'typescript',
+        content: `# 🧬 Interfaces & Modelagem Quântica
+
+Conforme seus sistemas crescem, você precisará modelar entidades complexas: usuários, naves espaciais, planos de voo. No TypeScript, usamos **interfaces** como contratos de arquitetura.
+
+---
+
+### 🏛️ Criando uma Interface
+
+Uma \`interface\` declara quais propriedades um objeto deve possuir e de que tipo elas são:
+
+\`\`\`typescript
+interface CadeteEspacial {
+  id: string;
+  nome: string;
+  nivel: number;
+  ativo: boolean;
+  moduloEspecial?: string; // Propriedade opcional com "?"
+}
+\`\`\`
+
+---
+
+### ❓ Propriedades Opcionais (\`?\`)
+
+Nem todo objeto possui todos os campos o tempo todo. Ao adicionar um ponto de interrogação antes dos dois pontos (\`?\`), você torna o campo opcional:
+
+\`\`\`typescript
+const novoCadete: CadeteEspacial = {
+  id: "C-101",
+  nome: "Lucas",
+  nivel: 1,
+  ativo: true
+  // moduloEspecial não é obrigatório aqui!
+};
+\`\`\`
+
+---
+
+### 🔀 Union Types: Restringindo Valores Possíveis
+
+Em vez de permitir qualquer texto, você pode criar uma união estrita de opções:
+
+\`\`\`typescript
+type StatusMissao = "PENDENTE" | "EM_PROGRESSO" | "CONCLUIDA" | "FALHA";
+
+let statusAtual: StatusMissao = "PENDENTE";
+// statusAtual = "CANCELADA"; // ERRO! Não faz parte do tipo!
+\`\`\`
+
+> **💡 Dica Pro:**
+> Use interfaces para definir a estrutura de objetos e modelos de dados da sua aplicação. Elas suportam extensão (\`extends\`) para herança limpa entre tipos.
+
+> **⚠️ Armadilha Comum:**
+> Tentar instanciar um objeto esquecendo uma propriedade obrigatória da interface gerará um erro do compilador antes mesmo de você rodar o projeto.`,
+        codeExample: `// Modelagem de Veículo Espacial
+interface NaveExploracao {
+  codigo: string;
+  capacidadeTripulantes: number;
+  escudoAtivo: boolean;
+  armaSecundaria?: string;
+}
+
+const navePrincipal: NaveExploracao = {
+  codigo: "NEXUS-PRIME",
+  capacidadeTripulantes: 8,
+  escudoAtivo: true
+};
+
+console.log("Nave pronta:", navePrincipal.codigo);`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual o significado do ponto de interrogação (?) após o nome de uma propriedade em uma interface TypeScript (ex: telefone?: string)?',
+            options: [
+              'Indica que a propriedade é secreta e criptografada no banco de dados.',
+              'Indica que a propriedade é opcional, podendo estar ausente no objeto.',
+              'Indica que a propriedade aceita qualquer tipo de dado arbitrário.',
+              'Indica que a propriedade só pode ser lida, mas nunca alterada.'
+            ],
+            correctIndex: 1,
+            explanation: 'O operador ? marca a propriedade como opcional, significando que o objeto pode ser instanciado validamente com ou sem aquele campo.'
+          },
+          {
+            type: 'code',
+            instruction: 'Defina uma interface chamada ModuloNave com as propriedades obrigatórias id (string), potencia (number) e ativa (boolean).',
+            initialCode: `// Defina a interface abaixo\n`,
+            expectedKeywords: ['interface ModuloNave', 'id: string', 'potencia: number', 'ativa: boolean'],
+            hint: 'Inicie com interface ModuloNave {. Em seguida adicione id: string;, potencia: number; e ativa: boolean;.',
+            solution: `interface ModuloNave {
+  id: string;
+  potencia: number;
+  ativa: boolean;
+}`
+          }
+        ]
+      }
     ],
   },
   {
@@ -608,34 +1384,239 @@ const jogador: Jogador = {
     slug: 'react',
     name: 'React',
     planetName: 'React Nexus',
-    description: 'Construa interfaces modernas com componentes.',
+    description: 'Construa interfaces reativas, declarativas e componentes modulares reutilizáveis.',
     icon: '⚛️',
     color: '#61DAFB',
     language: 'tsx',
     level: 'Intermediário',
-    totalXp: 60,
+    totalXp: 130,
     lessons: [
       {
         id: 'react-1',
-        title: 'Introducao ao React',
-        description: 'Componentes, JSX e props.',
-        content: `# Introducao ao React
-
-React e uma biblioteca para criar **interfaces de usuario**.
-
-## Componente Basico
-\`\`\`tsx
-function Saudacao({ nome }: { nome: string }) {
-  return <h1>Ola, {nome}!</h1>;
-}
-\`\`\``,
-        codeExample: `function Botao() {
-  return <button>Clique aqui</button>;
-}`,
-        language: 'tsx',
+        title: '1. Componentes Modulares, JSX & Props',
+        description: 'Aprenda a pensar em componentes reutilizáveis e passar dados com propriedades.',
         duration: 15,
-        xpReward: 50,
+        xpReward: 65,
+        language: 'tsx',
+        content: `# ⚛️ Componentes Modulares, JSX & Props
+
+Bem-vindo a **React Nexus**! No desenvolvimento web tradicional, páginas eram escritas como blocos monolíticos de centenas de linhas.
+
+O **React**, criado pelo time de engenharia do Facebook/Meta, revolucionou a indústria com um conceito simples e genial: **dividir a interface em pequenos componentes independentes e reutilizáveis** (como blocos de LEGO).
+
+---
+
+### 🧩 O que é um Componente React?
+
+Um componente no React nada mais é do que uma **função JavaScript que retorna marcação visual (JSX)**:
+
+\`\`\`tsx
+function BotaoDisparo() {
+  return (
+    <button className="btn-neon">
+      Ativar Propulsor
+    </button>
+  );
+}
+\`\`\`
+
+---
+
+### 📦 O que é JSX?
+
+**JSX** significa *JavaScript XML*. Ele permite escrever marcação semelhante a HTML diretamente dentro de funções JavaScript.
+
+Principais diferenças em relação ao HTML comum:
+1. Usamos \`className\` em vez de \`class\` (porque \`class\` é uma palavra reservada do JavaScript!).
+2. Todas as tags devem ser fechadas rigorosamente (ex: \`<img />\`, \`<input />\`, \`<br />\`).
+3. Expressões dinâmicas JavaScript ficam entre chaves: \`<h1>{nomeDoCadete}</h1>\`.
+
+---
+
+### 📬 Passando Dados com \`props\`
+
+Componentes tornam-se verdadeiramente poderosos quando são customizáveis através de **props** (parâmetros de entrada):
+
+\`\`\`tsx
+interface CardMissaoProps {
+  titulo: string;
+  recompensaXp: number;
+}
+
+function CardMissao({ titulo, recompensaXp }: CardMissaoProps) {
+  return (
+    <div className="card-missao">
+      <h3>{titulo}</h3>
+      <p>Recompensa: +{recompensaXp} XP</p>
+    </div>
+  );
+}
+\`\`\`
+
+> **💡 Dica Pro:**
+> Nomes de componentes React devem começar sempre com **letra maiúscula** (ex: \`PainelControle\`). Se começar com minúscula, o React acha que se trata de uma tag HTML nativa!
+
+> **⚠️ Armadilha Comum:**
+> Esquecer de importar o componente ou tentar retornar múltiplos elementos raiz sem envolvê-los em uma tag pai ou em um Fragment vazio (\`<>...</>\`).`,
+        codeExample: `// Componente de Badge de Status da Estação
+interface StatusBadgeProps {
+  status: "ONLINE" | "OFFLINE";
+}
+
+export function StatusBadge({ status }: StatusBadgeProps) {
+  const isOnline = status === "ONLINE";
+
+  return (
+    <span className={isOnline ? "badge-verde" : "badge-vermelho"}>
+      {isOnline ? "● Sistema Online" : "○ Sistema Offline"}
+    </span>
+  );
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Por que no JSX do React utilizamos o atributo "className" em vez de "class" para aplicar classes de estilo CSS?',
+            options: [
+              'Porque className é mais rápido para o compilador interpretar.',
+              'Porque "class" é uma palavra reservada do JavaScript para declaração de classes orientadas a objetos.',
+              'Porque o navegador Google Chrome proíbe o uso de class em bibliotecas modernas.',
+              'Porque className adiciona suporte automático a CSS inline.'
+            ],
+            correctIndex: 1,
+            explanation: 'Como o JSX é transformado em JavaScript puro por trás dos panos, usar a palavra-chave class geraria conflito com a sintaxe de classes ES6 do JavaScript.'
+          },
+          {
+            type: 'code',
+            instruction: 'Crie um componente funcional chamado BotaoNexus que recebe a prop { rotulo }: { rotulo: string } e retorna um botão com classe "btn-nexus" exibindo o rotulo.',
+            initialCode: `// Crie o componente BotaoNexus abaixo\n`,
+            expectedKeywords: ['function BotaoNexus', 'rotulo', 'className="btn-nexus"', '{rotulo}', '</button>'],
+            hint: 'Escreva function BotaoNexus({ rotulo }: { rotulo: string }) { return <button className="btn-nexus">{rotulo}</button>; }.',
+            solution: `function BotaoNexus({ rotulo }: { rotulo: string }) {
+  return <button className="btn-nexus">{rotulo}</button>;
+}`
+          },
+          {
+            type: 'bughunt',
+            title: 'Sintaxe Corrompida no JSX do Card',
+            scenario: 'O desenvolvedor júnior tentou criar o card do piloto, mas cometeu dois erros clássicos de JSX: usou "class" em vez de "className" e esqueceu de fechar a tag de imagem.',
+            buggyCode: `function CardPiloto() {
+  return (
+    <div class="card-piloto">
+      <h2>Comandante</h2>
+      <img src="avatar.png" alt="Avatar">
+    </div>
+  );
+}`,
+            expectedKeywords: ['className="card-piloto"', '<img src="avatar.png" alt="Avatar" />'],
+            forbiddenKeywords: ['class="card-piloto"', '<img src="avatar.png" alt="Avatar">'],
+            hint: 'Substitua class por className na div e feche a tag de imagem com uma barra no final (ex: <img ... />).',
+            solutionExplanation: 'Show de bola! Com className e a tag de imagem com fechamento automático (<img ... />), o JSX volta a ser 100% válido no React.'
+          }
+        ]
       },
+      {
+        id: 'react-2',
+        title: '2. O Pulso do Componente: Estado com useState',
+        description: 'Faça seus componentes reagirem dinamicamente a cliques e interações do usuário.',
+        duration: 16,
+        xpReward: 65,
+        language: 'tsx',
+        content: `# 💓 O Pulso do Componente: Estado com useState
+
+Componentes estáticos são úteis, mas a verdadeira mágica do React acontece quando as telas **reagem** às ações dos usuários: contadores que sobem, modais que abrem, formulários que validam.
+
+Para guardar informações mutáveis dentro de um componente, usamos o **Hook \`useState\`**.
+
+---
+
+### 🎣 Anatomia do \`useState\`
+
+\`\`\`tsx
+import { useState } from 'react';
+
+function PainelEscudo() {
+  const [escudos, setEscudos] = useState(100);
+
+  const tomarDano = () => {
+    setEscudos(escudos - 15);
+  };
+
+  return (
+    <div>
+      <p>Nível dos Escudos: {escudos}%</p>
+      <button onClick={tomarDano}>Receber Impacto</button>
+    </div>
+  );
+}
+\`\`\`
+
+O \`useState\` devolve um array com exatamente 2 itens:
+1. **O valor atual do estado** (\`escudos\`).
+2. **A função atualizadora** (\`setEscudos\`), que avisa ao React que o dado mudou e aciona a re-renderização da tela!
+
+---
+
+### 🛡️ Regra Inegociável: Imutabilidade
+
+Você **NUNCA** deve alterar a variável de estado diretamente:
+
+\`\`\`tsx
+// ❌ PROIBIDO: O React não detecta a mudança e a tela não atualiza!
+escudos = 50;
+
+// ✅ CORRETO: Chama a função atualizadora
+setEscudos(50);
+\`\`\`
+
+> **💡 Dica Pro:**
+> Quando o próximo estado depende do estado anterior, use uma função de atualização: \`setContador(prev => prev + 1)\`. Isso evita bugs de concorrência!
+
+> **⚠️ Armadilha Comum:**
+> Chamar a função atualizadora diretamente no corpo do componente (fora de um evento ou \`useEffect\`) causa um loop infinito de renderização fatal.`,
+        codeExample: `import { useState } from 'react';
+
+export function ContadorMissoes() {
+  const [concluidas, setConcluidas] = useState(0);
+
+  return (
+    <div className="painel-missoes">
+      <h3>Missões Concluídas: {concluidas}</h3>
+      <button onClick={() => setConcluidas(concluidas + 1)}>
+        +1 Missão Finalizada
+      </button>
+    </div>
+  );
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Por que não devemos modificar uma variável de estado diretamente no React (ex: contador = 5) em vez de usar setContador(5)?',
+            options: [
+              'Porque variáveis no React são protegidas contra gravação pelo navegador.',
+              'Porque o React só detecta alterações e dispara a atualização visual da tela quando usamos a função atualizadora.',
+              'Porque modificar variáveis diretamente trava a placa de vídeo do computador.',
+              'Porque o React só aceita valores booleanos no estado.'
+            ],
+            correctIndex: 1,
+            explanation: 'O React monitora as chamadas à função atualizadora para recalcular o DOM virtual e atualizar os pixels certos na tela com máxima eficiência.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Configurando o Estado dos Propulsores',
+            instruction: 'Complete a desestruturação do hook useState para gerenciar o estado da potência dos propulsores.',
+            codeSnippet: `const [potencia, {{funcao_atualizadora}}] = useState(50);`,
+            blanks: [
+              {
+                id: 'funcao_atualizadora',
+                placeholder: 'função atualizadora',
+                expectedValues: ['setPotencia', 'setPotência'],
+                hint: 'Por convenção universal no React, a função atualizadora usa o prefixo "set" seguido do nome da variável em CamelCase.'
+              }
+            ],
+            explanation: 'Exato! A convenção [valor, setValor] é um dos padrões mais reconhecíveis do ecossistema React mundial.'
+          }
+        ]
+      }
     ],
   },
   {
@@ -643,32 +1624,217 @@ function Saudacao({ nome }: { nome: string }) {
     slug: 'nodejs',
     name: 'Node.js',
     planetName: 'Backend Colony',
-    description: 'JavaScript no servidor.',
+    description: 'Execute JavaScript no servidor e construa APIs escaláveis e velozes.',
     icon: '🟢',
     color: '#339933',
     language: 'javascript',
     level: 'Intermediário',
-    totalXp: 50,
+    totalXp: 125,
     lessons: [
       {
         id: 'node-1',
-        title: 'Introducao ao Node.js',
-        description: 'O que e Node.js e como usa-lo.',
-        content: `# Introducao ao Node.js
+        title: '1. O Motor do Servidor & Arquitetura Assíncrona',
+        description: 'Entenda como o runtime Node.js executa JavaScript de alta performance fora do browser.',
+        duration: 15,
+        xpReward: 60,
+        language: 'javascript',
+        content: `# 🟢 O Motor do Servidor: Node.js
 
-Node.js permite rodar JavaScript **fora do navegador**.
+Bem-vindo à **Backend Colony**, a base de infraestrutura que sustenta todos os sistemas da frota!
+
+Durante quase 15 anos, o JavaScript esteve confinado dentro das janelas dos navegadores. Em 2009, Ryan Dahl pegou a engine **V8** do Google Chrome e a uniu a um sistema de entrada/saída assíncrono para criar o **Node.js**: o JavaScript agora domina os servidores!
+
+---
+
+### ⚡ O Segredo da Performance: Event Loop Não Bloqueante
+
+Em servidores tradicionais (como PHP clássico ou Apache), cada usuário conectado ocupa uma nova thread pesada do sistema operacional. Se 1.000 usuários fizerem consultas lentas, o servidor esgota a memória.
+
+O Node.js adota uma arquitetura diferente:
+- **Single-Threaded:** Opera com uma thread principal para execução lógica.
+- **Não-Bloqueante (Non-blocking I/O):** Quando você pede um arquivo do disco ou consulta o banco de dados, o Node entrega o trabalho para o sistema operacional em segundo plano e continua atendendo outros usuários imediatamente!
+
+---
+
+### 📦 Modularidade: CommonJS vs ESM
+
+No Node moderno, usamos o padrão oficial **ES Modules** (\`import\` / \`export\`):
 
 \`\`\`javascript
-const http = require('http');
-http.createServer((req, res) => {
-  res.end('Ola, Mundo!');
-}).listen(3000);
-\`\`\``,
-        codeExample: `console.log("Servidor Node.js rodando!");`,
-        language: 'javascript',
-        duration: 12,
-        xpReward: 40,
+import fs from 'fs/promises';
+
+async function lerRegistro() {
+  const log = await fs.readFile('telemetria.log', 'utf-8');
+  console.log(log);
+}
+\`\`\`
+
+> **💡 Dica Pro:**
+> Adicione \`"type": "module"\` no seu arquivo \`package.json\` para usar nativamente a sintaxe \`import/export\` sem precisar de ferramentas de build complexas.
+
+> **⚠️ Armadilha Comum:**
+> Executar operações síncronas pesadas (como \`fs.readFileSync\`) em rotas de produção congela a thread principal e impede o servidor de responder a qualquer outro usuário até o fim da leitura!`,
+        codeExample: `// Servidor HTTP Nativo do Node.js
+import http from 'http';
+
+const servidor = http.createServer((requisicao, resposta) => {
+  resposta.writeHead(200, { 'Content-Type': 'application/json' });
+  resposta.end(JSON.stringify({ status: 'BASE_OPERACIONAL', cadetesOnline: 42 }));
+});
+
+servidor.listen(3000, () => {
+  console.log('Servidor da Backend Colony escutando na porta 3000!');
+});`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual é a principal característica da arquitetura do Node.js que permite atender milhares de requisições concorrentes de forma ultrarrápida?',
+            options: [
+              'Criar uma nova thread física na CPU para cada requisição recebida.',
+              'Modelo de E/S assíncrono e não-bloqueante baseado em um Event Loop de thread única.',
+              'Compilar o código diretamente para linguagem Assembly proprietária da IBM.',
+              'Executar apenas em computadores quânticos de alta voltagem.'
+            ],
+            correctIndex: 1,
+            explanation: 'O modelo de I/O não-bloqueante delega operações lentas (leitura de arquivos, banco de dados, rede) em background, mantendo o Event Loop sempre livre para receber novas conexões.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Inicializando o Servidor HTTP',
+            instruction: 'Preencha a porta onde o servidor da colônia escutará as conexões recebidas.',
+            codeSnippet: `const PORTA = 3000;
+servidor.{{metodo_escuta}}(PORTA, () => {
+  console.log("Servidor ativo na porta", PORTA);
+});`,
+            blanks: [
+              {
+                id: 'metodo_escuta',
+                placeholder: 'método para escutar',
+                expectedValues: ['listen'],
+                hint: 'Palavra em inglês que significa "escutar" ou "ouvir".'
+              }
+            ],
+            explanation: 'Perfeito! O método listen(porta) coloca o servidor Node.js em modo de escuta contínua na porta de rede informada.'
+          }
+        ]
       },
+      {
+        id: 'node-2',
+        title: '2. Criando APIs REST com Express',
+        description: 'Construa rotas, receba requisições JSON e responda com códigos de status HTTP apropriados.',
+        duration: 16,
+        xpReward: 65,
+        language: 'javascript',
+        content: `# 🚀 APIs REST com Express
+
+Embora o módulo HTTP nativo do Node funcione, no dia a dia da indústria usamos **frameworks web** para criar rotas limpas, autenticação e middlewares. O **Express** é o líder absoluto desse ecossistema.
+
+---
+
+### 🛣️ O que é uma API REST?
+
+Uma **API REST** permite que diferentes sistemas (aplicativos móveis, páginas web, relógios inteligentes) conversem através do protocolo HTTP padrão da web:
+
+- \`GET /api/missoes\`: Buscar informações.
+- \`POST /api/missoes\`: Criar um novo recurso.
+- \`PUT /api/missoes/:id\`: Atualizar um recurso existente.
+- \`DELETE /api/missoes/:id\`: Remover um recurso.
+
+---
+
+### 📦 Criando um Servidor Express em 10 Linhas
+
+\`\`\`javascript
+import express from 'express';
+
+const app = express();
+app.use(express.json()); // Permite ler o corpo das requisições em formato JSON!
+
+app.get('/api/status', (req, res) => {
+  res.status(200).json({ status: 'Online', sistema: 'Nexus Core' });
+});
+
+app.post('/api/cadetes', (req, res) => {
+  const { nome } = req.body;
+  res.status(201).json({ mensagem: \`Cadete \${nome} registrado!\` });
+});
+
+app.listen(3000);
+\`\`\`
+
+---
+
+### 🚦 Códigos de Status HTTP Que Todo Desenvolvedor Deve Saber
+
+- **200 OK:** Sucesso padrão para leitura ou atualização.
+- **201 Created:** Sucesso ao criar um novo registro no banco.
+- **400 Bad Request:** O cliente enviou dados inválidos ou incompletos.
+- **404 Not Found:** O recurso solicitado não existe.
+- **500 Internal Server Error:** Falha inesperada no servidor.
+
+> **💡 Dica Pro:**
+> Sempre responda com o status code correto! Enviar \`200 OK\` quando houve erro ou \`200\` em vez de \`201\` ao criar um recurso confunde o frontend e dificulta a manutenção da API.
+
+> **⚠️ Armadilha Comum:**
+> Esquecer a linha \`app.use(express.json())\` faz com que qualquer rota \`POST\` receba \`req.body\` como \`undefined\`!`,
+        codeExample: `import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+// Rota de listagem de módulos
+app.get('/modulos', (req, res) => {
+  res.status(200).json([
+    { id: 1, nome: "Escudo Térmico" },
+    { id: 2, nome: "Sensor Quântico" }
+  ]);
+});
+
+app.listen(8080);`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual código de status HTTP (Status Code) é o padrão RESTful para indicar que uma requisição POST criou com sucesso um novo recurso no sistema?',
+            options: [
+              '200 OK',
+              '201 Created',
+              '302 Found',
+              '204 No Content'
+            ],
+            correctIndex: 1,
+            explanation: 'O status HTTP 201 (Created) é a resposta semântica ideal para informar que a criação do recurso solicitada via POST foi realizada com sucesso no banco de dados.'
+          },
+          {
+            type: 'code',
+            instruction: 'Crie uma rota GET em app para o caminho "/ping" que retorne o status 200 com o JSON { mensagem: "pong" }.',
+            initialCode: `// Considere que a constante "app" do express já existe
+// Adicione a rota abaixo\n`,
+            expectedKeywords: ['app.get', '/ping', 'res.status(200)', 'mensagem: "pong"', 'json('],
+            hint: 'Faça app.get("/ping", (req, res) => { res.status(200).json({ mensagem: "pong" }); });.',
+            solution: `app.get("/ping", (req, res) => {
+  res.status(200).json({ mensagem: "pong" });
+});`
+          },
+          {
+            type: 'bughunt',
+            title: 'O Enigma do Body Indefinido',
+            scenario: 'O desenvolvedor configurou a rota POST de cadastro de cadetes, mas req.body sempre chega como undefined porque faltou o middleware de leitura de JSON do Express.',
+            buggyCode: `import express from 'express';
+const app = express();
+
+// Faltou o middleware aqui!
+
+app.post('/cadetes', (req, res) => {
+  const { nome } = req.body;
+  res.status(201).json({ cadastrado: nome });
+});`,
+            expectedKeywords: ['app.use(express.json());'],
+            forbiddenKeywords: ['// Faltou o middleware aqui!'],
+            hint: 'Adicione app.use(express.json()); logo abaixo da inicialização de app para habilitar o parsing de JSON.',
+            solutionExplanation: 'Perfeito! app.use(express.json()) intercepta o corpo das requisições HTTP, converte a string JSON em objeto JavaScript e a disponibiliza em req.body.'
+          }
+        ]
+      }
     ],
   },
   {
@@ -676,34 +1842,232 @@ http.createServer((req, res) => {
     slug: 'python',
     name: 'Python',
     planetName: 'AI Planet',
-    description: 'Linguagem versatil para IA, dados e automacao.',
+    description: 'A linguagem versátil que comanda a inteligência artificial, automações e análise de dados.',
     icon: '🐍',
     color: '#00FF88',
     language: 'python',
     level: 'Iniciante',
-    totalXp: 50,
+    totalXp: 125,
     lessons: [
       {
         id: 'py-1',
-        title: 'Introducao ao Python',
-        description: 'Sintaxe basica e variaveis.',
-        content: `# Introducao ao Python
+        title: '1. A Força da Sintaxe Limpa & Tipos',
+        description: 'Descubra a elegância do Python, indentação como bloco de código e variáveis dinâmicas.',
+        duration: 14,
+        xpReward: 60,
+        language: 'python',
+        content: `# 🐍 A Força da Sintaxe Limpa & Tipos no AI Planet
 
-Python e uma linguagem **simples e poderosa**.
+Bem-vindo ao **AI Planet**, cadete! Aqui você aprenderá a linguagem favorita dos cientistas de dados, engenheiros de inteligência artificial e especialistas em cibersegurança ao redor do globo.
+
+> **💡 A Filosofia do Python (The Zen of Python):**
+> Criado por Guido van Rossum, o Python foi desenhado com um princípio sagrado: **código é lido muito mais vezes do que é escrito**. Sua sintaxe é limpa, direta e quase parece inglês estruturado.
+
+---
+
+### 📏 A Regra Suprema: Indentação Obrigatória
+
+Diferente do JavaScript ou C++ que usam chaves \`{ }\` para definir blocos, o Python usa **espaços de indentação** (4 espaços por convenção):
 
 \`\`\`python
-nome = "Coder"
-nivel = 10
-print(f"Jogador: {nome}")
-\`\`\``,
-        codeExample: `def saudacao(nome):
-    return f"Ola, {nome}!"
+energia = 85
 
-print(saudacao("CodeQuest"))`,
-        language: 'python',
-        duration: 10,
-        xpReward: 35,
+if energia > 50:
+    print("Sistemas operando em potência máxima!")
+else:
+    print("Modo de economia ativado.")
+\`\`\`
+
+---
+
+### 🧬 Variáveis e Tipagem Dinâmica
+
+Você não precisa declarar tipos explicitamente. O Python infere o tipo automaticamente no momento da atribuição:
+
+\`\`\`python
+nome_agente = "Ada Lovelace"  # str (texto)
+nivel_acesso = 7             # int (inteiro)
+fator_dobra = 3.14           # float (decimal)
+sistema_ativo = True         # bool (booleano - com inicial Maiúscula!)
+\`\`\`
+
+---
+
+### 💬 Textos Dinâmicos com F-Strings
+
+A maneira mais moderna e rápida de interpolar variáveis em textos no Python é usar **f-strings**:
+
+\`\`\`python
+pontuacao = 450
+print(f"O cadete {nome_agente} possui {pontuacao} pontos de XP!")
+\`\`\`
+
+> **💡 Dica Pro:**
+> Em Python, booleanos começam com letra maiúscula obrigatória: \`True\` e \`False\` (escrever \`true\` gera um erro \`NameError\`).
+
+> **⚠️ Armadilha Comum:**
+> Misturar espaços e teclas TAB na indentação causa o temido \`TabError\` ou \`IndentationError\`. Configure seu editor para sempre converter tabs em 4 espaços!`,
+        codeExample: `# Diagnóstico do Robô Explorador do AI Planet
+nome_robo = "Curiosity-X"
+bateria = 92
+sensores_ativos = True
+
+print(f"Status do robô {nome_robo}: Bateria em {bateria}%")
+
+if bateria >= 80 and sensores_ativos:
+    print("Pronto para coletar amostras geológicas.")`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Como o interpretador Python identifica onde começa e onde termina um bloco de código (como o corpo de um if, for ou função)?',
+            options: [
+              'Através de ponto e vírgula no final de cada instrução.',
+              'Através do nível de indentação de espaços à esquerda das linhas de código.',
+              'Através de palavras-chave como BEGIN e END.',
+              'Através de parênteses curvos envolvendo todo o bloco.'
+            ],
+            correctIndex: 1,
+            explanation: 'No Python, a indentação faz parte da sintaxe obrigatória da linguagem, eliminando a necessidade de chaves e tornando os programas naturalmente legíveis.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Emitindo o Relatório de Voo',
+            instruction: 'Complete o comando de impressão usando uma f-string para exibir o nome da sonda.',
+            codeSnippet: `sonda = "Voyager-3"
+{{comando_print}}({{prefixo_fstring}}"Sonda detectada: {sonda}")`,
+            blanks: [
+              {
+                id: 'comando_print',
+                placeholder: 'comando de saída',
+                expectedValues: ['print'],
+                hint: 'Função padrão em Python para exibir saídas no terminal.'
+              },
+              {
+                id: 'prefixo_fstring',
+                placeholder: 'letra da f-string',
+                expectedValues: ['f', 'F'],
+                hint: 'Letra única que prefixa a string para ativar a interpolação de variáveis em {chaves}.'
+              }
+            ],
+            explanation: 'Perfeito! O comando print(f"...") é a forma padrão da indústria moderna para formatar mensagens com elegância.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Alerta de Indentação na Sonda',
+            scenario: 'O script de ignição falhou na inicialização com IndentationError: expected an indented block after if statement.',
+            buggyCode: `temperatura = 120
+
+if temperatura > 100:
+print("Alerta: Superaquecimento detectado!")
+else:
+    print("Temperatura estável.")`,
+            expectedKeywords: ['    print("Alerta: Superaquecimento detectado!")'],
+            forbiddenKeywords: ['\nprint("Alerta: Superaquecimento detectado!")'],
+            hint: 'Adicione 4 espaços de indentação na linha do primeiro print para colocá-lo dentro do bloco if.',
+            solutionExplanation: 'Bug neutralizado! Com os 4 espaços de indentação, o Python compreende que o comando pertence ao bloco if.'
+          }
+        ]
       },
+      {
+        id: 'py-2',
+        title: '2. Estruturas de Dados & Laços de Repetição',
+        description: 'Manipule listas, dicionários e itere sobre coleções de dados no cosmos.',
+        duration: 16,
+        xpReward: 65,
+        language: 'python',
+        content: `# 📊 Estruturas de Dados & Laços no AI Planet
+
+Para processar grandes volumes de dados de telemetria ou treinar modelos neurais, você precisa de estruturas de dados eficientes e flexíveis.
+
+---
+
+### 📋 Listas em Python (Mutáveis & Dinâmicas)
+
+Listas armazenam sequências ordenadas de itens:
+
+\`\`\`python
+planetas = ["Terra Digital", "Neon City", "Cyber Core"]
+
+# Adicionando um novo planeta
+planetas.append("AI Planet")
+
+# Acessando o primeiro item (índice 0)
+primeiro = planetas[0]
+\`\`\`
+
+---
+
+### 📖 Dicionários (Chave e Valor)
+
+Dicionários são ideais para modelar entidades ricas com propriedades nomeadas:
+
+\`\`\`python
+cadete = {
+    "nome": "Kaelen",
+    "nivel": 12,
+    "especialidade": "Engenharia de Dados"
+}
+
+# Acessando com segurança usando .get()
+cargo = cadete.get("especialidade", "Geral")
+\`\`\`
+
+---
+
+### 🔁 Laço de Repetição \`for\` Elegante
+
+No Python, você itera diretamente sobre os elementos da coleção:
+
+\`\`\`python
+leituras_rad = [12, 45, 89, 23, 105]
+
+for leitura in leituras_rad:
+    if leitura > 80:
+        print(f"Radiação crítica detectada: {leitura} mSv")
+\`\`\`
+
+> **💡 Dica Pro:**
+> O método \`dicionario.get("chave", valor_padrao)\` evita que seu programa quebre com erro \`KeyError\` caso a chave não exista no dicionário.
+
+> **⚠️ Armadilha Comum:**
+> Modificar o tamanho de uma lista (adicionando ou removendo itens) enquanto você está iterando sobre ela em um laço \`for\` pode causar comportamento imprevisível ou pular elementos.`,
+        codeExample: `# Filtrando Módulos com Potência Alta
+modulos = [
+    {"nome": "Propulsor Alfa", "potencia": 120},
+    {"nome": "Sensor Laser", "potencia": 45},
+    {"nome": "Canhão de Plasma", "potencia": 95}
+]
+
+modulos_pesados = []
+for m in modulos:
+    if m["potencia"] >= 90:
+        modulos_pesados.append(m["nome"])
+
+print("Módulos de alta potência:", modulos_pesados)`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual a principal diferença entre uma lista [ ] e uma tupla ( ) no Python?',
+            options: [
+              'Listas só aceitam números, enquanto tuplas só aceitam strings.',
+              'Listas são mutáveis (podem ter itens adicionados/removidos), enquanto tuplas são imutáveis após criadas.',
+              'Tuplas rodam exclusivamente no servidor e listas rodam no navegador.',
+              'Não existe diferença prática entre listas e tuplas em Python.'
+            ],
+            correctIndex: 1,
+            explanation: 'Tuplas são estruturas de dados de tamanho e conteúdo fixos (imutáveis), ideais para coordenadas ou configurações imutáveis que não devem ser alteradas acidentalmente.'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva uma função chamada somar_xp que recebe uma lista de pontuacoes e retorna a soma total dos números da lista usando a função nativa sum().',
+            initialCode: `# Escreva a função somar_xp abaixo\n`,
+            expectedKeywords: ['def somar_xp', 'pontuacoes', 'return sum('],
+            hint: 'Declare def somar_xp(pontuacoes): e retorne sum(pontuacoes).',
+            solution: `def somar_xp(pontuacoes):
+    return sum(pontuacoes)`
+          }
+        ]
+      }
     ],
   },
   {
@@ -711,37 +2075,209 @@ print(saudacao("CodeQuest"))`,
     slug: 'java',
     name: 'Java',
     planetName: 'Enterprise World',
-    description: 'A linguagem corporativa.',
+    description: 'A robustez da orientação a objetos corporativa que move bancos e gigantes da indústria.',
     icon: '☕',
     color: '#F89820',
     language: 'java',
     level: 'Avançado',
-    totalXp: 50,
+    totalXp: 125,
     lessons: [
       {
         id: 'java-1',
-        title: 'Introducao ao Java',
-        description: 'Classes, objetos e o Hello World.',
-        content: `# Introducao ao Java
+        title: '1. O Paradigma dos Objetos & Classes Corporativas',
+        description: 'Compreenda a JVM, a força da tipagem estática e o ponto de entrada main.',
+        duration: 16,
+        xpReward: 60,
+        language: 'java',
+        content: `# ☕ O Paradigma dos Objetos no Enterprise World
 
-Java e uma linguagem **orientada a objetos**.
+Bem-vindo a **Enterprise World**, o planeta onde a confiabilidade inquebrável, sistemas bancários e naves de transporte massivo são construídos!
+
+O **Java**, criado por James Gosling na Sun Microsystems em 1995 (hoje sob a Oracle), é um dos pilares da engenharia de software mundial há mais de três décadas.
+
+---
+
+### 🌐 O Lema: "Write Once, Run Anywhere" (WORA)
+
+Diferente de linguagens como C++ que compilam diretamente para o código binário de um processador específico, o Java compila para **Bytecode** (\`.class\`). Esse Bytecode roda em qualquer máquina que tenha a **JVM** (*Java Virtual Machine*).
+
+---
+
+### 🚪 A Porta de Entrada: O Método \`main\`
+
+Todo programa executável em Java inicia obrigatoriamente a partir de um método com esta assinatura exata:
 
 \`\`\`java
-public class Main {
-  public static void main(String[] args) {
-    System.out.println("Ola, Mundo!");
-  }
+public class EstacaoEspacial {
+    public static void main(String[] args) {
+        System.out.println("Sistemas da Estação Online!");
+    }
 }
-\`\`\``,
-        codeExample: `public class Jogador {
-  public static void main(String[] args) {
-    System.out.println("CodeQuest");
-  }
+\`\`\`
+
+- **\`public\`**: Acessível externamente pelo sistema operacional.
+- **\`static\`**: Pode ser executado pela JVM sem precisar instanciar a classe primeiro.
+- **\`void\`**: Não devolve nenhum valor de retorno.
+- **\`String[] args\`**: Vetor de argumentos recebidos pela linha de comando.
+
+> **💡 Dica Pro:**
+> O nome do arquivo Java deve ser **exatamente idêntico** ao nome da classe pública (ex: a classe \`public class Nave\` deve ficar no arquivo \`Nave.java\`), respeitando maiúsculas e minúsculas!
+
+> **⚠️ Armadilha Comum:**
+> Esquecer o ponto-e-vírgula (\`;\`) no final das instruções em Java impede o código de compilar.`,
+        codeExample: `// Programa de Boas-Vindas da Enterprise World
+public class TerminalNexus {
+    public static void main(String[] args) {
+        String cadete = "Lucas";
+        int nivelAcesso = 5;
+        
+        System.out.println("Oficial: " + cadete + " | Credencial: " + nivelAcesso);
+    }
 }`,
-        language: 'java',
-        duration: 12,
-        xpReward: 40,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual é o papel da JVM (Java Virtual Machine) no ecossistema da linguagem Java?',
+            options: [
+              'Criar arquivos visuais em HTML para os navegadores.',
+              'Executar o Bytecode compilado (.class) de forma independente do sistema operacional subjacente.',
+              'Converter código Java diretamente para Python em tempo de execução.',
+              'Gerenciar exclusivamente conexões com a internet.'
+            ],
+            correctIndex: 1,
+            explanation: 'A JVM é a máquina virtual que interpreta ou compila via JIT o Bytecode Java em instruções nativas do hardware específico onde o programa está rodando.'
+          },
+          {
+            type: 'fillblank',
+            title: 'A Assinatura do Método Mestre',
+            instruction: 'Preencha as palavras-chave que faltam na assinatura universal do método de entrada do Java.',
+            codeSnippet: `public {{modificador_estatico}} void main({{tipo_argumento}}[] args) {
+    System.out.println("Inicialização concluída.");
+}`,
+            blanks: [
+              {
+                id: 'modificador_estatico',
+                placeholder: 'modificador estático',
+                expectedValues: ['static'],
+                hint: 'Palavra-chave que permite chamar o método sem precisar instanciar um objeto com new.'
+              },
+              {
+                id: 'tipo_argumento',
+                placeholder: 'tipo do vetor de texto',
+                expectedValues: ['String'],
+                hint: 'Classe que representa textos no Java (com inicial Maiúscula).'
+              }
+            ],
+            explanation: 'Perfeito! public static void main(String[] args) é o portal de partida de qualquer aplicação Java corporativa.'
+          }
+        ]
       },
+      {
+        id: 'java-2',
+        title: '2. Encapsulamento, Construtores & Segurança',
+        description: 'Proteja o estado interno das suas classes com private, getters e construtores robustos.',
+        duration: 17,
+        xpReward: 65,
+        language: 'java',
+        content: `# 🛡️ Encapsulamento, Construtores & Segurança
+
+Em sistemas de grande porte, permitir que qualquer parte do código altere diretamente atributos sensíveis (como saldo bancário ou nível de oxigênio de uma nave) é um convite ao desastre.
+
+---
+
+### 🔒 O Pilar do Encapsulamento
+
+O **Encapsulamento** consiste em ocultar os detalhes internos de um objeto e expor apenas métodos seguros para leitura e escrita:
+
+1. Atributos são declarados como **\`private\`**.
+2. O acesso para leitura é feito via método **\`get\`**.
+3. A alteração controlada é feita via método **\`set\`**.
+
+\`\`\`java
+public class ModuloEscudo {
+    private int potencia;
+
+    // Construtor
+    public ModuloEscudo(int potenciaInicial) {
+        this.setPotencia(potenciaInicial);
+    }
+
+    public int getPotencia() {
+        return this.potencia;
+    }
+
+    public void setPotencia(int novaPotencia) {
+        if (novaPotencia >= 0 && novaPotencia <= 100) {
+            this.potencia = novaPotencia;
+        }
+    }
+}
+\`\`\`
+
+---
+
+### 🎯 A Palavra-Chave \`this\`
+
+A palavra \`this\` referencia a instância atual do próprio objeto, resolvendo ambiguidades entre os parâmetros do método e os atributos da classe:
+
+\`\`\`java
+public void setNome(String nome) {
+    this.nome = nome; // "this.nome" é o atributo; "nome" é o parâmetro recebido!
+}
+\`\`\`
+
+> **💡 Dica Pro:**
+> Ao usar Getters e Setters, você pode incluir validações de negócio no \`set\` impedindo que dados corrompidos entrem na sua aplicação.
+
+> **⚠️ Armadilha Comum:**
+> Esquecer a palavra \`this\` em um construtor onde o parâmetro tem o mesmo nome do atributo (ex: \`nome = nome;\`) faz a variável atribuir valor a ela mesma, deixando o atributo da classe vazio!`,
+        codeExample: `// Modelagem de Piloto com Encapsulamento
+public class PilotoNexus {
+    private String nome;
+    private int horasVoo;
+
+    public PilotoNexus(String nome, int horasVoo) {
+        this.nome = nome;
+        this.horasVoo = horasVoo;
+    }
+
+    public String getNome() {
+        return this.nome;
+    }
+
+    public int getHorasVoo() {
+        return this.horasVoo;
+    }
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Por que no padrão corporativo Java os atributos de uma classe são declarados com o modificador de acesso "private"?',
+            options: [
+              'Para impedir que a classe seja compilada por outros desenvolvedores.',
+              'Para proteger os dados contra alterações diretas descontroladas, garantindo que o acesso ocorra apenas por métodos autorizados (Getters/Setters).',
+              'Porque variáveis private gastam menos memória RAM.',
+              'Porque o Java não permite criar variáveis sem a palavra private.'
+            ],
+            correctIndex: 1,
+            explanation: 'O encapsulamento garante integridade aos dados do objeto, permitindo validar regras de negócio antes de aceitar qualquer alteração no estado interno.'
+          },
+          {
+            type: 'code',
+            instruction: 'Crie uma classe pública chamada ModuloNave com um atributo privado int potencia e um método público getPotencia() que retorna a potencia.',
+            initialCode: `// Crie a classe ModuloNave abaixo\n`,
+            expectedKeywords: ['public class ModuloNave', 'private int potencia', 'public int getPotencia()', 'return'],
+            hint: 'Declare public class ModuloNave { private int potencia; public int getPotencia() { return this.potencia; } }.',
+            solution: `public class ModuloNave {
+    private int potencia;
+
+    public int getPotencia() {
+        return this.potencia;
+    }
+}`
+          }
+        ]
+      }
     ],
   },
   {
@@ -749,37 +2285,208 @@ public class Main {
     slug: 'sql',
     name: 'SQL',
     planetName: 'Data Matrix',
-    description: 'Consulte e manipule bancos de dados.',
+    description: 'A linguagem soberana para consultar, filtrar e relacionar dados em bancos relacionais.',
     icon: '🗄️',
     color: '#E48E00',
     language: 'sql',
     level: 'Intermediário',
-    totalXp: 50,
+    totalXp: 125,
     lessons: [
       {
         id: 'sql-1',
-        title: 'SELECT e WHERE',
-        description: 'Consultas basicas em SQL.',
-        content: `# Comandos Basicos SQL
+        title: '1. Consultas Mestras: SELECT, WHERE & ORDER BY',
+        description: 'Extraia informações precisas de tabelas de bancos de dados relacionais.',
+        duration: 15,
+        xpReward: 60,
+        language: 'sql',
+        content: `# 🗄️ Consultas Mestras em SQL
 
-## SELECT
+Bem-vindo à **Data Matrix**! Todas as missões, cadastros de cadetes, pontuações de XP e dados da frota estão armazenados em bancos de dados relacionais (PostgreSQL, MySQL, SQLite).
+
+O **SQL** (*Structured Query Language*) é a linguagem declarativa que permite extrair exatamente os dados necessários de tabelas estruturadas.
+
+---
+
+### 🔍 A Tríade da Consulta: \`SELECT\`, \`FROM\` & \`WHERE\`
+
+A estrutura elementar de qualquer consulta SQL:
+
 \`\`\`sql
-SELECT * FROM usuarios;
+SELECT nome, nivel, xp
+FROM cadetes
+WHERE xp >= 100;
 \`\`\`
 
-## WHERE
+- **\`SELECT\`**: Quais colunas você quer ver na resposta (use \`*\` para todas as colunas).
+- **\`FROM\`**: De qual tabela os dados devem ser puxados.
+- **\`WHERE\`**: Filtro condicional (apenas registros que atendam à condição).
+
+---
+
+### 📊 Ordenação e Limite: \`ORDER BY\` & \`LIMIT\`
+
+Para montar um ranking de líderes espaciais:
+
 \`\`\`sql
-SELECT nome FROM usuarios WHERE nivel > 10;
-\`\`\``,
-        codeExample: `SELECT username, xp
+SELECT username, pontuacao_total
 FROM usuarios
-WHERE nivel >= 5
+ORDER BY pontuacao_total DESC
+LIMIT 10;
+\`\`\`
+
+- **\`ORDER BY coluna DESC\`**: Ordena do maior para o menor (decrescente). Use \`ASC\` para crescente.
+- **\`LIMIT N\`**: Retorna apenas os N primeiros resultados (essencial para paginação e performance!).
+
+> **💡 Dica Pro:**
+> Em bancos de dados de produção com milhões de linhas, evite fazer \`SELECT *\`. Projete apenas as colunas que sua interface realmente usará para economizar largura de banda e memória de rede.
+
+> **⚠️ Armadilha Comum:**
+> Em SQL, valores de texto são cercados por aspas simples \`'texto'\`, e não aspas duplas! Aspas duplas em muitos dialetos SQL representam nomes de colunas ou tabelas.`,
+        codeExample: `-- Ranking dos Cadetes Mais Condecorados da Galáxia
+SELECT id, username, nivel, xp
+FROM cadetes
+WHERE ativo = true AND nivel >= 5
 ORDER BY xp DESC
-LIMIT 10;`,
-        language: 'sql',
-        duration: 10,
-        xpReward: 35,
+LIMIT 5;`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual cláusula do comando SQL é responsável por filtrar quais linhas da tabela devem ser devolvidas com base em uma condição lógica?',
+            options: [
+              'ORDER BY',
+              'WHERE',
+              'GROUP BY',
+              'LIMIT'
+            ],
+            correctIndex: 1,
+            explanation: 'A cláusula WHERE aplica filtros booleanos sobre as linhas da tabela, devolvendo apenas os registros que satisfazem a condição informada.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Filtrando os Agentes de Campo',
+            instruction: 'Complete a consulta SQL para selecionar o nome dos agentes ativos.',
+            codeSnippet: `{{palavra_selecao}} nome
+{{palavra_origem}} agentes
+{{palavra_filtro}} status = 'ATIVO';`,
+            blanks: [
+              {
+                id: 'palavra_selecao',
+                placeholder: 'projeção de colunas',
+                expectedValues: ['SELECT', 'select'],
+                hint: 'Comando SQL que inicia a busca e projeta as colunas desejadas.'
+              },
+              {
+                id: 'palavra_origem',
+                placeholder: 'origem da tabela',
+                expectedValues: ['FROM', 'from'],
+                hint: 'Palavra-chave que indica de qual tabela buscar os dados.'
+              },
+              {
+                id: 'palavra_filtro',
+                placeholder: 'filtro condicional',
+                expectedValues: ['WHERE', 'where'],
+                hint: 'Palavra-chave que aplica a condição de status ativo.'
+              }
+            ],
+            explanation: 'Perfeito! A sintaxe SELECT ... FROM ... WHERE ... é a fundação universal da manipulação de dados em SQL.'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva uma consulta SQL que seleciona as colunas titulo e xp da tabela missoes onde nivel_dificuldade = "Facil" ordenado por xp DESC.',
+            initialCode: `-- Escreva sua consulta SQL abaixo\n`,
+            expectedKeywords: ['SELECT titulo, xp', 'FROM missoes', 'WHERE nivel_dificuldade', 'ORDER BY xp DESC'],
+            hint: 'Escreva: SELECT titulo, xp FROM missoes WHERE nivel_dificuldade = \'Facil\' ORDER BY xp DESC;',
+            solution: `SELECT titulo, xp
+FROM missoes
+WHERE nivel_dificuldade = 'Facil'
+ORDER BY xp DESC;`
+          }
+        ]
       },
+      {
+        id: 'sql-2',
+        title: '2. Conectando Mundos: Relacionamentos & JOINs',
+        description: 'Una informações de múltiplas tabelas correlacionadas através de chaves estrangeiras.',
+        duration: 16,
+        xpReward: 65,
+        language: 'sql',
+        content: `# 🔗 Conectando Mundos: Relacionamentos & JOINs
+
+Em um banco relacional, os dados raramente ficam em uma única tabela gigantesca. Em vez disso, eles são normalizados e separados em tabelas menores ligadas por **chaves estrangeiras** (*Foreign Keys*).
+
+---
+
+### 🔑 Chave Primária (PK) vs Chave Estrangeira (FK)
+
+- **Primary Key (PK):** O identificador exclusivo de cada linha (ex: \`usuarios.id\`).
+- **Foreign Key (FK):** Um campo em outra tabela que aponta para a PK de origem (ex: \`pedidos.usuario_id\`).
+
+---
+
+### 🤝 O Poder do \`INNER JOIN\`
+
+Para unir dados de tabelas diferentes em um único relatório, usamos \`JOIN\`:
+
+\`\`\`sql
+SELECT usuarios.nome, cursos.titulo
+FROM usuarios
+INNER JOIN cursos ON cursos.id = usuarios.curso_atual_id;
+\`\`\`
+
+O \`INNER JOIN\` devolve apenas as linhas que possuem correspondência exata em ambas as tabelas.
+
+---
+
+### 🌐 \`LEFT JOIN\`: Não Perca Ninguém!
+
+Se você quiser listar **todos os usuários**, mesmo aqueles que ainda não se matricularam em nenhum curso:
+
+\`\`\`sql
+SELECT usuarios.nome, cursos.titulo
+FROM usuarios
+LEFT JOIN cursos ON cursos.id = usuarios.curso_atual_id;
+\`\`\`
+
+Se o usuário não tiver curso, o campo \`cursos.titulo\` virá preenchido como \`NULL\`.
+
+> **💡 Dica Pro:**
+> Use aliases para encurtar suas consultas: \`FROM usuarios u INNER JOIN inscricoes i ON i.usuario_id = u.id\`. Isso torna o SQL mais legível e rápido de digitar.
+
+> **⚠️ Armadilha Comum:**
+> Esquecer a cláusula \`ON\` em um JOIN gera um "Produto Cartesiano" (\`CROSS JOIN\`), multiplicando todas as linhas de uma tabela por todas as da outra e travando o banco de dados!`,
+        codeExample: `-- Relatório de Alunos e Lições Concluídas
+SELECT u.username, c.name AS nome_curso, p.completed
+FROM users u
+INNER JOIN user_progress p ON p.user_id = u.id
+INNER JOIN courses c ON c.id = p.course_id
+WHERE p.completed = true;`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual a diferença entre INNER JOIN e LEFT JOIN ao correlacionar duas tabelas A e B?',
+            options: [
+              'INNER JOIN remove registros duplicados, enquanto LEFT JOIN os duplica.',
+              'INNER JOIN só retorna registros que existem em ambas as tabelas; LEFT JOIN retorna todos os registros da tabela da esquerda (A), mesmo sem par na direita (B).',
+              'LEFT JOIN só funciona com números e INNER JOIN com textos.',
+              'São sinônimos idênticos em todos os bancos modernos.'
+            ],
+            correctIndex: 1,
+            explanation: 'O LEFT JOIN preserva todos os registros da tabela base (à esquerda da cláusula), preenchendo as colunas da tabela da direita com NULL quando não houver correspondência.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Ambiguidade na Consulta Espacial',
+            scenario: 'O relatório falhou com "error: column reference id is ambiguous" porque ambas as tabelas possuem uma coluna chamada id e a consulta não especificou de qual tabela puxar.',
+            buggyCode: `SELECT id, usuarios.nome, naves.modelo
+FROM usuarios
+INNER JOIN naves ON naves.id = usuarios.nave_id;`,
+            expectedKeywords: ['SELECT usuarios.id, usuarios.nome, naves.modelo'],
+            forbiddenKeywords: ['SELECT id, usuarios.nome, naves.modelo'],
+            hint: 'Especifique a qual tabela a coluna id pertence prefixando-a com usuarios.id.',
+            solutionExplanation: 'Perfeito! Ao usar usuarios.id, o banco de dados elimina a ambiguidade e executa a união com total clareza.'
+          }
+        ]
+      }
     ],
   },
   {
@@ -787,38 +2494,191 @@ LIMIT 10;`,
     slug: 'git',
     name: 'Git',
     planetName: 'Version Control Base',
-    description: 'Controle de versao para seus projetos.',
+    description: 'A máquina do tempo e a ferramenta colaborativa indispensável de todo time de software moderno.',
     icon: '🔀',
     color: '#F05032',
     language: 'bash',
     level: 'Iniciante',
-    totalXp: 50,
+    totalXp: 125,
     lessons: [
       {
         id: 'git-1',
-        title: 'Comandos Basicos do Git',
-        description: 'init, add, commit, push, pull.',
-        content: `# Git Basico
+        title: '1. O Túnel do Tempo: Init, Add & Commit Semântico',
+        description: 'Domine as 3 áreas do Git, versionamento seguro e boas práticas de mensagens de commit.',
+        duration: 14,
+        xpReward: 60,
+        language: 'bash',
+        content: `# 🔀 O Túnel do Tempo: Git & Commits Semânticos
 
-## Inicializar repositorio
-\`\`\`bash
-git init
+Bem-vindo à **Version Control Base**! Antes da criação do Git por Linus Torvalds em 2005, desenvolvedores faziam cópias manuais de pastas com nomes como \`projeto_final_v2_agora_vai_final_mesmo.zip\`.
+
+O **Git** é um sistema de controle de versão distribuído que funciona como uma máquina do tempo infalível para qualquer arquivo de código.
+
+---
+
+### 🗺️ As Três Áreas do Git
+
+O Git gerencia seus arquivos em três estados distintos:
+
+1. **Working Directory (Diretório de Trabalho):** Onde você edita, cria e apaga arquivos normalmente no seu editor de código.
+2. **Staging Area (Área de Preparação / Index):** Onde você seleciona com cirurgia quais alterações farão parte do próximo "pacote de viagem":
+   \`\`\`bash
+   git add index.html estilos.css
+   # Ou para adicionar tudo de uma vez:
+   git add .
+   \`\`\`
+3. **Repositório Local (Histórico Permanente):** Onde o "snapshot" (fotografia) permanente do projeto é registrado para sempre com um comentário explicativo:
+   \`\`\`bash
+   git commit -m "feat: adicionar botão de ignição no cockpit"
+   \`\`\`
+
+---
+
+### 📝 A Arte dos Commits Semânticos (Conventional Commits)
+
+Na indústria de alto padrão, não escrevemos mensagens vagas como *"ajustes"* ou *"corrigindo bug"*. Usamos prefixos padronizados:
+
+- **\`feat:\`** Uma nova funcionalidade para o usuário.
+- **\`fix:\`** Correção de um bug em produção.
+- **\`docs:\`** Alterações em documentações ou README.
+- **\`style:\`** Ajustes de formatação sem mudança de lógica.
+- **\`refactor:\`** Refatoração de código que não altera o comportamento.
+
+> **💡 Dica Pro:**
+> Use \`git status\` o tempo todo! Ele é o radar de bordo que mostra exatamente quais arquivos foram modificados, quais estão na Staging Area e quais ainda não foram rastreados.
+
+> **⚠️ Armadilha Comum:**
+> Esquecer de rodar \`git add\` antes do \`git commit\`. Fazer commit sem arquivos no staging resulta na mensagem \`nothing added to commit but untracked files present\`.`,
+        codeExample: `# Sequência Padrão de Trabalho com Git
+# 1. Checar o estado dos arquivos
+git status
+
+# 2. Adicionar arquivos modificados à Staging Area
 git add .
-git commit -m "Primeiro commit"
+
+# 3. Criar o ponto de restauração com mensagem semântica
+git commit -m "feat: implementar autenticador quântico de tripulantes"`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual comando Git é utilizado para mover as alterações do seu Working Directory para a Staging Area (preparação para o commit)?',
+            options: [
+              'git push',
+              'git add',
+              'git commit',
+              'git checkout'
+            ],
+            correctIndex: 1,
+            explanation: 'git add (ou git add .) envia as modificações selecionadas para a Staging Area, permitindo revisar exatamente o que será incluído no próximo commit.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Registrando a Nova Funcionalidade',
+            instruction: 'Complete a sequência de comandos para adicionar todos os arquivos e realizar o commit.',
+            codeSnippet: `git {{comando_adicionar}} .
+git {{comando_salvar}} -m "feat: modulo de navegacao"`,
+            blanks: [
+              {
+                id: 'comando_adicionar',
+                placeholder: 'comando de palco',
+                expectedValues: ['add'],
+                hint: 'Comando de 3 letras que adiciona arquivos à Staging Area.'
+              },
+              {
+                id: 'comando_salvar',
+                placeholder: 'comando de gravação',
+                expectedValues: ['commit'],
+                hint: 'Comando que grava o snapshot permanente no repositório.'
+              }
+            ],
+            explanation: 'Perfeito! git add . seguido de git commit -m "..." é o fluxo fundamental diário de todo programador profissional.'
+          }
+        ]
+      },
+      {
+        id: 'git-2',
+        title: '2. Ramificações Espaciais: Branch, Merge & GitHub',
+        description: 'Trabalhe em paralelo com branches isoladas e sincronize seu código com repositórios remotos.',
+        duration: 16,
+        xpReward: 65,
+        language: 'bash',
+        content: `# 🌿 Ramificações Espaciais: Branch, Merge & GitHub
+
+Em uma equipe profissional com 10 engenheiros trabalhando no mesmo projeto, seria um desastre se todos salvassem código simultaneamente no mesmo arquivo principal.
+
+Para resolver isso, o Git possui o conceito mais poderoso da engenharia de software moderna: **Branches (Ramificações)**.
+
+---
+
+### 🌿 O que é uma Branch?
+
+Uma **branch** é uma linha do tempo paralela e isolada. Você pode criar uma branch para testar uma ideia maluca sem nenhum risco de quebrar o sistema principal (\`main\`):
+
+\`\`\`bash
+# Criar e alternar para uma nova branch em um único comando
+git checkout -b feature/escudo-defesa
+# Ou no Git moderno:
+git switch -c feature/escudo-defesa
 \`\`\`
 
-## Conectar ao GitHub
+---
+
+### 🔀 Integrando Linhas do Tempo com \`merge\`
+
+Quando sua funcionalidade estiver testada e aprovada, você retorna para a branch principal e faz a fusão:
+
 \`\`\`bash
-git remote add origin URL
+git checkout main
+git merge feature/escudo-defesa
+\`\`\`
+
+---
+
+### ☁️ Conectando com a Nuvem (GitHub / GitLab)
+
+Para enviar seus commits locais para a nuvem onde toda a equipe tem acesso:
+
+\`\`\`bash
+# Adicionar o endereço do repositório remoto
+git remote add origin https://github.com/usuario/projeto.git
+
+# Enviar os commits da branch main para o repositório origin
 git push -u origin main
-\`\`\``,
-        codeExample: `git status
+\`\`\`
+
+> **💡 Dica Pro:**
+> Sempre rode \`git pull origin main\` antes de começar a trabalhar em uma nova tarefa. Isso garante que você está com o código mais atualizado da equipe no seu computador local.
+
+> **⚠️ Armadilha Comum:**
+> Nunca envie credenciais, chaves de API ou arquivos \`.env\` para o GitHub! Use sempre o arquivo \`.gitignore\` para excluir dados sensíveis e a pasta \`node_modules\`.`,
+        codeExample: `# Fluxo Completo de Feature em Equipe
+git checkout -b feature/radar-antimateria
 git add .
-git commit -m "feat: nova feature"`,
-        language: 'bash',
-        duration: 10,
-        xpReward: 30,
-      },
+git commit -m "feat: calibracao de sensores de radar"
+git push -u origin feature/radar-antimateria`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Por que boas práticas de engenharia de software proíbem desenvolvedores de programar e fazer commits diretamente na branch "main" de produção?',
+            options: [
+              'Porque a branch main é apagada automaticamente todo domingo à noite.',
+              'Porque criar branches isoladas permite testar, revisar em Pull Requests e validar o código sem colocar em risco a versão estável em produção.',
+              'Porque o Git só permite um único desenvolvedor por branch main.',
+              'Porque a branch main só aceita código escrito em linguagem Assembly.'
+            ],
+            correctIndex: 1,
+            explanation: 'Trabalhar em branches de feature mantém a branch principal sempre estável e pronta para deploy, permitindo que a equipe revise o código através de Pull Requests.'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva o comando Git para criar e alternar simultaneamente para uma nova branch chamada feature/painel-laser.',
+            initialCode: `# Digite o comando abaixo\n`,
+            expectedKeywords: ['git checkout -b feature/painel-laser'],
+            hint: 'Use git checkout -b seguido do nome da branch feature/painel-laser.',
+            solution: `git checkout -b feature/painel-laser`
+          }
+        ]
+      }
     ],
   },
 ];
