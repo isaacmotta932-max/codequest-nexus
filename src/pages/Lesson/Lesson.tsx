@@ -683,6 +683,15 @@ export function Lesson() {
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  // Helper para escapar entidades HTML em códigos
+  const escapeHtml = (str: string): string =>
+    str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
   // Renderizador de Markdown aprimorado com estilos Cyberpunk
   const renderContent = (markdown: string): string => {
     return markdown
@@ -716,24 +725,26 @@ export function Lesson() {
         /^## (.*$)/gim,
         '<h2 style="color: #E2E8F0; font-size: 22px; font-weight: 700; margin: 24px 0 12px;">$1</h2>'
       )
-      // Code blocks
+      // Code blocks (escapa tags para que apareçam visivelmente no HTML)
       .replace(
         /```(\w+)?\n([\s\S]*?)```/g,
-        '<div style="background: #090E1A; border: 1px solid #1E293B; border-radius: 8px; margin: 18px 0; overflow: hidden;"><div style="background: #111827; padding: 6px 14px; font-size: 12px; color: #94A3B8; font-family: monospace; border-bottom: 1px solid #1E293B;">Exemplo de Código ($1)</div><pre style="margin: 0; padding: 16px; overflow-x: auto; font-family: monospace; font-size: 13px; color: #38BDF8; line-height: 1.6;"><code>$2</code></pre></div>'
+        (_match, lang, code) =>
+          `<div style="background: #090E1A; border: 1px solid #1E293B; border-radius: 8px; margin: 18px 0; overflow: hidden;"><div style="background: #111827; padding: 6px 14px; font-size: 12px; color: #94A3B8; font-family: monospace; border-bottom: 1px solid #1E293B;">Exemplo de Código (${escapeHtml(lang || 'código')})</div><pre style="margin: 0; padding: 16px; overflow-x: auto; font-family: monospace; font-size: 13px; color: #38BDF8; line-height: 1.6;"><code>${escapeHtml(code)}</code></pre></div>`
       )
-      // Inline code
+      // Inline code (escapa tags como <!DOCTYPE html>, <html>, etc.)
       .replace(
         /`([^`]+)`/g,
-        '<code style="background: rgba(0, 212, 255, 0.12); color: #38BDF8; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.92em;">$1</code>'
+        (_match, code) =>
+          `<code style="background: rgba(0, 212, 255, 0.12); color: #38BDF8; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.92em;">${escapeHtml(code)}</code>`
       )
       // Bold and italics
       .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #FFFFFF;">$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em style="color: #CBD5E1;">$1</em>')
       // Horizontal rule
       .replace(/^---$/gim, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 26px 0;" />')
-      // Lists
+      // Lists (agrupamento de itens de lista contíguos)
       .replace(/^\- (.*$)/gim, '<li style="margin-bottom: 6px; color: #D1D5DB;">$1</li>')
-      .replace(/(<li>.*<\/li>)/s, '<ul style="padding-left: 20px; margin: 14px 0;">$1</ul>')
+      .replace(/((?:<li[\s\S]*?<\/li>\s*)+)/g, '<ul style="padding-left: 20px; margin: 14px 0;">$1</ul>')
       // Paragraphs
       .split('\n\n')
       .map((block) => {
