@@ -84,30 +84,57 @@ export function Sidebar() {
       </div>
 
       {user && (
-        <div
+        <NavLink
+          to="/profile"
           style={{
+            display: 'block',
+            textDecoration: 'none',
+            color: 'inherit',
             padding: '15px',
             background: '#111827',
-            borderRadius: '8px',
+            borderRadius: '10px',
             marginBottom: '20px',
             textAlign: 'center',
+            border: '1px solid rgba(0, 212, 255, 0.15)',
+            transition: 'border-color 0.2s, transform 0.2s',
+            cursor: 'pointer',
           }}
+          title="Ver perfil e alterar avatar pixel art"
         >
           <div
             style={{
-              width: '50px',
-              height: '50px',
+              width: '54px',
+              height: '54px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
+              background: user.avatarUrl
+                ? '#0B1220'
+                : 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
+              border: '2px solid rgba(0, 212, 255, 0.4)',
+              boxShadow: '0 0 15px rgba(0, 212, 255, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 10px',
               fontSize: '20px',
               fontWeight: 'bold',
+              overflow: 'hidden',
+              padding: user.avatarUrl ? '4px' : '0',
             }}
           >
-            {user.username[0].toUpperCase()}
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.username}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  imageRendering: 'pixelated',
+                }}
+              />
+            ) : (
+              (user.username?.[0] || 'U').toUpperCase()
+            )}
           </div>
 
           <p
@@ -115,6 +142,7 @@ export function Sidebar() {
               fontSize: '13px',
               fontWeight: 'bold',
               margin: '0 0 5px',
+              color: '#FFFFFF',
             }}
           >
             {user.username}
@@ -127,9 +155,9 @@ export function Sidebar() {
               margin: 0,
             }}
           >
-            Nivel {user.level}
+            Nível {user.level}
           </p>
-        </div>
+        </NavLink>
       )}
 
       <nav>
