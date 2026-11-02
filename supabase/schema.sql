@@ -193,4 +193,51 @@ CREATE POLICY "Users can manage own course rating" ON course_ratings FOR ALL USI
 DROP POLICY IF EXISTS "Users can manage searches" ON searches;
 CREATE POLICY "Users can manage searches" ON searches FOR ALL USING (true);
 
+-- ==============================================================================
+-- 8. SINCRONIZAÇÃO AUTOMÁTICA AUTH.USERS -> PUBLIC.USERS (TRIGGER & BACKFILL)
+-- ==============================================================================
+
+-- Função executada automaticamente ao criar conta no Supabase Auth:
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.users (id, email, username, role, level, xp, class_name, title)
+  VALUES (
+    new.id,
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
+    COALESCE(new.raw_user_meta_data->>'role', 'student'),
+    1,
+    0,
+    'Initiate',
+    'Iniciante'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    username = COALESCE(public.users.username, EXCLUDED.username);
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Registra o Trigger na tabela interna de autenticação auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- SINCRONIZAÇÃO RETROATIVA IMEDIATA:
+-- Copia todos os usuários que já se cadastraram no Supabase Auth para a tabela public.users
+INSERT INTO public.users (id, email, username, role, level, xp, class_name, title)
+SELECT
+  id,
+  email,
+  COALESCE(raw_user_meta_data->>'username', split_part(email, '@', 1)),
+  COALESCE(raw_user_meta_data->>'role', 'student'),
+  1,
+  0,
+  'Initiate',
+  'Iniciante'
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
+
 COMMIT;

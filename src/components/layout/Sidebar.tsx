@@ -8,16 +8,19 @@ import {
   Settings,
   MessageCircle,
   Zap,
+  X,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useUIStore } from '@/stores/useUIStore';
 
 export function Sidebar() {
   const { user } = useAuthStore();
+  const { sidebarOpen, closeSidebar } = useUIStore();
 
   const items = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
-    { to: '/galaxy', icon: Globe, label: 'Galaxia' },
-    { to: '/missions', icon: Target, label: 'Missoes' },
+    { to: '/galaxy', icon: Globe, label: 'Galáxia' },
+    { to: '/missions', icon: Target, label: 'Missões' },
     { to: '/achievements', icon: Award, label: 'Conquistas' },
     { to: '/profile', icon: User, label: 'Perfil' },
     { to: '/settings', icon: Settings, label: 'Ajustes' },
@@ -25,168 +28,116 @@ export function Sidebar() {
   ];
 
   return (
-    <aside
-      style={{
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        height: '100vh',
-        width: '250px',
-        background: '#0A1020',
-        borderRight: '1px solid #1F2937',
-        padding: '20px',
-        color: 'white',
-        fontFamily: 'sans-serif',
-        zIndex: 50,
-        boxSizing: 'border-box',
-      }}
-      className="sidebar"
-    >
-      <div style={{ marginBottom: '30px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              background: 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Zap size={20} color="white" fill="white" />
-          </div>
-
-          <div>
-            <h1
-              style={{
-                fontSize: '16px',
-                fontWeight: 'bold',
-                margin: 0,
-              }}
-            >
-              CODEQUEST
-            </h1>
-
-            <p
-              style={{
-                fontSize: '10px',
-                color: '#00D4FF',
-                letterSpacing: '2px',
-                margin: 0,
-              }}
-            >
-              NEXUS
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {user && (
-        <NavLink
-          to="/profile"
-          style={{
-            display: 'block',
-            textDecoration: 'none',
-            color: 'inherit',
-            padding: '15px',
-            background: '#111827',
-            borderRadius: '10px',
-            marginBottom: '20px',
-            textAlign: 'center',
-            border: '1px solid rgba(0, 212, 255, 0.15)',
-            transition: 'border-color 0.2s, transform 0.2s',
-            cursor: 'pointer',
-          }}
-          title="Ver perfil e alterar avatar pixel art"
-        >
-          <div
-            style={{
-              width: '54px',
-              height: '54px',
-              borderRadius: '50%',
-              background: user.avatarUrl
-                ? '#0B1220'
-                : 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
-              border: '2px solid rgba(0, 212, 255, 0.4)',
-              boxShadow: '0 0 15px rgba(0, 212, 255, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 10px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              overflow: 'hidden',
-              padding: user.avatarUrl ? '4px' : '0',
-            }}
-          >
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.username}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  imageRendering: 'pixelated',
-                }}
-              />
-            ) : (
-              (user.username?.[0] || 'U').toUpperCase()
-            )}
-          </div>
-
-          <p
-            style={{
-              fontSize: '13px',
-              fontWeight: 'bold',
-              margin: '0 0 5px',
-              color: '#FFFFFF',
-            }}
-          >
-            {user.username}
-          </p>
-
-          <p
-            style={{
-              fontSize: '11px',
-              color: '#9CA3AF',
-              margin: 0,
-            }}
-          >
-            Nível {user.level}
-          </p>
-        </NavLink>
+    <>
+      {/* Backdrop overlay on mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          onClick={closeSidebar}
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden transition-opacity duration-300"
+          aria-hidden="true"
+        />
       )}
 
-      <nav>
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '12px 15px',
-              marginBottom: '5px',
-              borderRadius: '8px',
-              background: isActive ? '#1F2937' : 'transparent',
-              color: isActive ? '#00D4FF' : '#9CA3AF',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: isActive ? 'bold' : 'normal',
-              borderLeft: isActive
-                ? '3px solid #00D4FF'
-                : '3px solid transparent',
-            })}
-          >
-            <item.icon size={18} />
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-    </aside>
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-[260px] max-w-[85vw] bg-[#0A1020] border-r border-[#1F2937] p-5 text-white flex flex-col justify-between overflow-y-auto transition-transform duration-300 ease-in-out md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        }`}
+      >
+        <div>
+          {/* Header with Brand Logo & Mobile Close (X) button */}
+          <div className="flex items-center justify-between mb-6 pb-2 border-b border-white/5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6] flex items-center justify-center shadow-[0_0_12px_rgba(0,212,255,0.4)]">
+                <Zap size={20} color="white" fill="white" />
+              </div>
+
+              <div>
+                <h1 className="text-sm font-bold tracking-wider leading-none m-0 text-white">
+                  CODEQUEST
+                </h1>
+                <p className="text-[10px] text-[#00D4FF] tracking-[2px] font-semibold leading-none mt-1">
+                  NEXUS
+                </p>
+              </div>
+            </div>
+
+            {/* Minimize / Close button on mobile */}
+            <button
+              onClick={closeSidebar}
+              className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              title="Minimizar menu lateral"
+              aria-label="Minimizar menu lateral"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* User profile card (clicks close sidebar on mobile) */}
+          {user && (
+            <NavLink
+              to="/profile"
+              onClick={closeSidebar}
+              className="block no-underline text-inherit p-3.5 bg-[#111827] rounded-xl mb-5 text-center border border-[#00D4FF]/20 hover:border-[#00D4FF]/60 hover:scale-[1.02] transition-all cursor-pointer shadow-lg"
+              title="Ver perfil e alterar avatar pixel art"
+            >
+              <div
+                className="w-14 h-14 rounded-full mx-auto mb-2 flex items-center justify-center text-lg font-bold overflow-hidden border-2 border-[#00D4FF]/50 shadow-[0_0_15px_rgba(0,212,255,0.25)]"
+                style={{
+                  background: user.avatarUrl
+                    ? '#0B1220'
+                    : 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
+                  padding: user.avatarUrl ? '4px' : '0',
+                }}
+              >
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.username}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                ) : (
+                  (user.username?.[0] || 'U').toUpperCase()
+                )}
+              </div>
+
+              <p className="text-sm font-bold m-0 mb-1 text-white truncate px-1">
+                {user.username}
+              </p>
+
+              <p className="text-xs text-gray-400 m-0">
+                Nível {user.level}
+              </p>
+            </NavLink>
+          )}
+
+          {/* Nav items */}
+          <nav className="flex flex-col gap-1">
+            {items.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={closeSidebar}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm transition-all ${
+                    isActive
+                      ? 'bg-[#1F2937] text-[#00D4FF] font-bold border-l-4 border-[#00D4FF] shadow-[inset_0_0_10px_rgba(0,212,255,0.1)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
+                  }`
+                }
+              >
+                <item.icon size={18} />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+
+        {/* Footer info in drawer */}
+        <div className="pt-4 border-t border-white/5 text-[11px] text-gray-500 text-center">
+          CodeQuest Nexus &copy; {new Date().getFullYear()}
+        </div>
+      </aside>
+    </>
   );
 }

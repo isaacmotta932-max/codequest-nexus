@@ -182,6 +182,11 @@ function InteractiveQuiz({
   const [selected, setSelected] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  useEffect(() => {
+    setSelected(null);
+    setSubmitted(false);
+  }, [quiz]);
+
   const isCorrect = selected === quiz.correctIndex;
 
   const handleVerify = () => {
@@ -334,20 +339,88 @@ function InteractiveCodeChallenge({
   const [errorMessage, setErrorMessage] = useState('');
   const [showHint, setShowHint] = useState(false);
 
-  const handleValidate = () => {
-    const normalized = code.replace(/\s+/g, ' ');
-    const allPresent = challenge.expectedKeywords.every((kw) =>
-      code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
-    );
+  useEffect(() => {
+    setCode(challenge.initialCode);
+    setValidated(null);
+    setErrorMessage('');
+    setShowHint(false);
+  }, [challenge]);
 
-    if (allPresent) {
+  const handleValidate = () => {
+    const cleanUserCode = code.trim();
+    const normalizedWhitespace = cleanUserCode.replace(/\s+/g, ' ');
+    const lowerUserCode = cleanUserCode.toLowerCase();
+    const lowerNormalized = normalizedWhitespace.toLowerCase();
+
+    const quoteNormalized = normalizedWhitespace.replace(/'/g, '"');
+    const lowerQuoteNormalized = lowerNormalized.replace(/'/g, '"');
+    const tagNormalized = lowerQuoteNormalized
+      .replace(/<\s+/g, '<')
+      .replace(/\s+>/g, '>')
+      .replace(/\s*\/\s*>/g, '/>')
+      .replace(/\s*=\s*/g, '=');
+
+    const missingKeywords: string[] = [];
+
+    for (const rawKw of challenge.expectedKeywords) {
+      const kw = rawKw.trim();
+      const kwNormalized = kw.replace(/\s+/g, ' ');
+      const lowerKw = kwNormalized.toLowerCase();
+      const quoteNormalizedKw = kwNormalized.replace(/'/g, '"');
+      const lowerQuoteNormalizedKw = lowerKw.replace(/'/g, '"');
+      const tagNormalizedKw = lowerQuoteNormalizedKw
+        .replace(/<\s+/g, '<')
+        .replace(/\s+>/g, '>')
+        .replace(/\s*\/\s*>/g, '/>')
+        .replace(/\s*=\s*/g, '=');
+
+      // 1. Verificação exata direta
+      if (code.includes(kw) || normalizedWhitespace.includes(kwNormalized)) {
+        continue;
+      }
+
+      // 2. Verificação com aspas normalizadas (' vs ")
+      if (quoteNormalized.includes(quoteNormalizedKw)) {
+        continue;
+      }
+
+      // 3. Verificação case-insensitive e tags flexíveis
+      if (
+        lowerUserCode.includes(lowerKw) ||
+        lowerNormalized.includes(lowerKw) ||
+        tagNormalized.includes(tagNormalizedKw)
+      ) {
+        continue;
+      }
+
+      // 4. Regex flexível para espaçamento interno de tags e textos
+      try {
+        const escaped = lowerKw
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          .replace(/\\\s\+/g, '\\s*')
+          .replace(/\\\s/g, '\\s*');
+        const regex = new RegExp(escaped, 'i');
+        if (regex.test(cleanUserCode)) {
+          continue;
+        }
+      } catch {
+        // Fallback silencioso
+      }
+
+      missingKeywords.push(kw);
+    }
+
+    if (missingKeywords.length === 0) {
       setValidated(true);
       setErrorMessage('');
       onComplete();
     } else {
       setValidated(false);
+      const detalhe = missingKeywords.length <= 2
+        ? `Verifique se incluiu: ${missingKeywords.map(k => `"${k}"`).join(' e ')}`
+        : 'Verifique se todos os elementos, tags ou palavras-chave solicitadas foram incluídos com a grafia correta.';
       setErrorMessage(
-        'Seu código ainda não possui todos os elementos solicitados. Revise a sintaxe e consulte a dica se precisar!'
+        `Ainda falta algo no seu código. ${detalhe}. Revise a sintaxe e consulte a dica se precisar!`
       );
     }
   };
@@ -515,17 +588,69 @@ function InteractiveBugHunt({
   const [errorMessage, setErrorMessage] = useState('');
   const [showHint, setShowHint] = useState(false);
 
+  useEffect(() => {
+    setCode(challenge.buggyCode);
+    setValidated(null);
+    setErrorMessage('');
+    setShowHint(false);
+  }, [challenge]);
+
   const handleValidate = () => {
-    const normalized = code.replace(/\s+/g, ' ');
-    const allKeywordsPresent = challenge.expectedKeywords.every((kw) =>
-      code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
-    );
+    const cleanUserCode = code.trim();
+    const normalizedWhitespace = cleanUserCode.replace(/\s+/g, ' ');
+    const lowerUserCode = cleanUserCode.toLowerCase();
+    const lowerNormalized = normalizedWhitespace.toLowerCase();
 
-    const hasForbidden = challenge.forbiddenKeywords?.some((kw) =>
-      code.includes(kw) || normalized.includes(kw.replace(/\s+/g, ' '))
-    );
+    const quoteNormalized = normalizedWhitespace.replace(/'/g, '"');
+    const lowerQuoteNormalized = lowerNormalized.replace(/'/g, '"');
+    const tagNormalized = lowerQuoteNormalized
+      .replace(/<\s+/g, '<')
+      .replace(/\s+>/g, '>')
+      .replace(/\s*\/\s*>/g, '/>')
+      .replace(/\s*=\s*/g, '=');
 
-    if (allKeywordsPresent && !hasForbidden) {
+    const missingKeywords: string[] = [];
+
+    for (const rawKw of challenge.expectedKeywords) {
+      const kw = rawKw.trim();
+      const kwNormalized = kw.replace(/\s+/g, ' ');
+      const lowerKw = kwNormalized.toLowerCase();
+      const quoteNormalizedKw = kwNormalized.replace(/'/g, '"');
+      const lowerQuoteNormalizedKw = lowerKw.replace(/'/g, '"');
+      const tagNormalizedKw = lowerQuoteNormalizedKw
+        .replace(/<\s+/g, '<')
+        .replace(/\s+>/g, '>')
+        .replace(/\s*\/\s*>/g, '/>')
+        .replace(/\s*=\s*/g, '=');
+
+      if (code.includes(kw) || normalizedWhitespace.includes(kwNormalized)) continue;
+      if (quoteNormalized.includes(quoteNormalizedKw)) continue;
+      if (
+        lowerUserCode.includes(lowerKw) ||
+        lowerNormalized.includes(lowerKw) ||
+        tagNormalized.includes(tagNormalizedKw)
+      ) continue;
+
+      try {
+        const escaped = lowerKw
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          .replace(/\\\s\+/g, '\\s*')
+          .replace(/\\\s/g, '\\s*');
+        const regex = new RegExp(escaped, 'i');
+        if (regex.test(cleanUserCode)) continue;
+      } catch {
+        // Fallback
+      }
+
+      missingKeywords.push(kw);
+    }
+
+    const hasForbidden = challenge.forbiddenKeywords?.some((kw) => {
+      const kwNorm = kw.replace(/\s+/g, ' ');
+      return code.includes(kw) || normalizedWhitespace.includes(kwNorm);
+    });
+
+    if (missingKeywords.length === 0 && !hasForbidden) {
       setValidated(true);
       setErrorMessage('');
       onComplete();
@@ -534,7 +659,9 @@ function InteractiveBugHunt({
       setErrorMessage(
         hasForbidden
           ? 'O bug ou trecho incorreto ainda está presente no código! Encontre e remova/corrija a linha falha.'
-          : 'A correção ainda não satisfaz todos os critérios. Revise a sintaxe e consulte a dica!'
+          : missingKeywords.length <= 2
+            ? `A correção ainda não satisfaz todos os critérios. Verifique se incluiu: ${missingKeywords.map(k => `"${k}"`).join(' e ')}.`
+            : 'A correção ainda não satisfaz todos os critérios. Revise a sintaxe e consulte a dica!'
       );
     }
   };
@@ -722,6 +849,12 @@ function InteractiveFillBlank({
   const [validated, setValidated] = useState<boolean | null>(null);
   const [activeHintIndex, setActiveHintIndex] = useState<number | null>(null);
 
+  useEffect(() => {
+    setAnswers({});
+    setValidated(null);
+    setActiveHintIndex(null);
+  }, [exercise]);
+
   const handleInputChange = (fieldId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [fieldId]: value }));
     if (validated !== null) setValidated(null);
@@ -729,8 +862,11 @@ function InteractiveFillBlank({
 
   const handleValidate = () => {
     const allCorrect = exercise.blanks.every((blank) => {
-      const userVal = (answers[blank.id] || '').trim().toLowerCase();
-      return blank.expectedValues.some((exp) => exp.trim().toLowerCase() === userVal);
+      const userVal = (answers[blank.id] || '').trim().toLowerCase().replace(/['"]/g, '');
+      return blank.expectedValues.some((exp) => {
+        const expClean = exp.trim().toLowerCase().replace(/['"]/g, '');
+        return expClean === userVal;
+      });
     });
 
     if (allCorrect) {
@@ -1304,10 +1440,12 @@ export function Lesson() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {lesson.exercises.map((exercise, index) => {
+              const uniqueExerciseKey = `${lesson.id}-exercise-${index}`;
+
               if (exercise.type === 'quiz') {
                 return (
                   <InteractiveQuiz
-                    key={index}
+                    key={uniqueExerciseKey}
                     quiz={exercise}
                     onComplete={() => handleExerciseCompleted(index)}
                   />
@@ -1317,7 +1455,7 @@ export function Lesson() {
               if (exercise.type === 'code') {
                 return (
                   <InteractiveCodeChallenge
-                    key={index}
+                    key={uniqueExerciseKey}
                     challenge={exercise}
                     onComplete={() => handleExerciseCompleted(index)}
                   />
@@ -1327,7 +1465,7 @@ export function Lesson() {
               if (exercise.type === 'bughunt') {
                 return (
                   <InteractiveBugHunt
-                    key={index}
+                    key={uniqueExerciseKey}
                     challenge={exercise}
                     onComplete={() => handleExerciseCompleted(index)}
                   />
@@ -1337,7 +1475,7 @@ export function Lesson() {
               if (exercise.type === 'fillblank') {
                 return (
                   <InteractiveFillBlank
-                    key={index}
+                    key={uniqueExerciseKey}
                     exercise={exercise}
                     onComplete={() => handleExerciseCompleted(index)}
                   />
