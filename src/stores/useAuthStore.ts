@@ -23,6 +23,7 @@ interface RegisterData {
   email: string;
   password: string;
   role: UserRole;
+  avatarUrl?: string;
   teacherApplication?: TeacherApplicationData;
 }
 
@@ -34,6 +35,7 @@ interface AuthState {
 
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  updateAvatar: (avatarUrl: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void> | void;
   initAuth: () => void;
@@ -83,7 +85,7 @@ function criarUsuario(
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       loading: false,
       initialized: false,
@@ -218,6 +220,9 @@ export const useAuthStore = create<AuthState>()(
               data.email,
               data.role
             );
+            if (data.avatarUrl) {
+              newUser.avatarUrl = data.avatarUrl;
+            }
 
             // Salva dados na tabela users
             await dbSaveUser(newUser);
@@ -263,6 +268,9 @@ export const useAuthStore = create<AuthState>()(
             data.email,
             data.role
           );
+          if (data.avatarUrl) {
+            localUser.avatarUrl = data.avatarUrl;
+          }
 
           try {
             const stored = JSON.parse(localStorage.getItem('codequest_registered_users') || '[]');
@@ -326,6 +334,22 @@ export const useAuthStore = create<AuthState>()(
             loading: false,
           });
           throw err;
+        }
+      },
+
+      updateAvatar: async (avatarUrl: string) => {
+        const currentUser = get().user;
+        if (!currentUser) return;
+
+        const updatedUser = { ...currentUser, avatarUrl };
+        set({ user: updatedUser });
+
+        if (isSupabaseConfigured && currentUser.id) {
+          try {
+            await dbSaveUser({ id: currentUser.id, avatarUrl });
+          } catch (e) {
+            console.error('Erro ao salvar avatar no Supabase:', e);
+          }
         }
       },
 

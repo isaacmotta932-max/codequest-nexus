@@ -40,6 +40,7 @@ export function TopBar() {
           {user && (
             <div className="flex items-center gap-3 border-l border-white/10 pl-3">
               <Avatar
+                src={user.avatarUrl}
                 fallback={user.username}
                 ring
                 ringColor="blue"

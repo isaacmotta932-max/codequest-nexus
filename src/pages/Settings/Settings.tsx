@@ -18,6 +18,7 @@ import {
   supabase,
 } from '@/lib/database';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { PIXEL_AVATARS, type PixelAvatar } from '@/constants/pixelAvatars';
 
 interface Course {
   id: string;
@@ -1707,9 +1708,19 @@ function AccountSection({
     username: string;
     email: string;
     id: string;
+    avatarUrl?: string;
   };
   onLogout: () => void | Promise<void>;
 }) {
+  const { updateAvatar } = useAuthStore();
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const handleAvatarSelect = async (avatar: PixelAvatar) => {
+    await updateAvatar(avatar.dataUrl);
+    setSuccessMsg(`Avatar "${avatar.name}" salvo com sucesso!`);
+    setTimeout(() => setSuccessMsg(''), 3000);
+  };
+
   return (
     <div
       style={styles.card}
@@ -1717,8 +1728,69 @@ function AccountSection({
       <SectionTitle
         icon="🔐"
         title="Conta"
-        description="Informações da sua conta CodeQuest."
+        description="Informações da sua conta e identidade visual CodeQuest."
       />
+
+      {/* Seção de Avatar Pixel Art (10 Opções) */}
+      <div style={{ ...styles.accountBox, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+          <div>
+            <span style={styles.accountLabel}>AVATAR DO CODER</span>
+            <strong style={{ fontSize: 16, color: '#FFF' }}>
+              Insígnia Pixel Art de Programação (10 Opções)
+            </strong>
+          </div>
+          {successMsg && (
+            <span style={{ fontSize: 12, color: '#00FFA3', background: 'rgba(0, 255, 163, 0.1)', padding: '4px 10px', borderRadius: 8, border: '1px solid rgba(0, 255, 163, 0.3)' }}>
+              ✓ {successMsg}
+            </span>
+          )}
+        </div>
+
+        <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 0, marginBottom: 14 }}>
+          Clique em qualquer ícone pixelado abaixo para atualizar seu avatar instantaneamente.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 10 }}>
+          {PIXEL_AVATARS.map((av) => {
+            const isSelected = user.avatarUrl === av.dataUrl || user.avatarUrl === av.id;
+            return (
+              <button
+                key={av.id}
+                type="button"
+                onClick={() => handleAvatarSelect(av)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '10px 6px',
+                  borderRadius: 10,
+                  border: `1px solid ${isSelected ? av.accentColor : 'rgba(255, 255, 255, 0.08)'}`,
+                  background: isSelected ? `${av.accentColor}18` : 'rgba(255, 255, 255, 0.02)',
+                  boxShadow: isSelected ? `0 0 14px ${av.accentColor}40` : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                title={`${av.name} - ${av.category}`}
+              >
+                <div style={{ width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
+                  <img
+                    src={av.dataUrl}
+                    alt={av.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated' }}
+                  />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#E2E8F0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                  {av.name}
+                </span>
+                <span style={{ fontSize: 9, color: av.accentColor, marginTop: 2, fontFamily: 'monospace' }}>
+                  {av.category}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <div
         style={

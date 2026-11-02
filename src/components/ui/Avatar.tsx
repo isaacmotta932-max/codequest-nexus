@@ -47,7 +47,11 @@ export function Avatar({
       )}
     >
       {src ? (
-        <img src={src} alt={alt} className="h-full w-full object-cover" />
+        <img
+          src={src}
+          alt={alt}
+          className="h-full w-full object-cover [image-rendering:pixelated]"
+        />
       ) : (
         <span>{fallback || alt.charAt(0).toUpperCase()}</span>
       )}

@@ -3,10 +3,13 @@ import type {
   CSSProperties,
   ReactNode,
 } from 'react';
+import { Sparkles } from 'lucide-react';
 
 import { useAuthStore } from '@/stores/useAuthStore';
 import { dbGetUser, isSupabaseConfigured } from '@/lib/database';
 import { useProgress } from '@/hooks/useProgress';
+import { AvatarSelectorModal } from '@/components/ui/AvatarSelectorModal';
+import { PIXEL_AVATARS, type PixelAvatar } from '@/constants/pixelAvatars';
 
 interface ProfileUser {
   username: string;
@@ -112,7 +115,8 @@ function calculateLevelProgress(xp: number) {
 }
 
 export function Profile() {
-  const { user } = useAuthStore();
+  const { user, updateAvatar } = useAuthStore();
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   /*
    * O progresso pertence exclusivamente
@@ -134,6 +138,13 @@ export function Profile() {
   ] = useState<ProfileUser | null>(
     null
   );
+
+  const handleSelectAvatar = async (avatar: PixelAvatar) => {
+    await updateAvatar(avatar.dataUrl);
+    setFirebaseProfile((prev) =>
+      prev ? { ...prev, avatarUrl: avatar.dataUrl } : prev
+    );
+  };
 
   /*
    * O documento users/{uid} é usado somente
@@ -249,20 +260,35 @@ export function Profile() {
           <div style={styles.heroGlow} />
 
           <div style={styles.heroContent}>
-            <div style={styles.avatar}>
-              {profile.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  alt={profile.username}
-                  style={
-                    styles.avatarImage
-                  }
-                />
-              ) : (
-                profile.username
-                  .charAt(0)
-                  .toUpperCase()
-              )}
+            <div style={styles.avatarWrapper}>
+              <div
+                style={{ ...styles.avatar, cursor: 'pointer' }}
+                onClick={() => setIsAvatarModalOpen(true)}
+                title="Clique para escolher seu avatar pixel art"
+              >
+                {profile.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.username}
+                    style={{
+                      ...styles.avatarImage,
+                      imageRendering: 'pixelated',
+                    }}
+                  />
+                ) : (
+                  profile.username
+                    .charAt(0)
+                    .toUpperCase()
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAvatarModalOpen(true)}
+                style={styles.avatarChangeBadge}
+                title="Escolher entre 10 ícones pixelados de programação"
+              >
+                <Sparkles size={14} />
+              </button>
             </div>
 
             <div>
@@ -297,6 +323,73 @@ export function Profile() {
                 </Badge>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* 10 Opções de Ícones Pixelados de Programação */}
+        <section style={styles.pixelAvatarsSection}>
+          <div style={styles.pixelAvatarsHeader}>
+            <div>
+              <div style={styles.eyebrow}>IDENTIDADE VISUAL 8-BIT</div>
+              <h2 style={styles.pixelAvatarsTitle}>
+                Insígnias de Programação em Pixel Art
+              </h2>
+              <p style={styles.pixelAvatarsSubtitle}>
+                Escolha seu avatar temático de desenvolvedor: 10 opções exclusivas criadas para coders do Nexus.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAvatarModalOpen(true)}
+              style={styles.openModalBtn}
+            >
+              <Sparkles size={15} /> Ver Catálogo Completo
+            </button>
+          </div>
+
+          <div style={styles.pixelAvatarsGrid}>
+            {PIXEL_AVATARS.map((av) => {
+              const isSelected =
+                profile.avatarUrl === av.dataUrl || profile.avatarUrl === av.id;
+              return (
+                <button
+                  key={av.id}
+                  type="button"
+                  onClick={() => handleSelectAvatar(av)}
+                  style={{
+                    ...styles.pixelAvatarItem,
+                    borderColor: isSelected
+                      ? av.accentColor
+                      : 'rgba(255, 255, 255, 0.08)',
+                    boxShadow: isSelected
+                      ? `0 0 16px ${av.accentColor}50`
+                      : 'none',
+                    background: isSelected
+                      ? 'rgba(255, 255, 255, 0.07)'
+                      : 'rgba(15, 23, 42, 0.6)',
+                  }}
+                  title={`${av.name} (${av.category}) - ${av.description}`}
+                >
+                  <div style={styles.pixelAvatarImgWrapper}>
+                    <img
+                      src={av.dataUrl}
+                      alt={av.name}
+                      style={styles.pixelAvatarImg}
+                    />
+                  </div>
+                  <span style={styles.pixelAvatarName}>{av.name}</span>
+                  <span
+                    style={{
+                      ...styles.pixelAvatarCategory,
+                      color: av.accentColor,
+                      background: `${av.accentColor}18`,
+                    }}
+                  >
+                    {av.category}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -432,6 +525,13 @@ export function Profile() {
             }
           />
         </section>
+
+        <AvatarSelectorModal
+          isOpen={isAvatarModalOpen}
+          onClose={() => setIsAvatarModalOpen(false)}
+          currentAvatarUrl={profile.avatarUrl}
+          onSelect={handleSelectAvatar}
+        />
       </div>
     </div>
   );
@@ -735,5 +835,126 @@ const styles: Record<
 
   infoTitle: {
     marginBottom: 0,
+  },
+
+  avatarWrapper: {
+    position: 'relative',
+    display: 'inline-block',
+  },
+
+  avatarChangeBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    background: '#00E5FF',
+    color: '#0A0E1A',
+    borderRadius: '50%',
+    width: 32,
+    height: 32,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '2px solid #0B1220',
+    boxShadow: '0 0 12px rgba(0, 229, 255, 0.6)',
+    cursor: 'pointer',
+  },
+
+  pixelAvatarsSection: {
+    background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(15, 23, 42, 0.9))',
+    border: '1px solid rgba(0, 229, 255, 0.2)',
+    borderRadius: 18,
+    padding: '24px 28px',
+    marginTop: 20,
+    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
+  },
+
+  pixelAvatarsHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+
+  pixelAvatarsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    margin: '4px 0',
+    color: '#FFFFFF',
+    letterSpacing: '0.5px',
+  },
+
+  pixelAvatarsSubtitle: {
+    fontSize: 13,
+    color: '#94A3B8',
+    margin: 0,
+  },
+
+  openModalBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '8px 16px',
+    borderRadius: 10,
+    background: 'linear-gradient(135deg, #00E5FF, #8B5CF6)',
+    color: '#0A0E1A',
+    fontWeight: 'bold',
+    fontSize: 13,
+    border: 'none',
+    cursor: 'pointer',
+    boxShadow: '0 0 15px rgba(0, 229, 255, 0.4)',
+  },
+
+  pixelAvatarsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+    gap: 12,
+  },
+
+  pixelAvatarItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '12px 8px',
+    borderRadius: 12,
+    border: '1px solid',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+
+  pixelAvatarImgWrapper: {
+    width: 48,
+    height: 48,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+
+  pixelAvatarImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    imageRendering: 'pixelated',
+  },
+
+  pixelAvatarName: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#E2E8F0',
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',
+  },
+
+  pixelAvatarCategory: {
+    fontSize: 9,
+    fontFamily: 'monospace',
+    padding: '2px 6px',
+    borderRadius: 4,
+    marginTop: 4,
   },
 };

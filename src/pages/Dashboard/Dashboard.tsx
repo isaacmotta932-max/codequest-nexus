@@ -614,30 +614,61 @@ export function Dashboard() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        <p style={styles.date}>
-          {new Date().toLocaleDateString(
-            'pt-BR',
-            {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-            }
-          )}
-        </p>
+      <div style={{ ...styles.header, display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+        {user.avatarUrl && (
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '16px',
+              background: '#0B1220',
+              border: '2px solid rgba(0, 229, 255, 0.4)',
+              boxShadow: '0 0 20px rgba(0, 229, 255, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '6px',
+              flexShrink: 0,
+            }}
+          >
+            <img
+              src={user.avatarUrl}
+              alt={user.username}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                imageRendering: 'pixelated',
+              }}
+            />
+          </div>
+        )}
 
-        <h1 style={styles.title}>
-          Bem-vindo,{' '}
-          <span style={styles.cyan}>
-            {user.username}
-          </span>
-          !
-        </h1>
+        <div>
+          <p style={styles.date}>
+            {new Date().toLocaleDateString(
+              'pt-BR',
+              {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+              }
+            )}
+          </p>
 
-        <p style={styles.subtitle}>
-          {user.title} • Nível{' '}
-          {levelData.level}
-        </p>
+          <h1 style={styles.title}>
+            Bem-vindo,{' '}
+            <span style={styles.cyan}>
+              {user.username}
+            </span>
+            !
+          </h1>
+
+          <p style={styles.subtitle}>
+            {user.title} • Nível{' '}
+            {levelData.level}
+          </p>
+        </div>
       </div>
 
       <div style={styles.statsGrid}>

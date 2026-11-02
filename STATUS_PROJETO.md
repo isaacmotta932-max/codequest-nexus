@@ -71,6 +71,7 @@ A plataforma opera com 4 modalidades de exercícios em tempo real dentro de cada
 - [x] **Tratamento de Autenticação Supabase**: Mensagens amigáveis em português para confirmação de e-mail e tratamento de duplicidade de conta.
 - [x] **Sincronização com GitHub**: Repositório centralizado e sincronizado na branch `main`.
 - [x] **Documentação Acadêmica**: Slides completos de apresentação para professores e banca examinadora estruturados em `SLIDES_APRESENTACAO.md`.
+- [x] **Coleção de 10 Ícones Pixel Art de Programação**: Criada a galeria de insígnias 8-bit com renderização vetorial SVG nítida (`[image-rendering:pixelated]`) e modal interativo integrado ao Perfil, Configurações e Cadastro.
 
 ---
 

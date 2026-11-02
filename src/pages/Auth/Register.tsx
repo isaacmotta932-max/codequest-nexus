@@ -17,6 +17,7 @@
   } from 'lucide-react';
 
   import { useAuthStore } from '@/stores/useAuthStore';
+  import { PIXEL_AVATARS } from '@/constants/pixelAvatars';
 
   type Role = 'student' | 'teacher';
 
@@ -28,6 +29,9 @@
       loading,
       error,
     } = useAuthStore();
+
+    const [selectedAvatar, setSelectedAvatar] =
+      useState(PIXEL_AVATARS[0].dataUrl);
 
     const [role, setRole] =
       useState<Role>('student');
@@ -150,6 +154,7 @@
           email,
           password,
           role,
+          avatarUrl: selectedAvatar,
 
           ...(role === 'teacher'
             ? {
@@ -341,6 +346,79 @@
             >
               2. Seus dados
             </h2>
+
+            {/* Seletor dos 10 Ícones Pixel Art */}
+            <div style={{ marginBottom: '22px' }}>
+              <label style={labelStyle}>
+                Escolha seu Avatar Pixel Art (10 Opções)
+              </label>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+                  gap: '8px',
+                  background: '#0B1220',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: '1px solid #263247',
+                }}
+              >
+                {PIXEL_AVATARS.map((av) => {
+                  const isSelected = selectedAvatar === av.dataUrl;
+                  return (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => setSelectedAvatar(av.dataUrl)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        padding: '8px 4px',
+                        borderRadius: '8px',
+                        border: `1px solid ${
+                          isSelected ? av.accentColor : 'rgba(255, 255, 255, 0.08)'
+                        }`,
+                        background: isSelected
+                          ? `${av.accentColor}22`
+                          : 'rgba(255, 255, 255, 0.02)',
+                        boxShadow: isSelected
+                          ? `0 0 10px ${av.accentColor}40`
+                          : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                      title={`${av.name} (${av.category}) - ${av.description}`}
+                    >
+                      <img
+                        src={av.dataUrl}
+                        alt={av.name}
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          objectFit: 'contain',
+                          imageRendering: 'pixelated',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          marginTop: '4px',
+                          fontWeight: 600,
+                          color: isSelected ? '#FFFFFF' : '#94A3B8',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '100%',
+                        }}
+                      >
+                        {av.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <Field
               label="Nome de usuário"
