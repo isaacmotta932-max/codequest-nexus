@@ -68,7 +68,7 @@ src/
 ## 📍 Roadmap de Desenvolvimento
 
 - [x] **Fase 1** — Fundação e Design System Cyberpunk ✅
-- [x] **Fase 2** — Conteúdo Educacional (10 Planetas & Cursos Completos) ✅
+- [x] **Fase 2** — Conteúdo Educacional (15 Planetas & Cursos Completos, 35 Aulas) ✅
 - [x] **Fase 3** — Gamificação Core (XP, Níveis, Trava de Conclusão) ✅
 - [x] **Fase 4** — Motor de 4 Tipos de Exercícios Interativos (Quiz, Live Code, BugHunt, FillBlank) ✅
 - [x] **Fase 5** — Backend & Persistência no Supabase (Auth, RLS, Tabelas) ✅

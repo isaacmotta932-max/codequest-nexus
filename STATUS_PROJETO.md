@@ -1,9 +1,9 @@
 # 🚀 Relatório de Situação do Projeto: CodeQuest Nexus
 
-**Data:** 30 de Outubro de 2026  
+**Data:** 02 de Novembro de 2026  
 **Repositório Oficial:** [github.com/isaacmotta932-max/codequest-nexus](https://github.com/isaacmotta932-max/codequest-nexus)  
 **Ambiente:** Produção (Netlify) & Desenvolvimento (Vite + React + TypeScript + Supabase)  
-**Status Geral:** ✅ **Estável, Funcional e Completo para Apresentação**
+**Status Geral:** ✅ **Estável, Funcional e Expandido (15 Planetas / Cursos)**
 
 ---
 
@@ -11,7 +11,7 @@
 
 O **CodeQuest Nexus** é uma plataforma educacional gamificada de programação com estética Cyberpunk AAA, projetada para transformar o aprendizado de tecnologia em uma expedição interplanetária.
 
-O projeto concluiu com êxito todas as etapas de infraestrutura, autenticação real, banco de dados em nuvem, currículo pedagógico e sistema de exercícios práticos com trava de conclusão.
+O projeto concluiu com êxito todas as etapas de infraestrutura, autenticação real, banco de dados em nuvem, métricas dinâmicas em tempo real, currículo pedagógico e sistema de exercícios práticos com trava de conclusão.
 
 ---
 
@@ -30,7 +30,7 @@ O projeto concluiu com êxito todas as etapas de infraestrutura, autenticação 
 
 ## 🌌 Matriz de Cursos & Galáxia de Código
 
-Todos os 10 cursos da Galáxia de Código contam com lições completas, narrativa contextualizada por planeta, teoria em Markdown com callouts temáticos e atividades interativas obrigatórias:
+Todos os 15 cursos da Galáxia de Código contam com lições completas, narrativa contextualizada por planeta, teoria em Markdown com callouts temáticos e atividades interativas obrigatórias:
 
 | Planeta | Curso | Aulas | XP Total | Tipos de Atividades |
 | :--- | :--- | :---: | :---: | :--- |
@@ -44,6 +44,12 @@ Todos os 10 cursos da Galáxia de Código contam com lições completas, narrati
 | **Enterprise World** | Java | 2 | 125 XP | `quiz`, `fillblank`, `code` |
 | **Data Matrix** | SQL | 2 | 125 XP | `quiz`, `fillblank`, `code`, `bughunt` |
 | **Version Control Base** | Git | 2 | 125 XP | `quiz`, `fillblank`, `code` |
+| **Cidadela de Ferro** | Rust | 2 | 130 XP | `quiz`, `fillblank`, `bughunt`, `code` |
+| **Estação Docker** | Docker | 2 | 130 XP | `quiz`, `fillblank`, `code` |
+| **Shadow Grid** | Cibersegurança | 2 | 130 XP | `quiz`, `bughunt`, `fillblank` |
+| **Núcleo Supersônico** | Golang | 2 | 130 XP | `quiz`, `fillblank`, `code` |
+| **Matriz Conectiva** | GraphQL | 2 | 130 XP | `quiz`, `fillblank`, `code` |
+| **TOTAL** | **15 Cursos** | **35 Aulas** | **2.205 XP** | **4 Modalidades Interativas** |
 
 ---
 

@@ -208,7 +208,7 @@ export function Landing() {
             <h2 className="font-display text-4xl font-black md:text-5xl">
               EXPLORE A <span className="text-gradient">GALÁXIA</span>
             </h2>
-            <p className="mt-4 text-gray-400">10 planetas. 10 linguagens. Infinitas possibilidades.</p>
+            <p className="mt-4 text-gray-400">{stats.planets} planetas. {stats.planets} linguagens e especialidades. Infinitas possibilidades.</p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
