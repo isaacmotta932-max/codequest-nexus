@@ -222,6 +222,17 @@ export const useAuthStore = create<AuthState>()(
             // Salva dados na tabela users
             await dbSaveUser(newUser);
 
+            // Registra o coder no histórico de cadastros
+            try {
+              const stored = JSON.parse(localStorage.getItem('codequest_registered_users') || '[]');
+              if (!stored.includes(newUser.email)) {
+                stored.push(newUser.email);
+                localStorage.setItem('codequest_registered_users', JSON.stringify(stored));
+              }
+            } catch {
+              // Ignora
+            }
+
             // Se for professor, salva candidatura na tabela teachers
             if (data.role === 'teacher' && data.teacherApplication) {
               await dbSaveTeacherApplication({
@@ -252,6 +263,16 @@ export const useAuthStore = create<AuthState>()(
             data.email,
             data.role
           );
+
+          try {
+            const stored = JSON.parse(localStorage.getItem('codequest_registered_users') || '[]');
+            if (!stored.includes(localUser.email)) {
+              stored.push(localUser.email);
+              localStorage.setItem('codequest_registered_users', JSON.stringify(stored));
+            }
+          } catch {
+            // Ignora
+          }
 
           set({
             user: localUser,

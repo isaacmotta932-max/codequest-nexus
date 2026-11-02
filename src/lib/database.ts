@@ -1,5 +1,6 @@
 // Camada unificada de dados (Supabase + fallback local)
 import { supabase, isSupabaseConfigured } from './supabase';
+import { COURSES } from '@/data/courses';
 import type { User, UserRole } from '@/types';
 import type { ProgressData } from '@/hooks/useProgress';
 
@@ -416,4 +417,65 @@ export async function dbSaveCourseRating(data: {
   } catch {
     return false;
   }
+}
+
+// ============================================================================
+// 8. ESTATÍSTICAS DA PLATAFORMA (DADOS REAIS)
+// ============================================================================
+
+export interface PlatformStats {
+  planets: number;
+  lessons: number;
+  coders: number;
+}
+
+export async function dbGetPlatformStats(): Promise<PlatformStats> {
+  const planets = COURSES.length;
+  const lessons = COURSES.reduce((sum, c) => sum + (c.lessons?.length || 0), 0);
+
+  let coders = 0;
+
+  // Busca do Supabase se configurado
+  if (isSupabaseConfigured) {
+    try {
+      const { count, error } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+      if (!error && typeof count === 'number' && count > 0) {
+        coders = count;
+      }
+    } catch {
+      // Ignora erro
+    }
+  }
+
+  // Se Supabase ainda não tem a tabela ou retornou 0, busca cadastros salvos localmente
+  if (coders === 0) {
+    try {
+      const stored = localStorage.getItem('codequest_registered_users');
+      if (stored) {
+        const list = JSON.parse(stored);
+        if (Array.isArray(list) && list.length > 0) {
+          coders = list.length;
+        }
+      }
+      if (coders === 0) {
+        const authStorage = localStorage.getItem('auth-storage');
+        if (authStorage) {
+          const parsed = JSON.parse(authStorage);
+          if (parsed?.state?.user?.id) {
+            coders = 1;
+          }
+        }
+      }
+    } catch {
+      // Ignora
+    }
+  }
+
+  return {
+    planets,
+    lessons,
+    coders,
+  };
 }

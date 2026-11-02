@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Zap, Sparkles, Trophy, Code2, Cpu, ArrowRight, Github, Star } from 'lucide-react';
@@ -7,8 +8,27 @@ import { Badge } from '@/components/ui/Badge';
 import { ParticleBackground } from '@/components/effects/ParticleBackground';
 import { GlitchText } from '@/components/effects/GlitchText';
 import { PLANETS } from '@/constants/planets';
+import { COURSES } from '@/data/courses';
+import { dbGetPlatformStats, PlatformStats } from '@/lib/database';
 
 export function Landing() {
+  const [stats, setStats] = useState<PlatformStats>({
+    planets: COURSES.length,
+    lessons: COURSES.reduce((sum, c) => sum + (c.lessons?.length || 0), 0),
+    coders: 0,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    dbGetPlatformStats().then((res) => {
+      if (!cancelled) {
+        setStats(res);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-bg-primary text-white">
       <ParticleBackground />
@@ -111,9 +131,9 @@ export function Landing() {
             className="mx-auto mt-16 grid max-w-3xl grid-cols-3 gap-4"
           >
             {[
-              { v: '10', l: 'Planetas' },
-              { v: '500+', l: 'Lições' },
-              { v: '50K+', l: 'Coders' },
+              { v: stats.planets, l: 'Planetas' },
+              { v: stats.lessons, l: 'Lições' },
+              { v: stats.coders, l: 'Coders' },
             ].map((s, i) => (
               <div key={i} className="text-center">
                 <p className="font-display text-3xl font-black text-gradient md:text-5xl">
