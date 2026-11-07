@@ -23,6 +23,7 @@ import { dbGetPublishedCourses, isSupabaseConfigured } from '@/lib/database';
 import { getCourseBySlug } from '@/data/courses';
 import { downloadLessonPDF } from '@/utils/pdfGenerator';
 import { useProgress } from '@/hooks/useProgress';
+import DOMPurify from 'dompurify';
 import type {
   LessonExercise,
   QuizExercise,
@@ -1187,7 +1188,20 @@ export function Lesson() {
   const lessonContent = lesson.content || '';
   const videoUrl = lesson.fileUrl?.trim() || '';
   const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
-  const iframeVideoUrl = youtubeEmbedUrl || videoUrl;
+
+  const isSafeUrl = (url: string): boolean => {
+    if (!url) return false;
+    const trimmed = url.trim().toLowerCase();
+    return (
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('data:application/pdf') ||
+      trimmed.startsWith('data:application/msword') ||
+      trimmed.startsWith('data:application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    );
+  };
+
+  const iframeVideoUrl = youtubeEmbedUrl || (isSafeUrl(videoUrl) ? videoUrl : '');
 
   const handleDownload = async () => {
     try {
@@ -1225,7 +1239,7 @@ export function Lesson() {
 
   // Renderizador de Markdown aprimorado com estilos Cyberpunk
   const renderContent = (markdown: string): string => {
-    return markdown
+    const rawHtml = markdown
       // Callouts / Quotes
       .replace(
         /^>\s*(\*\*💡[^*]+\*\*)\s*\n>([^\n]+)/gim,
@@ -1290,6 +1304,15 @@ export function Lesson() {
         return `<p style="margin: 12px 0; color: #CBD5E1; font-size: 15px; line-height: 1.75;">${block.replace(/\n/g, '<br>')}</p>`;
       })
       .join('\n');
+
+    return DOMPurify.sanitize(rawHtml, {
+      ALLOWED_TAGS: [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'strong', 'em', 'code', 'pre',
+        'div', 'span', 'ul', 'ol', 'li', 'hr', 'br', 'blockquote',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'
+      ],
+      ALLOWED_ATTR: ['style', 'class', 'href', 'target', 'rel'],
+    });
   };
 
   return (
@@ -1386,11 +1409,11 @@ export function Lesson() {
               />
             ) : null}
           </div>
-          {!youtubeEmbedUrl && (
+          {!youtubeEmbedUrl && isSafeUrl(lesson.fileUrl || '') && (
             <a
               href={lesson.fileUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={{ ...styles.simpleLink, display: 'inline-block', marginTop: 12 }}
             >
               ▶️ Abrir vídeo em outra aba

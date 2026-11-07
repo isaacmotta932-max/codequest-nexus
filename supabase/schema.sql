@@ -1,8 +1,8 @@
 -- ==============================================================================
--- CODEQUEST NEXUS: ESQUEMA COMPLETO PARA SUPABASE (POSTGRESQL)
+-- CODEQUEST NEXUS: ESQUEMA COMPLETO PARA SUPABASE (POSTGRESQL) - HARDENED
 -- ==============================================================================
 -- Este script cria todas as tabelas, índices e políticas de segurança (RLS)
--- necessárias para o funcionamento integral do CodeQuest Nexus.
+-- blindadas contra injeção, escalação de privilégios e adulteração de dados.
 -- Execute este script no SQL Editor do seu projeto Supabase.
 -- ==============================================================================
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     xp INT NOT NULL DEFAULT 0,
     current_streak INT NOT NULL DEFAULT 0,
     longest_streak INT NOT NULL DEFAULT 0,
-    class_name VARCHAR(100) NOT NULL DEFAULT 'Initiate',
+    class_name VARCHAR(100) NOT NULL DEFAULT 'Iniciante',
     title VARCHAR(100) NOT NULL DEFAULT 'Iniciante',
     joined_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -121,7 +121,32 @@ CREATE INDEX IF NOT EXISTS idx_platform_ratings_created ON platform_ratings(crea
 CREATE INDEX IF NOT EXISTS idx_course_ratings_course ON course_ratings(course_id);
 
 -- ==============================================================================
--- ROW LEVEL SECURITY (RLS) & POLÍTICAS DE ACESSO
+-- FUNÇÕES DE AUTORIZAÇÃO SEGURAS (SECURITY DEFINER / STABLE)
+-- ==============================================================================
+-- Evitam recursão infinita no RLS ao checar o perfil do usuário logado.
+
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid()::text AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+CREATE OR REPLACE FUNCTION public.is_teacher()
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid()::text AND role IN ('teacher', 'admin')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- ==============================================================================
+-- ROW LEVEL SECURITY (RLS) & POLÍTICAS DE ACESSO BLINDADAS
 -- ==============================================================================
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -132,72 +157,172 @@ ALTER TABLE platform_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_ratings ENABLE ROW LEVEL SECURITY;
 
--- Políticas para users
+-- ------------------------------------------------------------------------------
+-- Políticas para 'users'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Public can read users" ON users;
-CREATE POLICY "Public can read users" ON users FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Users can insert own record" ON users;
-CREATE POLICY "Users can insert own record" ON users FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Users can update own record" ON users;
-CREATE POLICY "Users can update own record" ON users FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Users can delete own record" ON users;
-CREATE POLICY "Users can delete own record" ON users FOR DELETE USING (true);
 
--- Políticas para teachers
+-- Leitura pública para cards de contagem, rankings e identificação de autores
+CREATE POLICY "Public can read users" ON users
+  FOR SELECT USING (true);
+
+-- Inserção: apenas o próprio usuário no momento do cadastro (restrito a 'student') ou admin
+CREATE POLICY "Users can insert own record" ON users
+  FOR INSERT WITH CHECK (
+    (auth.uid()::text = id AND (role = 'student' OR role IS NULL))
+    OR public.is_admin()
+  );
+
+-- Atualização: o próprio usuário pode atualizar seu perfil (nome, avatar, etc.),
+-- MAS NÃO PODE elevar seu próprio 'role' a 'admin' ou 'teacher'
+CREATE POLICY "Users can update own record" ON users
+  FOR UPDATE USING (
+    auth.uid()::text = id OR public.is_admin()
+  )
+  WITH CHECK (
+    -- Usuário comum não pode alterar o campo 'role' (permanece inalterado)
+    (auth.uid()::text = id AND role = (SELECT u.role FROM public.users u WHERE u.id = auth.uid()::text))
+    OR public.is_admin()
+  );
+
+-- Exclusão: somente o próprio usuário ou administradores
+CREATE POLICY "Users can delete own record" ON users
+  FOR DELETE USING (
+    auth.uid()::text = id OR public.is_admin()
+  );
+
+-- ------------------------------------------------------------------------------
+-- Políticas para 'teachers'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Public can read teachers" ON teachers;
-CREATE POLICY "Public can read teachers" ON teachers FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Teachers can insert application" ON teachers;
-CREATE POLICY "Teachers can insert application" ON teachers FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Teachers can update application" ON teachers;
-CREATE POLICY "Teachers can update application" ON teachers FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Teachers can delete own courses" ON teachers;
 
--- Políticas para courses
+CREATE POLICY "Public can read teachers" ON teachers
+  FOR SELECT USING (true);
+
+CREATE POLICY "Teachers can insert application" ON teachers
+  FOR INSERT WITH CHECK (
+    auth.uid()::text = user_id OR public.is_admin()
+  );
+
+CREATE POLICY "Teachers can update application" ON teachers
+  FOR UPDATE USING (
+    public.is_admin()
+    OR (auth.uid()::text = user_id AND status = 'pending')
+  );
+
+-- ------------------------------------------------------------------------------
+-- Políticas para 'courses'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Public can read courses" ON courses;
-CREATE POLICY "Public can read courses" ON courses FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Teachers can create courses" ON courses;
-CREATE POLICY "Teachers can create courses" ON courses FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Teachers can update own courses" ON courses;
-CREATE POLICY "Teachers can update own courses" ON courses FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Teachers can delete own courses" ON courses;
-CREATE POLICY "Teachers can delete own courses" ON courses FOR DELETE USING (true);
 
--- Políticas para user_progress
+-- Cursos publicados são visíveis por todos; rascunhos apenas pelo autor ou admin
+CREATE POLICY "Public can read courses" ON courses
+  FOR SELECT USING (
+    published = true
+    OR teacher_id = auth.uid()::text
+    OR public.is_admin()
+  );
+
+-- Somente professores aprovados ou admins podem criar cursos
+CREATE POLICY "Teachers can create courses" ON courses
+  FOR INSERT WITH CHECK (
+    (teacher_id = auth.uid()::text AND public.is_teacher())
+    OR public.is_admin()
+  );
+
+-- Somente o professor autor ou admin pode atualizar o curso
+CREATE POLICY "Teachers can update own courses" ON courses
+  FOR UPDATE USING (
+    teacher_id = auth.uid()::text OR public.is_admin()
+  );
+
+-- Somente o professor autor ou admin pode excluir o curso
+CREATE POLICY "Teachers can delete own courses" ON courses
+  FOR DELETE USING (
+    teacher_id = auth.uid()::text OR public.is_admin()
+  );
+
+-- ------------------------------------------------------------------------------
+-- Políticas para 'user_progress'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Users can read own progress" ON user_progress;
-CREATE POLICY "Users can read own progress" ON user_progress FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Users can manage own progress" ON user_progress;
-CREATE POLICY "Users can manage own progress" ON user_progress FOR ALL USING (true);
 
--- Políticas para platform_ratings
+CREATE POLICY "Users can read own progress" ON user_progress
+  FOR SELECT USING (
+    auth.uid()::text = user_id OR public.is_admin()
+  );
+
+CREATE POLICY "Users can manage own progress" ON user_progress
+  FOR ALL USING (
+    auth.uid()::text = user_id OR public.is_admin()
+  )
+  WITH CHECK (
+    auth.uid()::text = user_id OR public.is_admin()
+  );
+
+-- ------------------------------------------------------------------------------
+-- Políticas para 'platform_ratings'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Public can read platform ratings" ON platform_ratings;
-CREATE POLICY "Public can read platform ratings" ON platform_ratings FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Users can manage own platform rating" ON platform_ratings;
-CREATE POLICY "Users can manage own platform rating" ON platform_ratings FOR ALL USING (true);
 
--- Políticas para course_ratings
+CREATE POLICY "Public can read platform ratings" ON platform_ratings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can manage own platform rating" ON platform_ratings
+  FOR ALL USING (
+    auth.uid()::text = user_id OR public.is_admin()
+  )
+  WITH CHECK (
+    auth.uid()::text = user_id OR public.is_admin()
+  );
+
+-- ------------------------------------------------------------------------------
+-- Políticas para 'course_ratings'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Public can read course ratings" ON course_ratings;
-CREATE POLICY "Public can read course ratings" ON course_ratings FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Users can manage own course rating" ON course_ratings;
-CREATE POLICY "Users can manage own course rating" ON course_ratings FOR ALL USING (true);
 
--- Políticas para searches
+CREATE POLICY "Public can read course ratings" ON course_ratings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can manage own course rating" ON course_ratings
+  FOR ALL USING (
+    auth.uid()::text = user_id OR public.is_admin()
+  )
+  WITH CHECK (
+    auth.uid()::text = user_id OR public.is_admin()
+  );
+
+-- ------------------------------------------------------------------------------
+-- Políticas para 'searches'
+-- ------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Users can manage searches" ON searches;
-CREATE POLICY "Users can manage searches" ON searches FOR ALL USING (true);
+
+CREATE POLICY "Users can manage searches" ON searches
+  FOR ALL USING (
+    auth.uid()::text = user_id OR public.is_admin()
+  )
+  WITH CHECK (
+    auth.uid()::text = user_id OR public.is_admin()
+  );
 
 -- ==============================================================================
--- 8. SINCRONIZAÇÃO AUTOMÁTICA AUTH.USERS -> PUBLIC.USERS (TRIGGER & BACKFILL)
+-- 8. SINCRONIZAÇÃO AUTOMÁTICA AUTH.USERS -> PUBLIC.USERS (TRIGGER SEGURO)
 -- ==============================================================================
 
 -- Função executada automaticamente ao criar conta no Supabase Auth:
+-- Força 'student' no cadastro público, eliminando escalação de privilégios.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -206,10 +331,10 @@ BEGIN
     new.id,
     new.email,
     COALESCE(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
-    COALESCE(new.raw_user_meta_data->>'role', 'student'),
+    'student', -- Segurança: novos cadastros públicos são estritamente alunos
     1,
     0,
-    'Initiate',
+    'Iniciante',
     'Iniciante'
   )
   ON CONFLICT (id) DO UPDATE SET
@@ -232,10 +357,10 @@ SELECT
   id,
   email,
   COALESCE(raw_user_meta_data->>'username', split_part(email, '@', 1)),
-  COALESCE(raw_user_meta_data->>'role', 'student'),
+  'student',
   1,
   0,
-  'Initiate',
+  'Iniciante',
   'Iniciante'
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
