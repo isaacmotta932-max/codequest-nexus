@@ -7,6 +7,7 @@ import { getAllCourses } from '@/data/courses';
 import { MISSIONS } from '@/data/missions';
 import { ACHIEVEMENTS } from '@/data/achievements';
 import { useProgress } from '@/hooks/useProgress';
+import { getAvatarByUrlOrId } from '@/constants/pixelAvatars';
 
 type LessonType = 'pdf' | 'word' | 'video' | 'quiz';
 
@@ -608,12 +609,21 @@ export function Dashboard() {
     );
   }
 
+  const activeAvatar = getAvatarByUrlOrId(user.avatarUrl);
+  const { primary: avatarPrimary, secondary: avatarSecondary, glowRgb } = activeAvatar.themePalette;
+
   return (
     <div className="w-full max-w-[1200px] mx-auto px-4 py-5 md:p-8 text-white">
       {/* iOS Native Profile & Welcome Header */}
       <div className="flex items-center gap-3.5 md:gap-5 mb-6 md:mb-8">
         {user.avatarUrl && (
-          <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-[#0B1220] border-2 border-[#00E5FF]/40 shadow-[0_0_20px_rgba(0,229,255,0.2)] flex items-center justify-center p-1.5 shrink-0">
+          <div
+            className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-[#0B1220] border-2 flex items-center justify-center p-1.5 shrink-0 transition-all duration-300"
+            style={{
+              borderColor: `rgba(${glowRgb}, 0.55)`,
+              boxShadow: `0 0 22px rgba(${glowRgb}, 0.25)`,
+            }}
+          >
             <img
               src={user.avatarUrl}
               alt={user.username}
@@ -633,15 +643,29 @@ export function Dashboard() {
           </p>
 
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight m-0 mt-0.5 truncate">
-            Olá, <span className="text-[#00D4FF]">{user.username}</span>!
+            Olá,{' '}
+            <span
+              className="transition-colors duration-300"
+              style={{ color: avatarPrimary }}
+            >
+              {user.username}
+            </span>
+            !
           </h1>
 
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30">
+            <span
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-colors duration-300"
+              style={{
+                backgroundColor: `rgba(${glowRgb}, 0.14)`,
+                color: avatarPrimary,
+                borderColor: `rgba(${glowRgb}, 0.35)`,
+              }}
+            >
               Nível {levelData.level}
             </span>
             <span className="text-xs text-gray-400 truncate">
-              {user.title}
+              {user.title} • Insígnia: <strong style={{ color: avatarPrimary }}>{activeAvatar.name}</strong>
             </span>
           </div>
         </div>
@@ -650,15 +674,29 @@ export function Dashboard() {
       {/* iOS Widget Grid: XP Full Width on Mobile + 3 Compact Widgets, 4 cols on Desktop */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {/* XP Widget - Spans 2 cols on mobile for clean iOS look */}
-        <div className="col-span-2 lg:col-span-1 ios-glass rounded-2xl p-4 md:p-5 border border-[#00D4FF]/30 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between">
+        <div
+          className="col-span-2 lg:col-span-1 ios-glass rounded-2xl p-4 md:p-5 border shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between transition-colors duration-300"
+          style={{
+            borderColor: `rgba(${glowRgb}, 0.35)`,
+          }}
+        >
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-xs font-medium text-gray-400 m-0">XP Total</p>
-              <p className="text-2xl md:text-3xl font-extrabold text-[#00D4FF] m-0 mt-0.5 tracking-tight">
+              <p
+                className="text-2xl md:text-3xl font-extrabold m-0 mt-0.5 tracking-tight transition-colors duration-300"
+                style={{ color: avatarPrimary }}
+              >
                 {progress.xp.toLocaleString('pt-BR')}
               </p>
             </div>
-            <div className="w-11 h-11 rounded-2xl bg-[#00D4FF]/15 border border-[#00D4FF]/30 flex items-center justify-center text-xl">
+            <div
+              className="w-11 h-11 rounded-2xl border flex items-center justify-center text-xl transition-colors duration-300"
+              style={{
+                backgroundColor: `rgba(${glowRgb}, 0.14)`,
+                borderColor: `rgba(${glowRgb}, 0.35)`,
+              }}
+            >
               ⚡
             </div>
           </div>
@@ -669,7 +707,7 @@ export function Dashboard() {
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${levelData.percent}%`,
-                  background: 'linear-gradient(90deg, #00D4FF, #8B5CF6)',
+                  background: `linear-gradient(90deg, ${avatarPrimary}, ${avatarSecondary})`,
                 }}
               />
             </div>

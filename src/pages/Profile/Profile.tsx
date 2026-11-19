@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Lock, Crown, Check, Palette } from 'lucide-react';
 
 import { useAuthStore } from '@/stores/useAuthStore';
 import { dbGetUser, isSupabaseConfigured } from '@/lib/database';
 import { useProgress } from '@/hooks/useProgress';
 import { AvatarSelectorModal } from '@/components/ui/AvatarSelectorModal';
-import { PIXEL_AVATARS, type PixelAvatar } from '@/constants/pixelAvatars';
+import {
+  STARTER_PIXEL_AVATARS,
+  PLANETARY_PIXEL_AVATARS,
+  getAvatarByUrlOrId,
+  isAvatarUnlocked,
+  type PixelAvatar,
+} from '@/constants/pixelAvatars';
 
 interface ProfileUser {
   username: string;
@@ -212,14 +218,26 @@ export function Profile() {
 
   const xp = Math.max(0, progress.xp);
   const levelData = calculateLevelProgress(xp);
+  const completedLessons = progress.completedLessons || [];
+  const activeAvatar = getAvatarByUrlOrId(profile.avatarUrl);
+  const { primary: avatarPrimary, secondary: avatarSecondary, glowRgb } = activeAvatar.themePalette;
+
+  const unlockedPlanetaryCount = PLANETARY_PIXEL_AVATARS.filter(
+    (av) => isAvatarUnlocked(av, completedLessons).unlocked
+  ).length;
 
   return (
     <div className="w-full max-w-[1050px] mx-auto px-4 py-5 md:p-8 text-white">
       {/* iOS Native Profile Hero Card */}
-      <section className="ios-glass relative rounded-2xl p-5 md:p-8 overflow-hidden border border-[#00D4FF]/30 shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
+      <section
+        className="ios-glass relative rounded-2xl p-5 md:p-8 overflow-hidden border shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition-colors duration-300"
+        style={{
+          borderColor: `rgba(${glowRgb}, 0.35)`,
+        }}
+      >
         <div
-          className="absolute -right-16 -top-20 w-56 h-56 rounded-full pointer-events-none"
-          style={{ background: 'rgba(0, 212, 255, 0.08)', filter: 'blur(20px)' }}
+          className="absolute -right-16 -top-20 w-56 h-56 rounded-full pointer-events-none transition-colors duration-500"
+          style={{ background: `rgba(${glowRgb}, 0.12)`, filter: 'blur(24px)' }}
         />
 
         <div className="relative flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6 text-center sm:text-left">
@@ -227,13 +245,15 @@ export function Profile() {
             <div
               onClick={() => setIsAvatarModalOpen(true)}
               title="Clique para escolher seu avatar pixel art"
-              className="ios-press w-22 h-22 md:w-24 md:h-24 rounded-full flex items-center justify-center text-4xl font-bold overflow-hidden cursor-pointer border-2 border-[#00D4FF]/50 shadow-[0_0_30px_rgba(0,212,255,0.25)]"
+              className="ios-press w-22 h-22 md:w-24 md:h-24 rounded-full flex items-center justify-center text-4xl font-bold overflow-hidden cursor-pointer border-2 transition-all duration-300"
               style={{
                 width: 88,
                 height: 88,
+                borderColor: `rgba(${glowRgb}, 0.65)`,
+                boxShadow: `0 0 30px rgba(${glowRgb}, 0.3)`,
                 background: profile.avatarUrl
                   ? '#0B1220'
-                  : 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
+                  : `linear-gradient(135deg, ${avatarPrimary}, ${avatarSecondary})`,
                 padding: profile.avatarUrl ? 6 : 0,
               }}
             >
@@ -251,16 +271,23 @@ export function Profile() {
             <button
               type="button"
               onClick={() => setIsAvatarModalOpen(true)}
-              className="ios-press absolute -bottom-0.5 -right-0.5 bg-[#00E5FF] text-[#0A0E1A] rounded-full w-8 h-8 flex items-center justify-center border-2 border-[#0B1220] shadow-[0_0_12px_rgba(0,229,255,0.6)] cursor-pointer"
-              title="Escolher entre 10 ícones pixelados de programação"
+              className="ios-press absolute -bottom-0.5 -right-0.5 text-[#0A0E1A] rounded-full w-8 h-8 flex items-center justify-center border-2 border-[#0B1220] cursor-pointer transition-colors duration-300"
+              style={{
+                background: avatarPrimary,
+                boxShadow: `0 0 12px rgba(${glowRgb}, 0.65)`,
+              }}
+              title="Escolher entre 20 ícones pixelados de programação"
             >
               <Sparkles size={14} />
             </button>
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="text-[#00D4FF] text-[10px] md:text-[11px] tracking-[2.5px] font-bold uppercase">
-              CODEQUEST MEMBER
+            <div
+              className="text-[10px] md:text-[11px] tracking-[2.5px] font-bold uppercase transition-colors duration-300"
+              style={{ color: avatarPrimary }}
+            >
+              CODEQUEST MEMBER • TEMA: {activeAvatar.name.toUpperCase()}
             </div>
 
             <h1 className="text-2xl md:text-3xl font-extrabold m-0 mt-1 truncate">
@@ -275,48 +302,65 @@ export function Profile() {
               <Badge>{profile.title}</Badge>
               <Badge>{profile.className}</Badge>
               <Badge>Nível {levelData.level}</Badge>
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border"
+                style={{
+                  background: `rgba(${glowRgb}, 0.14)`,
+                  borderColor: `rgba(${glowRgb}, 0.4)`,
+                  color: avatarPrimary,
+                }}
+              >
+                <Palette size={12} /> Paleta Ativa
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 10 Opções de Ícones Pixelados de Programação */}
-      <section className="ios-glass rounded-2xl p-4 md:p-6 mt-4 md:mt-5 border border-[#00E5FF]/20">
+      {/* =====================================================================
+          SEÇÃO 1: 10 OPÇÕES INICIAIS (16-BIT) + TEMAS DINÂMICOS
+         ===================================================================== */}
+      <section
+        className="ios-glass rounded-2xl p-4 md:p-6 mt-4 md:mt-5 border transition-colors duration-300"
+        style={{ borderColor: `rgba(${glowRgb}, 0.25)` }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <div className="text-[#00D4FF] text-[10px] tracking-[2px] font-bold uppercase">
-              IDENTIDADE VISUAL 8-BIT
+            <div
+              className="text-[10px] tracking-[2px] font-bold uppercase"
+              style={{ color: avatarPrimary }}
+            >
+              IDENTIDADE VISUAL 16-BIT • TEMA ADAPTATIVO
             </div>
             <h2 className="text-base md:text-xl font-bold m-0 mt-0.5 text-white">
-              Insígnias de Programação em Pixel Art
+              Insígnias Base de Programação (10 Desbloqueadas)
             </h2>
             <p className="text-xs text-gray-400 m-0 mt-0.5">
-              Escolha seu avatar temático de desenvolvedor: 10 opções exclusivas.
+              Ao trocar de ícone, a paleta de cores da interface se adapta sutilmente às cores do seu avatar.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setIsAvatarModalOpen(true)}
-            className="ios-press inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[#0A0E1A] font-bold text-xs border-none cursor-pointer shrink-0 shadow-[0_0_15px_rgba(0,229,255,0.35)]"
+            className="ios-press inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[#0A0E1A] font-bold text-xs border-none cursor-pointer shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #00E5FF, #8B5CF6)',
+              background: `linear-gradient(135deg, ${avatarPrimary}, ${avatarSecondary})`,
+              boxShadow: `0 0 15px rgba(${glowRgb}, 0.35)`,
             }}
           >
-            <Sparkles size={14} /> Ver Catálogo Completo
+            <Sparkles size={14} /> Abrir Arsenal Completo (20)
           </button>
         </div>
 
-        {/* Horizontal scroll on mobile or compact 5-col grid */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-          {PIXEL_AVATARS.map((av) => {
-            const isSelected =
-              profile.avatarUrl === av.dataUrl || profile.avatarUrl === av.id;
+          {STARTER_PIXEL_AVATARS.map((av) => {
+            const isSelected = activeAvatar.id === av.id;
             return (
               <button
                 key={av.id}
                 type="button"
                 onClick={() => handleSelectAvatar(av)}
-                className="ios-press flex flex-col items-center p-3 rounded-xl border cursor-pointer transition-all"
+                className="ios-press relative flex flex-col items-center p-3 rounded-xl border cursor-pointer transition-all"
                 style={{
                   borderColor: isSelected
                     ? av.accentColor
@@ -325,11 +369,19 @@ export function Profile() {
                     ? `0 0 16px ${av.accentColor}40`
                     : 'none',
                   background: isSelected
-                    ? 'rgba(255, 255, 255, 0.08)'
+                    ? `${av.accentColor}15`
                     : 'rgba(10, 16, 32, 0.7)',
                 }}
                 title={`${av.name} (${av.category}) - ${av.description}`}
               >
+                {isSelected && (
+                  <span
+                    className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center text-black"
+                    style={{ background: av.accentColor }}
+                  >
+                    <Check size={10} strokeWidth={3} />
+                  </span>
+                )}
                 <div className="w-11 h-11 flex items-center justify-center mb-1.5">
                   <img
                     src={av.dataUrl}
@@ -350,6 +402,151 @@ export function Profile() {
                 >
                   {av.category}
                 </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* =====================================================================
+          SEÇÃO 2: 10 NOVOS GUARDIÕES PLANETÁRIOS (24-BIT HIGH-DETAIL)
+         ===================================================================== */}
+      <section className="ios-glass rounded-2xl p-4 md:p-6 mt-4 md:mt-5 border border-[#FFD700]/25">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <div className="text-[#FFD700] text-[10px] tracking-[2px] font-bold uppercase flex items-center gap-1.5">
+              <Crown size={12} /> COLEÇÃO DE ELITE 24-BIT • DESBLOQUEIO POR PLANETAS
+            </div>
+            <h2 className="text-base md:text-xl font-bold m-0 mt-0.5 text-white">
+              Guardiões Planetários ({unlockedPlanetaryCount}/10 Desbloqueados)
+            </h2>
+            <p className="text-xs text-gray-400 m-0 mt-0.5">
+              Ícones ultra-detalhados de 24x24 pixels desbloqueados conforme você completa 100% das aulas de cada planeta na Galáxia!
+            </p>
+          </div>
+
+          <span className="px-3 py-1.5 rounded-xl bg-[#FFD700]/15 border border-[#FFD700]/35 text-[#FFD700] text-xs font-extrabold shrink-0 self-start sm:self-center">
+            🏆 {unlockedPlanetaryCount} / 10 Conquistados
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          {PLANETARY_PIXEL_AVATARS.map((av) => {
+            const isSelected = activeAvatar.id === av.id;
+            const unlockInfo = isAvatarUnlocked(av, completedLessons);
+            const pct =
+              unlockInfo.totalInPlanet > 0
+                ? Math.round((unlockInfo.completedInPlanet / unlockInfo.totalInPlanet) * 100)
+                : 0;
+
+            return (
+              <button
+                key={av.id}
+                type="button"
+                onClick={() => {
+                  if (unlockInfo.unlocked) {
+                    void handleSelectAvatar(av);
+                  } else {
+                    setIsAvatarModalOpen(true);
+                  }
+                }}
+                className="ios-press relative flex flex-col items-center justify-between p-3 rounded-xl border cursor-pointer transition-all text-center"
+                style={{
+                  borderColor: isSelected
+                    ? av.accentColor
+                    : unlockInfo.unlocked
+                      ? `${av.accentColor}50`
+                      : 'rgba(255, 255, 255, 0.07)',
+                  boxShadow: isSelected
+                    ? `0 0 18px ${av.accentColor}45`
+                    : 'none',
+                  background: isSelected
+                    ? `${av.accentColor}18`
+                    : unlockInfo.unlocked
+                      ? 'rgba(15, 23, 42, 0.85)'
+                      : 'rgba(10, 14, 26, 0.55)',
+                }}
+                title={`${av.name} — ${unlockInfo.progressText}`}
+              >
+                {/* Badge HD 24-Bit */}
+                <span
+                  className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase"
+                  style={{
+                    background: `${av.accentColor}22`,
+                    color: av.accentColor,
+                  }}
+                >
+                  24-BIT
+                </span>
+
+                {/* Status: Desbloqueado ou Cadeado */}
+                {unlockInfo.unlocked ? (
+                  isSelected ? (
+                    <span
+                      className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center text-black"
+                      style={{ background: av.accentColor }}
+                    >
+                      <Check size={10} strokeWidth={3} />
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 right-2 text-[10px] text-[#00FF88] font-bold">
+                      ✓
+                    </span>
+                  )
+                ) : (
+                  <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/70 border border-white/15 flex items-center justify-center text-gray-400">
+                    <Lock size={10} />
+                  </span>
+                )}
+
+                <div
+                  className="w-13 h-13 flex items-center justify-center mt-4 mb-2 transition-transform"
+                  style={{
+                    width: 52,
+                    height: 52,
+                    opacity: unlockInfo.unlocked ? 1 : 0.4,
+                    filter: unlockInfo.unlocked ? 'none' : 'grayscale(65%)',
+                  }}
+                >
+                  <img
+                    src={av.dataUrl}
+                    alt={av.name}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                </div>
+
+                <div className="w-full">
+                  <span className="block text-[11px] font-bold text-gray-100 truncate w-full">
+                    {av.name}
+                  </span>
+
+                  <span
+                    className="inline-block text-[9px] font-mono px-1.5 py-0.5 rounded mt-1"
+                    style={{
+                      color: av.accentColor,
+                      background: `${av.accentColor}18`,
+                    }}
+                  >
+                    {av.category}
+                  </span>
+
+                  {/* Mini barra de progresso do planeta */}
+                  <div className="mt-2 w-full bg-[#1F2937] h-1 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${pct}%`,
+                        background: unlockInfo.unlocked ? '#00FF88' : av.accentColor,
+                      }}
+                    />
+                  </div>
+                  <span className="block text-[9px] text-gray-400 mt-1 truncate">
+                    {unlockInfo.unlocked
+                      ? '★ Desbloqueado'
+                      : `${unlockInfo.completedInPlanet}/${unlockInfo.totalInPlanet} aulas`}
+                  </span>
+                </div>
               </button>
             );
           })}
@@ -421,6 +618,7 @@ export function Profile() {
         isOpen={isAvatarModalOpen}
         onClose={() => setIsAvatarModalOpen(false)}
         currentAvatarUrl={profile.avatarUrl}
+        completedLessons={completedLessons}
         onSelect={handleSelectAvatar}
       />
     </div>

@@ -12,10 +12,14 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUIStore } from '@/stores/useUIStore';
+import { getAvatarByUrlOrId } from '@/constants/pixelAvatars';
 
 export function Sidebar() {
   const { user } = useAuthStore();
   const { sidebarOpen, closeSidebar } = useUIStore();
+
+  const activeAvatar = getAvatarByUrlOrId(user?.avatarUrl);
+  const { primary, secondary, surfaceTint, glowRgb } = activeAvatar.themePalette;
 
   const items = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -39,15 +43,26 @@ export function Sidebar() {
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-screen w-[260px] max-w-[85vw] bg-[#0A1020] border-r border-[#1F2937] p-5 text-white flex flex-col justify-between overflow-y-auto transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-screen w-[260px] max-w-[85vw] border-r p-5 text-white flex flex-col justify-between overflow-y-auto transition-all duration-300 ease-in-out md:translate-x-0 ${
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
+        style={{
+          backgroundColor: '#0A1020',
+          backgroundImage: `linear-gradient(180deg, rgba(${glowRgb}, 0.07) 0%, transparent 40%)`,
+          borderColor: `rgba(${glowRgb}, 0.16)`,
+        }}
       >
         <div>
           {/* Header with Brand Logo & Mobile Close (X) button */}
           <div className="flex items-center justify-between mb-6 pb-2 border-b border-white/5">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6] flex items-center justify-center shadow-[0_0_12px_rgba(0,212,255,0.4)]">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300"
+                style={{
+                  background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+                  boxShadow: `0 0 12px rgba(${glowRgb}, 0.4)`,
+                }}
+              >
                 <Zap size={20} color="white" fill="white" />
               </div>
 
@@ -55,7 +70,10 @@ export function Sidebar() {
                 <h1 className="text-sm font-bold tracking-wider leading-none m-0 text-white">
                   CODEQUEST
                 </h1>
-                <p className="text-[10px] text-[#00D4FF] tracking-[2px] font-semibold leading-none mt-1">
+                <p
+                  className="text-[10px] tracking-[2px] font-semibold leading-none mt-1 transition-colors duration-300"
+                  style={{ color: primary }}
+                >
                   NEXUS
                 </p>
               </div>
@@ -77,15 +95,21 @@ export function Sidebar() {
             <NavLink
               to="/profile"
               onClick={closeSidebar}
-              className="block no-underline text-inherit p-3.5 bg-[#111827] rounded-xl mb-5 text-center border border-[#00D4FF]/20 hover:border-[#00D4FF]/60 hover:scale-[1.02] transition-all cursor-pointer shadow-lg"
+              className="block no-underline text-inherit p-3.5 rounded-xl mb-5 text-center border hover:scale-[1.02] transition-all cursor-pointer shadow-lg"
+              style={{
+                backgroundColor: surfaceTint,
+                borderColor: `rgba(${glowRgb}, 0.3)`,
+              }}
               title="Ver perfil e alterar avatar pixel art"
             >
               <div
-                className="w-14 h-14 rounded-full mx-auto mb-2 flex items-center justify-center text-lg font-bold overflow-hidden border-2 border-[#00D4FF]/50 shadow-[0_0_15px_rgba(0,212,255,0.25)]"
+                className="w-14 h-14 rounded-full mx-auto mb-2 flex items-center justify-center text-lg font-bold overflow-hidden border-2"
                 style={{
                   background: user.avatarUrl
                     ? '#0B1220'
-                    : 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
+                    : `linear-gradient(135deg, ${primary}, ${secondary})`,
+                  borderColor: `rgba(${glowRgb}, 0.6)`,
+                  boxShadow: `0 0 15px rgba(${glowRgb}, 0.25)`,
                   padding: user.avatarUrl ? '4px' : '0',
                 }}
               >
@@ -101,8 +125,15 @@ export function Sidebar() {
                 )}
               </div>
 
-              <p className="text-sm font-bold m-0 mb-1 text-white truncate px-1">
+              <p className="text-sm font-bold m-0 mb-0.5 text-white truncate px-1">
                 {user.username}
+              </p>
+
+              <p
+                className="text-[10px] font-mono m-0 mb-0.5 truncate"
+                style={{ color: primary }}
+              >
+                {activeAvatar.name}
               </p>
 
               <p className="text-xs text-gray-400 m-0">
@@ -121,10 +152,15 @@ export function Sidebar() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm transition-all ${
                     isActive
-                      ? 'bg-[#1F2937] text-[#00D4FF] font-bold border-l-4 border-[#00D4FF] shadow-[inset_0_0_10px_rgba(0,212,255,0.1)]'
+                      ? 'bg-[#1F2937] font-bold border-l-4'
                       : 'text-gray-400 hover:text-white hover:bg-white/5 border-l-4 border-transparent'
                   }`
                 }
+                style={({ isActive }) => ({
+                  color: isActive ? primary : undefined,
+                  borderLeftColor: isActive ? primary : 'transparent',
+                  boxShadow: isActive ? `inset 0 0 12px rgba(${glowRgb}, 0.12)` : undefined,
+                })}
               >
                 <item.icon size={18} />
                 <span>{item.label}</span>

@@ -17,7 +17,7 @@
   } from 'lucide-react';
 
   import { useAuthStore } from '@/stores/useAuthStore';
-  import { PIXEL_AVATARS } from '@/constants/pixelAvatars';
+  import { STARTER_PIXEL_AVATARS as PIXEL_AVATARS } from '@/constants/pixelAvatars';
 
   type Role = 'student' | 'teacher';
 

@@ -1,16 +1,37 @@
+import { useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Menu, Zap } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { useUIStore } from '@/stores/useUIStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { getAvatarByUrlOrId } from '@/constants/pixelAvatars';
 
 export function AppShell() {
   const { toggleSidebar } = useUIStore();
   const { user } = useAuthStore();
 
+  const activeAvatar = getAvatarByUrlOrId(user?.avatarUrl);
+  const { primary, secondary, bgTint, surfaceTint, glowRgb } = activeAvatar.themePalette;
+
+  // Aplica a paleta sutil do avatar ativo nas variáveis CSS globais da interface
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--avatar-accent', primary);
+    root.style.setProperty('--avatar-secondary', secondary);
+    root.style.setProperty('--avatar-bg-tint', bgTint);
+    root.style.setProperty('--avatar-surface-tint', surfaceTint);
+    root.style.setProperty('--avatar-glow-rgb', glowRgb);
+  }, [primary, secondary, bgTint, surfaceTint, glowRgb]);
+
   return (
-    <div className="min-h-screen bg-[#050816] text-white flex flex-col md:flex-row antialiased overflow-x-hidden">
+    <div
+      className="relative min-h-screen text-white flex flex-col md:flex-row antialiased overflow-x-hidden transition-colors duration-500"
+      style={{
+        backgroundColor: bgTint,
+        backgroundImage: `radial-gradient(circle at 85% 0%, rgba(${glowRgb}, 0.11) 0%, transparent 45%), radial-gradient(circle at 10% 90%, rgba(${glowRgb}, 0.06) 0%, transparent 50%)`,
+      }}
+    >
       {/* iOS Native Top Navigation Bar (Mobile only) */}
       <header className="ios-header sticky top-0 z-30 flex min-h-[54px] w-full items-center justify-between px-4 md:hidden">
         <button
@@ -23,20 +44,35 @@ export function AppShell() {
         </button>
 
         <Link to="/dashboard" className="ios-press flex items-center gap-2 no-underline">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6] flex items-center justify-center shadow-[0_0_12px_rgba(0,212,255,0.45)]">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300"
+            style={{
+              background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+              boxShadow: `0 0 12px rgba(${glowRgb}, 0.45)`,
+            }}
+          >
             <Zap size={15} color="white" fill="white" />
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-bold text-[13px] tracking-wider text-white">CODEQUEST</span>
-            <span className="text-[9px] font-semibold tracking-[0.22em] text-[#00D4FF]">NEXUS</span>
+            <span
+              className="text-[9px] font-semibold tracking-[0.22em] transition-colors duration-300"
+              style={{ color: primary }}
+            >
+              NEXUS
+            </span>
           </div>
         </Link>
 
         {user ? (
           <Link
             to="/profile"
-            className="ios-press flex items-center justify-center p-0.5 rounded-full border border-[#00D4FF]/40 hover:border-[#00D4FF] shadow-[0_0_10px_rgba(0,212,255,0.2)] transition-all"
-            title="Meu Perfil"
+            className="ios-press flex items-center justify-center p-0.5 rounded-full border transition-all duration-300"
+            style={{
+              borderColor: `rgba(${glowRgb}, 0.55)`,
+              boxShadow: `0 0 10px rgba(${glowRgb}, 0.25)`,
+            }}
+            title={`Meu Perfil • Tema: ${activeAvatar.name}`}
           >
             <div className="w-8 h-8 rounded-full overflow-hidden bg-[#0B1220] flex items-center justify-center text-xs font-bold text-white">
               {user.avatarUrl ? (
