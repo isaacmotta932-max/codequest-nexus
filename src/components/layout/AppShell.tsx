@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { Menu, Zap } from 'lucide-react';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Menu, Zap, LogOut } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { useUIStore } from '@/stores/useUIStore';
@@ -9,10 +9,19 @@ import { getAvatarByUrlOrId, applyAvatarThemeToDOM } from '@/constants/pixelAvat
 
 export function AppShell() {
   const { toggleSidebar } = useUIStore();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
 
   const activeAvatar = getAvatarByUrlOrId(user?.avatarUrl);
   const { primary, secondary, bgTint, glowRgb } = activeAvatar.themePalette;
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/', { replace: true });
+    }
+  };
 
   // Aplica sincronamente antes da pintura do navegador (zero atraso visual)
   useLayoutEffect(() => {
@@ -60,28 +69,40 @@ export function AppShell() {
         </Link>
 
         {user ? (
-          <Link
-            to="/profile"
-            className="ios-press flex items-center justify-center p-0.5 rounded-full border transition-all duration-300"
-            style={{
-              borderColor: `rgba(${glowRgb}, 0.55)`,
-              boxShadow: `0 0 10px rgba(${glowRgb}, 0.25)`,
-            }}
-            title={`Meu Perfil • Tema: ${activeAvatar.name}`}
-          >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#0B1220] flex items-center justify-center text-xs font-bold text-white">
-              {user.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt={user.username}
-                  className="w-full h-full object-contain"
-                  style={{ imageRendering: 'pixelated' }}
-                />
-              ) : (
-                (user.username?.[0] || 'U').toUpperCase()
-              )}
-            </div>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/profile"
+              className="ios-press flex items-center justify-center p-0.5 rounded-full border transition-all duration-300"
+              style={{
+                borderColor: `rgba(${glowRgb}, 0.55)`,
+                boxShadow: `0 0 10px rgba(${glowRgb}, 0.25)`,
+              }}
+              title={`Meu Perfil • Tema: ${activeAvatar.name}`}
+            >
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-[#0B1220] flex items-center justify-center text-xs font-bold text-white">
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.username}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                ) : (
+                  (user.username?.[0] || 'U').toUpperCase()
+                )}
+              </div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="ios-press flex h-9 w-9 items-center justify-center rounded-full bg-red-500/12 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
+              title="Sair da conta"
+              aria-label="Sair da conta"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         ) : (
           <div className="w-10" />
         )}

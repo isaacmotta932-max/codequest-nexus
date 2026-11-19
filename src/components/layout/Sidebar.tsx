@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home,
   Globe,
@@ -9,17 +9,28 @@ import {
   MessageCircle,
   Zap,
   X,
+  LogOut,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUIStore } from '@/stores/useUIStore';
 import { getAvatarByUrlOrId } from '@/constants/pixelAvatars';
 
 export function Sidebar() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { sidebarOpen, closeSidebar } = useUIStore();
+  const navigate = useNavigate();
 
   const activeAvatar = getAvatarByUrlOrId(user?.avatarUrl);
   const { primary, secondary, surfaceTint, glowRgb } = activeAvatar.themePalette;
+
+  const handleLogout = async () => {
+    closeSidebar();
+    try {
+      await logout();
+    } finally {
+      navigate('/', { replace: true });
+    }
+  };
 
   const items = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -169,9 +180,21 @@ export function Sidebar() {
           </nav>
         </div>
 
-        {/* Footer info in drawer */}
-        <div className="pt-4 border-t border-white/5 text-[11px] text-gray-500 text-center">
-          CodeQuest Nexus &copy; {new Date().getFullYear()}
+        {/* Footer with Logout button & copyright */}
+        <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+          {user && (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="ios-press w-full flex items-center justify-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 transition-colors cursor-pointer"
+            >
+              <LogOut size={16} />
+              <span>Sair da conta</span>
+            </button>
+          )}
+          <div className="text-[11px] text-gray-500 text-center">
+            CodeQuest Nexus &copy; {new Date().getFullYear()}
+          </div>
         </div>
       </aside>
     </>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { Sparkles, Lock, Crown, Check, Palette } from 'lucide-react';
+import { Sparkles, Lock, Crown, Check, Palette, LogOut } from 'lucide-react';
 
 import { useAuthStore } from '@/stores/useAuthStore';
 import { dbGetUser, isSupabaseConfigured } from '@/lib/database';
@@ -119,8 +120,17 @@ function calculateLevelProgress(xp: number) {
 }
 
 export function Profile() {
-  const { user, updateAvatar } = useAuthStore();
+  const { user, updateAvatar, logout } = useAuthStore();
+  const navigate = useNavigate();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/', { replace: true });
+    }
+  };
 
   /*
    * O progresso pertence exclusivamente
@@ -616,6 +626,18 @@ export function Profile() {
           title="Título"
           value={profile.title}
         />
+      </section>
+
+      {/* Botão de Sair da Conta estilo iOS Settings Row */}
+      <section className="mt-5 md:mt-6">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="ios-press w-full py-3.5 px-5 rounded-2xl bg-red-500/12 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold text-sm flex items-center justify-center gap-2.5 cursor-pointer transition-colors"
+        >
+          <LogOut size={17} />
+          <span>Sair da Conta</span>
+        </button>
       </section>
 
       <AvatarSelectorModal
