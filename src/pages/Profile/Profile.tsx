@@ -10,6 +10,7 @@ import {
   STARTER_PIXEL_AVATARS,
   PLANETARY_PIXEL_AVATARS,
   getAvatarByUrlOrId,
+  applyAvatarThemeToDOM,
   isAvatarUnlocked,
   type PixelAvatar,
 } from '@/constants/pixelAvatars';
@@ -142,18 +143,20 @@ export function Profile() {
     null
   );
 
-  const handleSelectAvatar = async (avatar: PixelAvatar) => {
-    await updateAvatar(avatar.dataUrl);
+  const handleSelectAvatar = (avatar: PixelAvatar) => {
+    // 1. Atualiza imediatamente o estado local e o DOM (zero espera de rede!)
+    applyAvatarThemeToDOM(avatar.dataUrl);
     setFirebaseProfile((prev) =>
       prev ? { ...prev, avatarUrl: avatar.dataUrl } : prev
     );
+    // 2. Persiste no Zustand + Supabase em background
+    void updateAvatar(avatar.dataUrl);
   };
 
   /*
    * O documento users/{uid} é usado somente
    * para os dados cadastrais do perfil.
-   *
-   * XP NÃO é mais lido daqui.
+   * Dependemos apenas de user?.id para não re-buscar o banco antigo quando o avatar muda!
    */
   useEffect(() => {
     let cancelled = false;
@@ -167,10 +170,11 @@ export function Profile() {
       .then((profileData) => {
         if (cancelled) return;
         if (profileData) {
+          const latestUser = useAuthStore.getState().user;
           setFirebaseProfile({
-            username: profileData.username || user.username,
-            email: profileData.email || user.email,
-            avatarUrl: profileData.avatarUrl || user.avatarUrl || '',
+            username: profileData.username || latestUser?.username || user.username,
+            email: profileData.email || latestUser?.email || user.email,
+            avatarUrl: latestUser?.avatarUrl || profileData.avatarUrl || user.avatarUrl || '',
             currentStreak: profileData.currentStreak ?? user.currentStreak,
             longestStreak: profileData.longestStreak ?? user.longestStreak,
             className: profileData.className || user.className,
@@ -186,7 +190,7 @@ export function Profile() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user?.id]);
 
   if (!user) {
     return (
@@ -204,17 +208,17 @@ export function Profile() {
     );
   }
 
-  const profile: ProfileUser =
-    firebaseProfile || {
-      username: user.username,
-      email: user.email,
-      avatarUrl: user.avatarUrl || '',
-      currentStreak: user.currentStreak,
-      longestStreak: user.longestStreak,
-      className: user.className,
-      title: user.title,
-      joinedAt: normalizeDate(user.joinedAt),
-    };
+  const profile: ProfileUser = {
+    username: firebaseProfile?.username || user.username,
+    email: firebaseProfile?.email || user.email,
+    // Sempre prioriza user.avatarUrl do Zustand para refletir mudanças em 0ms!
+    avatarUrl: user.avatarUrl || firebaseProfile?.avatarUrl || '',
+    currentStreak: firebaseProfile?.currentStreak ?? user.currentStreak,
+    longestStreak: firebaseProfile?.longestStreak ?? user.longestStreak,
+    className: firebaseProfile?.className || user.className,
+    title: firebaseProfile?.title || user.title,
+    joinedAt: firebaseProfile?.joinedAt || normalizeDate(user.joinedAt),
+  };
 
   const xp = Math.max(0, progress.xp);
   const levelData = calculateLevelProgress(xp);

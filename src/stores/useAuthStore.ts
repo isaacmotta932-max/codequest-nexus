@@ -14,6 +14,7 @@ import {
 import {
   resolveAvatarUrl,
   normalizeAvatarId,
+  applyAvatarThemeToDOM,
   DEFAULT_PIXEL_AVATAR,
 } from '@/constants/pixelAvatars';
 
@@ -424,37 +425,33 @@ export const useAuthStore = create<AuthState>()(
         const resolved = resolveAvatarUrl(avatarUrl);
         const shortId = normalizeAvatarId(avatarUrl);
 
+        // 1. Aplica o tema IMEDIATAMENTE (0ms) no DOM e no Zustand
+        applyAvatarThemeToDOM(resolved);
         const updatedUser = { ...currentUser, avatarUrl: resolved };
         set({ user: updatedUser });
 
-        // 1. Salva no cache persistente por ID e e-mail (sobrevive ao logout)
+        // 2. Salva no cache persistente local (instantâneo)
         setCachedAvatar(resolved, currentUser.id, currentUser.email);
 
+        // 3. Sincroniza em segundo plano com o Supabase (em paralelo, sem travar a UI!)
         if (isSupabaseConfigured && currentUser.id) {
-          // 2. Salva nos metadados do Supabase Auth (sempre persiste na sessão da conta)
-          try {
-            await supabase.auth.updateUser({
-              data: {
-                avatar_id: shortId,
-                avatar_url: shortId,
-              },
-            });
-          } catch (e) {
-            console.error('Erro ao salvar avatar no Auth metadata:', e);
-          }
-
-          // 3. Salva na tabela users passando os campos completos para funcionar tanto em update quanto upsert
-          try {
-            await dbSaveUser({
+          void Promise.all([
+            supabase.auth
+              .updateUser({
+                data: {
+                  avatar_id: shortId,
+                  avatar_url: shortId,
+                },
+              })
+              .catch((e) => console.error('Erro ao salvar avatar no Auth metadata:', e)),
+            dbSaveUser({
               id: currentUser.id,
               email: currentUser.email,
               username: currentUser.username,
               role: currentUser.role,
               avatarUrl: shortId,
-            });
-          } catch (e) {
-            console.error('Erro ao salvar avatar no Supabase:', e);
-          }
+            }).catch((e) => console.error('Erro ao salvar avatar no Supabase:', e)),
+          ]);
         }
       },
 

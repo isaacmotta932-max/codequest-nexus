@@ -4,6 +4,7 @@ import {
   PIXEL_AVATARS,
   STARTER_PIXEL_AVATARS,
   PLANETARY_PIXEL_AVATARS,
+  applyAvatarThemeToDOM,
   isAvatarUnlocked,
   type PixelAvatar,
 } from '@/constants/pixelAvatars';
@@ -31,8 +32,6 @@ export function AvatarSelectorModal({
   });
 
   const [tab, setTab] = useState<'all' | 'starter' | 'planetary'>('all');
-  const [saving, setSaving] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
 
   if (!isOpen) return null;
 
@@ -51,19 +50,11 @@ export function AvatarSelectorModal({
     (av) => isAvatarUnlocked(av, completedLessons).unlocked
   ).length;
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     if (!activeUnlockInfo.unlocked) return;
-    try {
-      setSaving(true);
-      await onSelect(activeAvatar);
-      setSavedSuccess(true);
-      setTimeout(() => {
-        setSavedSuccess(false);
-        onClose();
-      }, 650);
-    } finally {
-      setSaving(false);
-    }
+    applyAvatarThemeToDOM(activeAvatar.dataUrl);
+    void onSelect(activeAvatar);
+    onClose();
   };
 
   return (
@@ -347,25 +338,14 @@ export function AvatarSelectorModal({
           {activeUnlockInfo.unlocked ? (
             <button
               type="button"
-              disabled={saving || savedSuccess}
               onClick={handleConfirm}
-              className="ios-press px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold uppercase tracking-wider text-black transition-all duration-200 flex items-center gap-2 shadow-lg disabled:opacity-50 cursor-pointer border-none"
+              className="ios-press px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold uppercase tracking-wider text-black transition-all duration-150 flex items-center gap-2 shadow-lg cursor-pointer border-none"
               style={{
                 background: `linear-gradient(135deg, ${activeAvatar.accentColor}, ${activeAvatar.secondaryColor})`,
                 boxShadow: `0 0 20px ${activeAvatar.accentColor}50`,
               }}
             >
-              {savedSuccess ? (
-                <>
-                  <Check className="h-4 w-4" /> Tema & Avatar Aplicados!
-                </>
-              ) : saving ? (
-                'Aplicando...'
-              ) : (
-                <>
-                  <Check className="h-4 w-4" /> Equipar Insígnia & Tema
-                </>
-              )}
+              <Check className="h-4 w-4" /> Equipar Insígnia & Tema
             </button>
           ) : (
             <div className="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-gray-400 flex items-center gap-1.5">

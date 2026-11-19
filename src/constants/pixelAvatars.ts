@@ -1034,6 +1034,23 @@ export function getAvatarByUrlOrId(avatarUrlOrId?: string | null): PixelAvatar {
 }
 
 /**
+ * Aplica imediatamente (de forma síncrona, zero delay) a paleta do avatar nas variáveis CSS do documento.
+ */
+export function applyAvatarThemeToDOM(avatarUrlOrId?: string | null): PixelAvatar {
+  const avatar = getAvatarByUrlOrId(avatarUrlOrId);
+  if (typeof document !== 'undefined') {
+    const root = document.documentElement;
+    const { primary, secondary, bgTint, surfaceTint, glowRgb } = avatar.themePalette;
+    root.style.setProperty('--avatar-accent', primary);
+    root.style.setProperty('--avatar-secondary', secondary);
+    root.style.setProperty('--avatar-bg-tint', bgTint);
+    root.style.setProperty('--avatar-surface-tint', surfaceTint);
+    root.style.setProperty('--avatar-glow-rgb', glowRgb);
+  }
+  return avatar;
+}
+
+/**
  * Retorna o dataUrl renderizável a partir de um ID ('pixel-hacker') ou dataUrl.
  */
 export function resolveAvatarUrl(avatarUrlOrId?: string | null): string {

@@ -1,32 +1,27 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Menu, Zap } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { useUIStore } from '@/stores/useUIStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { getAvatarByUrlOrId } from '@/constants/pixelAvatars';
+import { getAvatarByUrlOrId, applyAvatarThemeToDOM } from '@/constants/pixelAvatars';
 
 export function AppShell() {
   const { toggleSidebar } = useUIStore();
   const { user } = useAuthStore();
 
   const activeAvatar = getAvatarByUrlOrId(user?.avatarUrl);
-  const { primary, secondary, bgTint, surfaceTint, glowRgb } = activeAvatar.themePalette;
+  const { primary, secondary, bgTint, glowRgb } = activeAvatar.themePalette;
 
-  // Aplica a paleta sutil do avatar ativo nas variáveis CSS globais da interface
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--avatar-accent', primary);
-    root.style.setProperty('--avatar-secondary', secondary);
-    root.style.setProperty('--avatar-bg-tint', bgTint);
-    root.style.setProperty('--avatar-surface-tint', surfaceTint);
-    root.style.setProperty('--avatar-glow-rgb', glowRgb);
-  }, [primary, secondary, bgTint, surfaceTint, glowRgb]);
+  // Aplica sincronamente antes da pintura do navegador (zero atraso visual)
+  useLayoutEffect(() => {
+    applyAvatarThemeToDOM(user?.avatarUrl);
+  }, [user?.avatarUrl]);
 
   return (
     <div
-      className="relative min-h-screen text-white flex flex-col md:flex-row antialiased overflow-x-hidden transition-colors duration-500"
+      className="relative min-h-screen text-white flex flex-col md:flex-row antialiased overflow-x-hidden transition-colors duration-150"
       style={{
         backgroundColor: bgTint,
         backgroundImage: `radial-gradient(circle at 85% 0%, rgba(${glowRgb}, 0.11) 0%, transparent 45%), radial-gradient(circle at 10% 90%, rgba(${glowRgb}, 0.06) 0%, transparent 50%)`,
