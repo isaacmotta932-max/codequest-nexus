@@ -17,7 +17,6 @@ import {
   Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { ParticleBackground } from '@/components/effects/ParticleBackground';
 import { COURSES } from '@/data/courses';
 import { dbGetPlatformStats, PlatformStats } from '@/lib/database';
@@ -143,32 +142,34 @@ export function Landing() {
       {/* =====================================================================
           NAVBAR ESTILO iOS TRANSLÚCIDA
          ===================================================================== */}
-      <nav className="sticky top-0 z-30 border-b border-white/10 bg-[#070C1E]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-15 max-w-6xl items-center justify-between px-4 py-3 md:px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6] shadow-[0_0_15px_rgba(0,212,255,0.4)]">
-              <Zap className="h-5 w-5 text-white" fill="white" />
+      <nav className="sticky top-0 z-30 border-b border-white/10 bg-[#070C1E]/85 backdrop-blur-2xl">
+        <div className="mx-auto flex h-15 max-w-6xl items-center justify-between px-3.5 py-2.5 sm:px-6 gap-2">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6] shadow-[0_0_14px_rgba(0,212,255,0.4)]">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="white" />
             </div>
             <div>
-              <h1 className="font-display text-sm md:text-base font-black leading-none tracking-wider">
+              <h1 className="font-display text-xs sm:text-base font-black leading-none tracking-wider m-0">
                 CODEQUEST
               </h1>
-              <p className="font-display text-[9px] font-bold tracking-[0.28em] text-[#00D4FF] mt-0.5">
+              <p className="font-display text-[8px] sm:text-[9px] font-bold tracking-[0.28em] text-[#00D4FF] m-0 mt-0.5">
                 NEXUS
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link to="/auth/login" className="no-underline">
-              <Button variant="ghost" size="sm">
-                Entrar
-              </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/auth/login"
+              className="ios-press no-underline px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white whitespace-nowrap transition-colors"
+            >
+              Entrar
             </Link>
-            <Link to="/auth/register" className="no-underline">
-              <Button variant="primary" size="sm" glow>
-                Começar grátis
-              </Button>
+            <Link
+              to="/auth/register"
+              className="ios-press no-underline px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-[#050816] text-xs sm:text-sm font-extrabold whitespace-nowrap shadow-[0_4px_15px_rgba(0,212,255,0.35)] border border-white/25"
+            >
+              Começar grátis
             </Link>
           </div>
         </div>
@@ -177,24 +178,24 @@ export function Landing() {
       {/* =====================================================================
           HERO SECTION — LIMPA, FOCADA E RESPONSIVA NO CELULAR
          ===================================================================== */}
-      <section className="relative z-10 px-4 pt-10 pb-14 md:pt-16 md:pb-20 md:px-6">
+      <section className="relative z-10 px-4 pt-9 pb-12 md:pt-16 md:pb-20 md:px-6">
         <div className="mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Badge rarity="legendary" variant="glass" size="md" className="mb-5">
-              <Star className="h-3 w-3" />
-              ACADEMIA GAMIFICADA DE PROGRAMAÇÃO
-            </Badge>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFD700]/10 border border-[#FFD700]/35 text-[#FFD700] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider mb-5 shadow-[0_0_20px_rgba(255,215,0,0.12)]">
+              <Star className="h-3.5 w-3.5 fill-[#FFD700] shrink-0" />
+              <span>Academia Gamificada de Programação</span>
+            </div>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="font-display text-3xl sm:text-5xl md:text-6xl font-black leading-[1.12] tracking-tight"
+            className="font-display text-3xl sm:text-5xl md:text-6xl font-black leading-[1.14] tracking-tight m-0"
           >
             Aprenda a programar
             <br />
@@ -215,22 +216,21 @@ export function Landing() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.25 }}
-            className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto"
+            className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-sm sm:max-w-none mx-auto"
           >
-            <Link to="/auth/register" className="no-underline">
-              <Button
-                size="lg"
-                fullWidth
-                glow
-                rightIcon={<ArrowRight className="h-4 w-4" />}
-              >
-                Criar Conta Grátis
-              </Button>
+            <Link
+              to="/auth/register"
+              className="ios-press no-underline flex items-center justify-center gap-2.5 h-13 px-7 rounded-2xl bg-gradient-to-r from-[#00D4FF] via-[#38BDF8] to-[#8B5CF6] text-[#050816] font-extrabold text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(0,212,255,0.5)] border border-white/30"
+            >
+              <span>Criar Conta Grátis</span>
+              <ArrowRight className="h-4 w-4 stroke-[2.5px]" />
             </Link>
-            <a href="#explorar-planetas" className="no-underline">
-              <Button size="lg" fullWidth variant="outline">
-                Explorar os {stats.planets} Planetas
-              </Button>
+
+            <a
+              href="#explorar-planetas"
+              className="ios-press no-underline flex items-center justify-center gap-2 h-13 px-7 rounded-2xl bg-[#0D162C]/90 hover:bg-[#13203F] border border-white/15 hover:border-[#00D4FF]/50 text-white font-bold text-sm sm:text-base shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-colors"
+            >
+              <span>🪐 Explorar os {stats.planets} Planetas</span>
             </a>
           </motion.div>
 
