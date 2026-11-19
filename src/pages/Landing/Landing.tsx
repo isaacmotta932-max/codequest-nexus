@@ -16,7 +16,6 @@ import {
   Play,
   Layers,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { ParticleBackground } from '@/components/effects/ParticleBackground';
 import { COURSES } from '@/data/courses';
 import { dbGetPlatformStats, PlatformStats } from '@/lib/database';
@@ -216,11 +215,11 @@ export function Landing() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.25 }}
-            className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-sm sm:max-w-none mx-auto"
+            className="mt-7 flex flex-row flex-wrap items-center justify-center gap-3"
           >
             <Link
               to="/auth/register"
-              className="ios-press no-underline flex items-center justify-center gap-2.5 h-13 px-7 rounded-2xl bg-gradient-to-r from-[#00D4FF] via-[#38BDF8] to-[#8B5CF6] text-[#050816] font-extrabold text-sm sm:text-base shadow-[0_10px_30px_-5px_rgba(0,212,255,0.5)] border border-white/30"
+              className="ios-press no-underline inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-[#050816] font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-[0_4px_15px_rgba(0,212,255,0.35)] border border-white/25"
             >
               <span>Criar Conta Grátis</span>
               <ArrowRight className="h-4 w-4 stroke-[2.5px]" />
@@ -228,9 +227,9 @@ export function Landing() {
 
             <a
               href="#explorar-planetas"
-              className="ios-press no-underline flex items-center justify-center gap-2 h-13 px-7 rounded-2xl bg-[#0D162C]/90 hover:bg-[#13203F] border border-white/15 hover:border-[#00D4FF]/50 text-white font-bold text-sm sm:text-base shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-colors"
+              className="ios-press no-underline inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white whitespace-nowrap transition-colors"
             >
-              <span>🪐 Explorar os {stats.planets} Planetas</span>
+              <span>Explorar os {stats.planets} Planetas</span>
             </a>
           </motion.div>
 
@@ -786,21 +785,19 @@ export function Landing() {
             <p className="mt-3 text-xs sm:text-sm text-gray-300 max-w-lg mx-auto">
               Escolha seu avatar em Pixel Art, embarque no primeiro planeta e domine a programação passo a passo.
             </p>
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link to="/auth/register" className="no-underline w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  fullWidth
-                  glow
-                  rightIcon={<ChevronRight className="h-5 w-5" />}
-                >
-                  Criar Conta Grátis
-                </Button>
+            <div className="mt-6 flex flex-row flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/auth/register"
+                className="ios-press no-underline inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-[#050816] font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-[0_4px_15px_rgba(0,212,255,0.35)] border border-white/25"
+              >
+                <span>Criar Conta Grátis</span>
+                <ChevronRight className="h-4 w-4 stroke-[2.5px]" />
               </Link>
-              <Link to="/auth/login" className="no-underline w-full sm:w-auto">
-                <Button size="lg" fullWidth variant="ghost">
-                  Já tenho uma conta
-                </Button>
+              <Link
+                to="/auth/login"
+                className="ios-press no-underline inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white whitespace-nowrap transition-colors"
+              >
+                Já tenho uma conta
               </Link>
             </div>
           </div>
