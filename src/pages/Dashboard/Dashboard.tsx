@@ -589,10 +589,8 @@ export function Dashboard() {
 
   if (!user) {
     return (
-      <div style={styles.center}>
-        <p>
-          Carregando usuário...
-        </p>
+      <div className="flex min-h-[60vh] items-center justify-center text-white">
+        <p className="text-sm text-gray-400">Carregando usuário...</p>
       </div>
     );
   }
@@ -604,124 +602,85 @@ export function Dashboard() {
    */
   if (progressLoading) {
     return (
-      <div style={styles.center}>
-        <p>
-          Carregando seu progresso...
-        </p>
+      <div className="flex min-h-[60vh] items-center justify-center text-white">
+        <p className="text-sm text-gray-400">Carregando seu progresso...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.page}>
-      <div style={{ ...styles.header, display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+    <div className="w-full max-w-[1200px] mx-auto px-4 py-5 md:p-8 text-white">
+      {/* iOS Native Profile & Welcome Header */}
+      <div className="flex items-center gap-3.5 md:gap-5 mb-6 md:mb-8">
         {user.avatarUrl && (
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '16px',
-              background: '#0B1220',
-              border: '2px solid rgba(0, 229, 255, 0.4)',
-              boxShadow: '0 0 20px rgba(0, 229, 255, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '6px',
-              flexShrink: 0,
-            }}
-          >
+          <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-[#0B1220] border-2 border-[#00E5FF]/40 shadow-[0_0_20px_rgba(0,229,255,0.2)] flex items-center justify-center p-1.5 shrink-0">
             <img
               src={user.avatarUrl}
               alt={user.username}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                imageRendering: 'pixelated',
-              }}
+              className="w-full h-full object-contain"
+              style={{ imageRendering: 'pixelated' }}
             />
           </div>
         )}
 
-        <div>
-          <p style={styles.date}>
-            {new Date().toLocaleDateString(
-              'pt-BR',
-              {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              }
-            )}
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] md:text-xs font-semibold uppercase tracking-wider text-gray-400 m-0">
+            {new Date().toLocaleDateString('pt-BR', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+            })}
           </p>
 
-          <h1 style={styles.title}>
-            Bem-vindo,{' '}
-            <span style={styles.cyan}>
-              {user.username}
-            </span>
-            !
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight m-0 mt-0.5 truncate">
+            Olá, <span className="text-[#00D4FF]">{user.username}</span>!
           </h1>
 
-          <p style={styles.subtitle}>
-            {user.title} • Nível{' '}
-            {levelData.level}
-          </p>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30">
+              Nível {levelData.level}
+            </span>
+            <span className="text-xs text-gray-400 truncate">
+              {user.title}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div style={styles.statsGrid}>
-        <div
-          style={{
-            ...styles.statCard,
-            borderColor:
-              '#00D4FF40',
-          }}
-        >
-          <div style={styles.statIcon}>
-            ⚡
+      {/* iOS Widget Grid: XP Full Width on Mobile + 3 Compact Widgets, 4 cols on Desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+        {/* XP Widget - Spans 2 cols on mobile for clean iOS look */}
+        <div className="col-span-2 lg:col-span-1 ios-glass rounded-2xl p-4 md:p-5 border border-[#00D4FF]/30 shadow-[0_4px_20px_rgba(0,0,0,0.25)] flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="text-xs font-medium text-gray-400 m-0">XP Total</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-[#00D4FF] m-0 mt-0.5 tracking-tight">
+                {progress.xp.toLocaleString('pt-BR')}
+              </p>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-[#00D4FF]/15 border border-[#00D4FF]/30 flex items-center justify-center text-xl">
+              ⚡
+            </div>
           </div>
 
           <div>
-            <p style={styles.statLabel}>
-              XP Total
-            </p>
+            <div className="bg-[#1F2937] rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${levelData.percent}%`,
+                  background: 'linear-gradient(90deg, #00D4FF, #8B5CF6)',
+                }}
+              />
+            </div>
 
-            <p
-              style={{
-                ...styles.statValue,
-                color: '#00D4FF',
-              }}
-            >
-              {progress.xp.toLocaleString(
-                'pt-BR'
-              )}
-            </p>
+            <div className="flex items-center justify-between text-[11px] text-gray-400 mt-1.5">
+              <span>Nível {levelData.level}</span>
+              <span>
+                {Math.floor(levelData.xpIntoLevel)} / {Math.floor(levelData.xpNeededForNextLevel)} XP
+              </span>
+            </div>
           </div>
-
-          <div style={styles.progressTrack}>
-            <div
-              style={{
-                ...styles.progressFill,
-                width: `${levelData.percent}%`,
-                background:
-                  'linear-gradient(90deg, #00D4FF, #8B5CF6)',
-              }}
-            />
-          </div>
-
-          <p style={styles.progressText}>
-            {Math.floor(
-              levelData.xpIntoLevel
-            )}{' '}
-            /{' '}
-            {Math.floor(
-              levelData.xpNeededForNextLevel
-            )}{' '}
-            para o nível{' '}
-            {levelData.level + 1}
-          </p>
         </div>
 
         <StatCard
@@ -743,59 +702,62 @@ export function Dashboard() {
           label="Cursos Ativos"
           value={activeCoursesCount}
           color="#FFD700"
+          fullWidthMobile
         />
       </div>
 
+      {/* Continue Aprendendo - iOS Hero Action Card */}
       {nextLesson && (
         <div
+          className="ios-glass rounded-2xl p-4 md:p-6 mb-6 md:mb-8 border-2 transition-all"
           style={{
-            ...styles.continueCard,
-            borderColor:
-              nextLesson.course.color,
-            boxShadow:
-              `0 0 30px ${nextLesson.course.color}40`,
+            borderColor: `${nextLesson.course.color}80`,
+            boxShadow: `0 8px 30px ${nextLesson.course.color}22`,
           }}
         >
-          <h2 style={styles.sectionTitle}>
-            ⚡ Continue Aprendendo
-          </h2>
-
-          <div style={styles.continueContent}>
-            <div
-              style={
-                styles.courseIconLarge
-              }
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-1.5">
+              ⚡ Continue Aprendendo
+            </span>
+            <span
+              className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+              style={{
+                background: `${nextLesson.course.color}20`,
+                color: nextLesson.course.color,
+              }}
             >
-              {nextLesson.course.icon}
-            </div>
+              {nextLesson.course.name}
+            </span>
+          </div>
 
-            <div style={styles.continueInfo}>
-              <p
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 border"
                 style={{
-                  ...styles.eyebrow,
-                  color:
-                    nextLesson.course.color,
+                  background: `${nextLesson.course.color}15`,
+                  borderColor: `${nextLesson.course.color}40`,
                 }}
               >
-                {nextLesson.course.name}
-              </p>
+                {nextLesson.course.icon}
+              </div>
 
-              <h3 style={styles.lessonTitle}>
-                {nextLesson.lesson.title}
-              </h3>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base md:text-xl font-bold text-white m-0 leading-snug">
+                  {nextLesson.lesson.title}
+                </h3>
 
-              <p style={styles.description}>
-                {nextLesson.lesson.description ||
-                  'Continue sua jornada de aprendizado.'}
-              </p>
+                <p className="text-xs md:text-sm text-gray-400 m-0 mt-1 line-clamp-2 leading-relaxed">
+                  {nextLesson.lesson.description || 'Continue sua jornada de aprendizado.'}
+                </p>
+              </div>
             </div>
 
             <Link
               to={`/lesson/${nextLesson.course.slug}/${nextLesson.lesson.id}`}
+              className="ios-press w-full sm:w-auto text-center px-6 py-3.5 rounded-xl font-bold text-sm text-black no-underline shrink-0 shadow-lg"
               style={{
-                ...styles.primaryButton,
-                background:
-                  nextLesson.course.color,
+                background: nextLesson.course.color,
               }}
             >
               Continuar →
@@ -804,408 +766,294 @@ export function Dashboard() {
         </div>
       )}
 
-      <div style={styles.contentGrid}>
-        <section style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h2 style={styles.sectionTitle}>
+      {/* Main Content Grid: Single column on mobile (NO HORIZONTAL OVERFLOW!), 2 columns on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {/* Missões Diárias Card */}
+        <section className="ios-glass rounded-2xl p-4 md:p-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-base md:text-lg font-bold m-0 flex items-center gap-2">
               🎯 Missões Diárias
             </h2>
 
             <Link
               to="/missions"
-              style={styles.link}
+              className="ios-press text-xs font-semibold text-[#00D4FF] no-underline whitespace-nowrap"
             >
               Ver todas →
             </Link>
           </div>
 
-          {dailyMissions
-            .slice(0, 3)
-            .map((mission) => {
+          <div className="flex flex-col gap-2.5">
+            {dailyMissions.slice(0, 3).map((mission) => {
               const percent =
                 mission.target > 0
-                  ? (mission.progress /
-                      mission.target) *
-                    100
+                  ? (mission.progress / mission.target) * 100
                   : 0;
 
               return (
                 <div
                   key={mission.id}
+                  className="p-3.5 rounded-xl bg-[#0A1020]/90 border transition-colors"
                   style={{
-                    ...styles.mission,
-                    borderColor:
-                      mission.completed
-                        ? '#00FF88'
-                        : '#1F2937',
+                    borderColor: mission.completed ? '#00FF8860' : 'rgba(255,255,255,0.07)',
                   }}
                 >
-                  <div
-                    style={
-                      styles.missionHeader
-                    }
-                  >
-                    <p
-                      style={
-                        styles.missionTitle
-                      }
-                    >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <p className="text-xs md:text-[13px] font-bold m-0 text-gray-100">
                       {mission.title}
                     </p>
 
-                    <span
-                      style={
-                        styles.missionXp
-                      }
-                    >
+                    <span className="text-xs font-bold text-[#FFD700] shrink-0">
                       +{mission.xpReward} XP
                     </span>
                   </div>
 
-                  <div
-                    style={
-                      styles.progressTrack
-                    }
-                  >
+                  <div className="bg-[#1F2937] rounded-full h-1.5 overflow-hidden">
                     <div
+                      className="h-full rounded-full transition-all duration-300"
                       style={{
-                        ...styles.progressFill,
-                        width: `${Math.min(
-                          percent,
-                          100
-                        )}%`,
-                        background:
-                          mission.completed
-                            ? 'linear-gradient(90deg, #00FF88, #10B981)'
-                            : 'linear-gradient(90deg, #00D4FF, #8B5CF6)',
+                        width: `${Math.min(percent, 100)}%`,
+                        background: mission.completed
+                          ? 'linear-gradient(90deg, #00FF88, #10B981)'
+                          : 'linear-gradient(90deg, #00D4FF, #8B5CF6)',
                       }}
                     />
                   </div>
 
-                  <p
-                    style={
-                      styles.progressText
-                    }
-                  >
-                    {mission.progress}/
-                    {mission.target}
-                  </p>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <p className="text-[11px] text-gray-400 m-0">
+                      {mission.progress}/{mission.target} concluídos
+                    </p>
+                    {mission.completed && (
+                      <span className="text-[10px] font-bold text-[#00FF88]">✓ Concluída</span>
+                    )}
+                  </div>
                 </div>
               );
             })}
+          </div>
         </section>
 
-        <section style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h2 style={styles.sectionTitle}>
-              🏆 Conquistas
-            </h2>
+        {/* Conquistas Card */}
+        <section className="ios-glass rounded-2xl p-4 md:p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h2 className="text-base md:text-lg font-bold m-0 flex items-center gap-2">
+                🏆 Conquistas
+              </h2>
 
-            <Link
-              to="/achievements"
-              style={{
-                ...styles.link,
-                color: '#FFD700',
-              }}
-            >
-              Ver todas →
-            </Link>
-          </div>
+              <Link
+                to="/achievements"
+                className="ios-press text-xs font-semibold text-[#FFD700] no-underline whitespace-nowrap"
+              >
+                Ver todas →
+              </Link>
+            </div>
 
-          <div style={styles.achievementsGrid}>
-            {recentAchievements.map(
-              (achievement) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {recentAchievements.map((achievement) => (
                 <div
                   key={achievement.id}
+                  className="flex flex-col items-center justify-center text-center p-3.5 rounded-xl bg-[#0A1020]/90 border border-white/5"
                   style={{
-                    ...styles.achievement,
-                    opacity:
-                      achievement.unlocked
-                        ? 1
-                        : 0.4,
+                    opacity: achievement.unlocked ? 1 : 0.45,
                   }}
                 >
-                  <div
-                    style={
-                      styles.achievementIcon
-                    }
-                  >
-                    {achievement.unlocked
-                      ? achievement.icon
-                      : '🔒'}
+                  <div className="text-2xl md:text-3xl mb-1.5">
+                    {achievement.unlocked ? achievement.icon : '🔒'}
                   </div>
 
-                  <p
-                    style={
-                      styles.achievementName
-                    }
-                  >
+                  <p className="text-[11px] font-semibold text-gray-300 m-0 line-clamp-1">
                     {achievement.name}
                   </p>
                 </div>
-              )
-            )}
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-gray-400">
+            <span>Desbloqueie insígnias estudando</span>
+            <Link to="/achievements" className="text-[#00D4FF] no-underline font-medium">
+              Explorar →
+            </Link>
           </div>
         </section>
 
-        <section
-          style={{
-            ...styles.card,
-            gridColumn: 'span 2',
-          }}
-        >
-          <div style={styles.cardHeader}>
+        {/* Cursos Section - Full Width on Desktop & Mobile */}
+        <section className="ios-glass rounded-2xl p-4 md:p-6 lg:col-span-2">
+          <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <h2 style={styles.sectionTitle}>
+              <h2 className="text-base md:text-lg font-bold m-0">
                 📚 Cursos
               </h2>
-
-              <p style={styles.cardHint}>
-                Cursos publicados pelos
-                professores.
+              <p className="text-xs text-gray-400 m-0 mt-0.5">
+                Cursos publicados pelos professores.
               </p>
             </div>
 
             <Link
               to="/galaxy"
-              style={styles.link}
+              className="ios-press text-xs font-semibold text-[#00D4FF] no-underline whitespace-nowrap"
             >
               Ver galáxia →
             </Link>
           </div>
 
           {coursesLoading ? (
-            <div style={styles.empty}>
+            <div className="min-h-[150px] flex flex-col items-center justify-center text-center text-gray-300 gap-2">
               Carregando cursos...
             </div>
           ) : coursesError ? (
-            <div style={styles.empty}>
+            <div className="min-h-[150px] flex flex-col items-center justify-center text-center text-gray-300 gap-2">
               <p>{coursesError}</p>
-
               <button
                 type="button"
-                onClick={() =>
-                  window.location.reload()
-                }
-                style={
-                  styles.retryButton
-                }
+                onClick={() => window.location.reload()}
+                className="mt-1 border border-[#00D4FF] bg-[#0A1020] text-[#00D4FF] rounded-lg px-3.5 py-2 cursor-pointer text-xs font-bold"
               >
                 Tentar novamente
               </button>
             </div>
           ) : courses.length === 0 ? (
-            <div style={styles.empty}>
-              <div
-                style={
-                  styles.emptyIcon
-                }
-              >
-                🪐
-              </div>
-
-              <strong>
-                Nenhum curso publicado ainda
-              </strong>
-
-              <p style={styles.cardHint}>
-                Quando um professor publicar
-                um curso, ele aparecerá aqui.
+            <div className="min-h-[150px] flex flex-col items-center justify-center text-center text-gray-300 gap-2">
+              <div className="text-4xl">🪐</div>
+              <strong>Nenhum curso publicado ainda</strong>
+              <p className="text-xs text-gray-400 m-0">
+                Quando um professor publicar um curso, ele aparecerá aqui.
               </p>
             </div>
           ) : (
-            <div style={styles.coursesGrid}>
-              {coursesWithProgress
-                .slice(0, 6)
-                .map((course) => {
-                  const firstIncomplete =
-                    course.lessons.find(
-                      (lesson) =>
-                        !completedSet.has(
-                          lesson.id
-                        )
-                    );
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              {coursesWithProgress.slice(0, 6).map((course) => {
+                const firstIncomplete = course.lessons.find(
+                  (lesson) => !completedSet.has(lesson.id)
+                );
+                const targetLesson = firstIncomplete || course.lessons[0];
 
-                  const targetLesson =
-                    firstIncomplete ||
+                if (!targetLesson) {
+                  return null;
+                }
+
+                return (
+                  <Link
+                    key={course.id}
+                    to={`/lesson/${course.slug}/${targetLesson.id}`}
+                    className="ios-press no-underline text-inherit block"
+                  >
+                    <div
+                      className="bg-[#0A1020]/90 border rounded-2xl p-4 h-full flex flex-col justify-between transition-all hover:bg-[#0A1020]"
+                      style={{
+                        borderColor: `${course.color}40`,
+                      }}
+                    >
+                      <div>
+                        <div className="flex items-center gap-3 mb-2.5">
+                          <div
+                            className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0"
+                            style={{
+                              background: `${course.color}15`,
+                              border: `1px solid ${course.color}35`,
+                            }}
+                          >
+                            {course.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3
+                              className="font-bold text-sm m-0 truncate"
+                              style={{ color: course.color }}
+                            >
+                              {course.name}
+                            </h3>
+                            <span className="text-[11px] text-gray-400">
+                              {course.lessons.length} {course.lessons.length === 1 ? 'aula' : 'aulas'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 mb-3">
+                          {course.description || 'Curso disponível para você.'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="bg-[#1F2937] rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                              width: `${course.progress.percent}%`,
+                              background: course.color,
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-gray-400 mt-1.5">
+                          <span>
+                            {course.progress.completed}/{course.lessons.length} aulas
+                          </span>
+                          <span className="font-semibold" style={{ color: course.color }}>
+                            {course.progress.percent}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {coursesInProgress.length > 0 && (
+            <div className="mt-6 pt-5 border-t border-white/10">
+              <h3 className="text-sm font-bold m-0 mb-3.5">
+                🚀 Seus cursos em progresso
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {coursesInProgress.map((course) => {
+                  const next =
+                    course.lessons.find((lesson) => !completedSet.has(lesson.id)) ||
                     course.lessons[0];
 
-                  if (!targetLesson) {
+                  if (!next) {
                     return null;
                   }
 
                   return (
                     <Link
-                      key={course.id}
-                      to={`/lesson/${course.slug}/${targetLesson.id}`}
-                      style={
-                        styles.courseLink
-                      }
+                      key={`progress-${course.id}`}
+                      to={`/lesson/${course.slug}/${next.id}`}
+                      className="ios-press no-underline text-inherit block"
                     >
                       <div
+                        className="bg-[#0A1020] border rounded-xl p-3.5 h-full"
                         style={{
-                          ...styles.courseCard,
-                          borderColor:
-                            `${course.color}40`,
+                          borderColor: `${course.color}80`,
                         }}
                       >
-                        <div
-                          style={
-                            styles.courseIcon
-                          }
-                        >
-                          {course.icon}
+                        <div className="flex items-center gap-2.5 mb-2.5">
+                          <span className="text-2xl">{course.icon}</span>
+                          <strong className="text-sm truncate" style={{ color: course.color }}>
+                            {course.name}
+                          </strong>
                         </div>
 
-                        <h3
-                          style={{
-                            ...styles.courseName,
-                            color:
-                              course.color,
-                          }}
-                        >
-                          {course.name}
-                        </h3>
-
-                        <p
-                          style={
-                            styles.courseDescription
-                          }
-                        >
-                          {course.description ||
-                            'Curso disponível para você.'}
-                        </p>
-
-                        <div
-                          style={
-                            styles.progressTrack
-                          }
-                        >
+                        <div className="bg-[#1F2937] rounded-full h-1.5 overflow-hidden">
                           <div
+                            className="h-full rounded-full"
                             style={{
-                              ...styles.progressFill,
                               width: `${course.progress.percent}%`,
-                              background:
-                                course.color,
+                              background: course.color,
                             }}
                           />
                         </div>
 
-                        <p
-                          style={
-                            styles.progressText
-                          }
-                        >
-                          {course.progress.completed}
-                          /
-                          {course.lessons.length}{' '}
-                          aulas •{' '}
-                          {course.progress.percent}
-                          %
+                        <p className="text-[11px] text-gray-400 m-0 mt-1.5">
+                          {course.progress.percent}% completo
                         </p>
                       </div>
                     </Link>
                   );
                 })}
-            </div>
-          )}
-
-          {coursesInProgress.length > 0 && (
-            <div
-              style={
-                styles.inProgressBlock
-              }
-            >
-              <h3
-                style={
-                  styles.subsectionTitle
-                }
-              >
-                🚀 Seus cursos em progresso
-              </h3>
-
-              <div style={styles.coursesGrid}>
-                {coursesInProgress.map(
-                  (course) => {
-                    const next =
-                      course.lessons.find(
-                        (lesson) =>
-                          !completedSet.has(
-                            lesson.id
-                          )
-                      ) ||
-                      course.lessons[0];
-
-                    if (!next) {
-                      return null;
-                    }
-
-                    return (
-                      <Link
-                        key={`progress-${course.id}`}
-                        to={`/lesson/${course.slug}/${next.id}`}
-                        style={
-                          styles.courseLink
-                        }
-                      >
-                        <div
-                          style={{
-                            ...styles.courseCard,
-                            borderColor:
-                              `${course.color}80`,
-                          }}
-                        >
-                          <div
-                            style={
-                              styles.courseRow
-                            }
-                          >
-                            <span
-                              style={
-                                styles.courseIconSmall
-                              }
-                            >
-                              {course.icon}
-                            </span>
-
-                            <strong
-                              style={{
-                                color:
-                                  course.color,
-                              }}
-                            >
-                              {course.name}
-                            </strong>
-                          </div>
-
-                          <div
-                            style={
-                              styles.progressTrack
-                            }
-                          >
-                            <div
-                              style={{
-                                ...styles.progressFill,
-                                width: `${course.progress.percent}%`,
-                                background:
-                                  course.color,
-                              }}
-                            />
-                          </div>
-
-                          <p
-                            style={
-                              styles.progressText
-                            }
-                          >
-                            {course.progress.percent}
-                            % completo
-                          </p>
-                        </div>
-                      </Link>
-                    );
-                  }
-                )}
               </div>
             </div>
           )}
@@ -1220,374 +1068,45 @@ function StatCard({
   label,
   value,
   color,
+  fullWidthMobile = false,
 }: {
   icon: string;
   label: string;
   value: number;
   color: string;
+  fullWidthMobile?: boolean;
 }) {
   return (
     <div
+      className={`ios-glass rounded-2xl p-3.5 md:p-5 flex items-center gap-3 md:gap-4 border ${
+        fullWidthMobile ? 'col-span-2 sm:col-span-1' : 'col-span-1'
+      }`}
       style={{
-        ...styles.statCard,
-        borderColor:
-          `${color}40`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '15px',
+        borderColor: `${color}35`,
       }}
     >
-      <div style={styles.statBigIcon}>
+      <div
+        className="w-11 h-11 md:w-12 md:h-12 rounded-2xl flex items-center justify-center text-xl md:text-2xl shrink-0"
+        style={{
+          background: `${color}15`,
+          border: `1px solid ${color}30`,
+        }}
+      >
         {icon}
       </div>
 
-      <div>
-        <p style={styles.statLabel}>
+      <div className="min-w-0">
+        <p className="text-[11px] md:text-xs font-medium text-gray-400 m-0 truncate">
           {label}
         </p>
 
         <p
-          style={{
-            ...styles.statValue,
-            color,
-          }}
+          className="text-xl md:text-2xl font-extrabold m-0 mt-0.5 tracking-tight"
+          style={{ color }}
         >
-          {value.toLocaleString(
-            'pt-BR'
-          )}
+          {value.toLocaleString('pt-BR')}
         </p>
       </div>
     </div>
   );
 }
-
-const styles: Record<
-  string,
-  React.CSSProperties
-> = {
-  page: {
-    padding: 20,
-    color: 'white',
-    fontFamily: 'sans-serif',
-    minHeight: '100vh',
-  },
-
-  center: {
-    minHeight: '60vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-  },
-
-  header: {
-    marginBottom: 30,
-  },
-
-  date: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    margin: 0,
-  },
-
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    margin: '5px 0 0',
-  },
-
-  cyan: {
-    color: '#00D4FF',
-  },
-
-  subtitle: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    marginTop: 5,
-  },
-
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: 15,
-    marginBottom: 30,
-  },
-
-  statCard: {
-    background: '#111827',
-    border: '1px solid',
-    borderRadius: 10,
-    padding: 20,
-    minHeight: 80,
-  },
-
-  statIcon: {
-    fontSize: 24,
-  },
-
-  statBigIcon: {
-    fontSize: 40,
-  },
-
-  statLabel: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    margin: 0,
-  },
-
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    margin: '2px 0 0',
-  },
-
-  progressTrack: {
-    background: '#1F2937',
-    borderRadius: 10,
-    height: 6,
-    overflow: 'hidden',
-  },
-
-  progressFill: {
-    height: '100%',
-    borderRadius: 10,
-  },
-
-  progressText: {
-    color: '#9CA3AF',
-    fontSize: 11,
-    margin: '5px 0 0',
-  },
-
-  continueCard: {
-    background: '#111827',
-    border: '2px solid',
-    borderRadius: 10,
-    padding: 25,
-    marginBottom: 20,
-  },
-
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    margin: 0,
-  },
-
-  continueContent: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 20,
-    flexWrap: 'wrap',
-    marginTop: 15,
-  },
-
-  courseIconLarge: {
-    fontSize: 50,
-  },
-
-  continueInfo: {
-    flex: 1,
-    minWidth: 200,
-  },
-
-  eyebrow: {
-    fontSize: 12,
-    textTransform: 'uppercase',
-    fontWeight: 'bold',
-    margin: 0,
-  },
-
-  lessonTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: '5px 0 0',
-  },
-
-  description: {
-    color: '#9CA3AF',
-    fontSize: 13,
-    marginTop: 5,
-  },
-
-  primaryButton: {
-    padding: '12px 24px',
-    color: 'black',
-    borderRadius: 5,
-    textDecoration: 'none',
-    fontWeight: 'bold',
-  },
-
-  contentGrid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(auto-fit, minmax(350px, 1fr))',
-    gap: 20,
-  },
-
-  card: {
-    background: '#111827',
-    border: '1px solid #1F2937',
-    borderRadius: 10,
-    padding: 25,
-  },
-
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 15,
-    marginBottom: 15,
-  },
-
-  link: {
-    color: '#00D4FF',
-    fontSize: 12,
-    textDecoration: 'none',
-    whiteSpace: 'nowrap',
-  },
-
-  cardHint: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    margin: '5px 0 0',
-  },
-
-  mission: {
-    padding: 12,
-    background: '#0A1020',
-    border: '1px solid',
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-
-  missionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-    gap: 10,
-  },
-
-  missionTitle: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    margin: 0,
-  },
-
-  missionXp: {
-    color: '#FFD700',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-
-  achievementsGrid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(4, minmax(0, 1fr))',
-    gap: 10,
-  },
-
-  achievement: {
-    textAlign: 'center',
-    padding: 10,
-    background: '#0A1020',
-    borderRadius: 8,
-  },
-
-  achievementIcon: {
-    fontSize: 30,
-  },
-
-  achievementName: {
-    fontSize: 10,
-    marginTop: 5,
-    color: '#9CA3AF',
-  },
-
-  coursesGrid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: 15,
-  },
-
-  courseLink: {
-    textDecoration: 'none',
-    color: 'inherit',
-  },
-
-  courseCard: {
-    background: '#0A1020',
-    border: '1px solid',
-    borderRadius: 8,
-    padding: 15,
-    height: '100%',
-    boxSizing: 'border-box',
-  },
-
-  courseIcon: {
-    fontSize: 30,
-    marginBottom: 10,
-  },
-
-  courseName: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    margin: 0,
-  },
-
-  courseDescription: {
-    color: '#9CA3AF',
-    fontSize: 11,
-    lineHeight: 1.4,
-    minHeight: 32,
-  },
-
-  courseRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 12,
-  },
-
-  courseIconSmall: {
-    fontSize: 28,
-  },
-
-  inProgressBlock: {
-    marginTop: 25,
-    paddingTop: 20,
-    borderTop: '1px solid #1F2937',
-  },
-
-  subsectionTitle: {
-    fontSize: 15,
-    margin: '0 0 15px',
-  },
-
-  empty: {
-    minHeight: 150,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    color: '#D1D5DB',
-    gap: 8,
-  },
-
-  emptyIcon: {
-    fontSize: 42,
-  },
-
-  retryButton: {
-    marginTop: 5,
-    border: '1px solid #00D4FF',
-    background: '#0A1020',
-    color: '#00D4FF',
-    borderRadius: 6,
-    padding: '8px 14px',
-    cursor: 'pointer',
-  },
-};

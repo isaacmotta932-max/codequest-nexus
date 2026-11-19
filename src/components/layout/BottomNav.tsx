@@ -11,22 +11,38 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/10 bg-[#0A1020]/95 px-2 py-1.5 backdrop-blur-xl md:hidden">
-      <ul className="flex items-center justify-around m-0 p-0 list-none">
+    <nav className="ios-tabbar fixed bottom-0 left-0 right-0 z-30 px-2 pt-1.5 md:hidden">
+      <ul className="mx-auto flex max-w-md items-center justify-around m-0 p-0 list-none">
         {items.map((item) => (
           <li key={item.to} className="flex-1 text-center">
             <NavLink
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-1 rounded-lg py-1 text-[11px] font-medium transition-colors ${
+                `ios-press relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[10px] tracking-tight transition-all duration-200 no-underline ${
                   isActive
-                    ? 'font-bold text-[#00D4FF] drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'font-semibold text-[#00D4FF]'
+                    : 'font-medium text-gray-400/90 hover:text-white'
                 }`
               }
             >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              {({ isActive }) => (
+                <>
+                  <div
+                    className={`flex h-7 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+                      isActive
+                        ? 'bg-[#00D4FF]/15 shadow-[0_0_12px_rgba(0,212,255,0.25)]'
+                        : 'bg-transparent'
+                    }`}
+                  >
+                    <item.icon
+                      className={`h-[19px] w-[19px] transition-transform duration-200 ${
+                        isActive ? 'scale-105 stroke-[2.4px]' : 'stroke-[1.9px]'
+                      }`}
+                    />
+                  </div>
+                  <span className="leading-tight">{item.label}</span>
+                </>
+              )}
             </NavLink>
           </li>
         ))}

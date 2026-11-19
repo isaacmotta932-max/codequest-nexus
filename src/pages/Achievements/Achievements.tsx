@@ -48,114 +48,93 @@ export function Achievements() {
   const unlockedCount = achievementsWithStatus.filter((a) => a.unlocked).length;
 
   return (
-    <div style={{ padding: '20px', color: 'white', fontFamily: 'sans-serif' }}>
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '10px' }}>
+    <div className="w-full max-w-[1200px] mx-auto px-4 py-5 md:p-8 text-white">
+      <div className="mb-5">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-[#FFD700]">
+          SALA DE TROFÉUS
+        </span>
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight m-0 mt-1">
           🏆 Conquistas
         </h1>
-        <p style={{ color: '#9CA3AF' }}>
+        <p className="text-xs md:text-sm text-gray-400 m-0 mt-1">
           {unlockedCount} de {ACHIEVEMENTS.length} desbloqueadas
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
-        {(['all', 'common', 'rare', 'epic', 'legendary', 'mythic'] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              padding: '8px 16px',
-              background: filter === f ? '#FFD700' : '#1F2937',
-              color: filter === f ? 'black' : 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '12px',
-              textTransform: 'uppercase',
-            }}
-          >
-            {f === 'all' ? 'Todas' : RARITY_LABELS[f as Rarity]}
-          </button>
-        ))}
+      {/* iOS Horizontal Scrollable Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-4 -mx-4 px-4 md:mx-0 md:px-0">
+        {(['all', 'common', 'rare', 'epic', 'legendary', 'mythic'] as const).map((f) => {
+          const active = filter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`ios-press px-4 py-2 rounded-full border text-xs font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer transition-all ${
+                active
+                  ? 'bg-[#FFD700] text-black border-[#FFD700] shadow-[0_0_15px_rgba(255,215,0,0.3)]'
+                  : 'bg-[#111827]/90 text-gray-300 border-white/10 hover:text-white'
+              }`}
+            >
+              {f === 'all' ? 'Todas' : RARITY_LABELS[f as Rarity]}
+            </button>
+          );
+        })}
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-          gap: '20px',
-        }}
-      >
+      {/* 2 Columns on Mobile, up to 4 on Desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
         {filtered.map((achievement) => {
           const color = RARITY_COLORS[achievement.rarity];
           return (
             <div
               key={achievement.id}
+              className="ios-glass rounded-2xl p-4 md:p-5 text-center flex flex-col items-center justify-between transition-transform duration-200"
               style={{
-                background: '#111827',
-                border: `2px solid ${achievement.unlocked ? color : '#1F2937'}`,
-                borderRadius: '10px',
-                padding: '20px',
-                textAlign: 'center',
-                opacity: achievement.unlocked ? 1 : 0.4,
+                border: `1.5px solid ${achievement.unlocked ? `${color}80` : 'rgba(255,255,255,0.07)'}`,
+                opacity: achievement.unlocked ? 1 : 0.45,
                 filter: achievement.unlocked ? 'none' : 'grayscale(80%)',
-                transition: 'transform 0.2s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             >
-              <div
-                style={{
-                  fontSize: '50px',
-                  marginBottom: '10px',
-                  filter: achievement.unlocked ? 'none' : 'blur(2px)',
-                }}
-              >
-                {achievement.unlocked ? achievement.icon : '🔒'}
+              <div className="w-full flex flex-col items-center">
+                <div
+                  className="w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-3xl md:text-4xl mb-2.5"
+                  style={{
+                    background: achievement.unlocked ? `${color}15` : 'rgba(255,255,255,0.04)',
+                    filter: achievement.unlocked ? 'none' : 'blur(1px)',
+                  }}
+                >
+                  {achievement.unlocked ? achievement.icon : '🔒'}
+                </div>
+
+                <h3
+                  className="text-xs md:text-sm font-bold m-0 mb-1 line-clamp-1"
+                  style={{
+                    color: achievement.unlocked ? color : '#9CA3AF',
+                  }}
+                >
+                  {achievement.name}
+                </h3>
+
+                <p className="text-[11px] md:text-xs text-gray-400 m-0 mb-3 line-clamp-2 leading-snug">
+                  {achievement.description}
+                </p>
               </div>
 
-              <h3
-                style={{
-                  fontSize: '15px',
-                  fontWeight: 'bold',
-                  color: achievement.unlocked ? color : '#6B7280',
-                  marginBottom: '5px',
-                }}
-              >
-                {achievement.name}
-              </h3>
+              <div className="w-full flex flex-col items-center gap-1.5">
+                <span
+                  className="inline-block text-[9px] md:text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                  style={{
+                    background: `${color}20`,
+                    color: color,
+                    border: `1px solid ${color}60`,
+                  }}
+                >
+                  {RARITY_LABELS[achievement.rarity]}
+                </span>
 
-              <p style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '10px' }}>
-                {achievement.description}
-              </p>
-
-              <div
-                style={{
-                  display: 'inline-block',
-                  background: `${color}20`,
-                  color: color,
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  padding: '3px 8px',
-                  borderRadius: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  border: `1px solid ${color}`,
-                }}
-              >
-                {RARITY_LABELS[achievement.rarity]}
-              </div>
-
-              <div
-                style={{
-                  marginTop: '10px',
-                  fontSize: '13px',
-                  color: '#FFD700',
-                  fontWeight: 'bold',
-                }}
-              >
-                +{achievement.xpReward} XP
+                <span className="text-xs font-extrabold text-[#FFD700]">
+                  +{achievement.xpReward} XP
+                </span>
               </div>
             </div>
           );

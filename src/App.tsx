@@ -819,23 +819,21 @@ function App() {
       <div
         style={{
           position: 'fixed',
-          top: 20,
-          right: 20,
-          background:
-            'var(--cq-surface, #111827)',
-          color:
-            'var(--cq-text, #FFFFFF)',
-          border:
-            `2px solid ${color}`,
-          borderRadius: 10,
-          padding:
-            '15px 20px',
-          maxWidth: 350,
+          top: 16,
+          right: 16,
+          left: 16,
+          marginLeft: 'auto',
+          background: 'rgba(17, 24, 39, 0.88)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+          color: 'var(--cq-text, #FFFFFF)',
+          border: `1.5px solid ${color}80`,
+          borderRadius: 18,
+          padding: '13px 16px',
+          maxWidth: 360,
           zIndex: 9999,
-          boxShadow:
-            `0 0 30px ${color}80`,
-          fontFamily:
-            'sans-serif',
+          boxShadow: `0 10px 30px rgba(0,0,0,0.45), 0 0 20px ${color}35`,
+          fontFamily: '-apple-system, BlinkMacSystemFont, Inter, sans-serif',
         }}
       >
         <div

@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
-import type {
-  CSSProperties,
-  ReactNode,
-} from 'react';
+import type { ReactNode } from 'react';
 import { Sparkles } from 'lucide-react';
 
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -187,7 +184,7 @@ export function Profile() {
 
   if (!user) {
     return (
-      <div style={styles.center}>
+      <div className="flex min-h-[60vh] items-center justify-center text-white text-sm">
         <p>Carregando perfil...</p>
       </div>
     );
@@ -195,355 +192,244 @@ export function Profile() {
 
   if (progressLoading) {
     return (
-      <div style={styles.center}>
-        <p>
-          Carregando seu progresso...
-        </p>
+      <div className="flex min-h-[60vh] items-center justify-center text-white text-sm">
+        <p>Carregando seu progresso...</p>
       </div>
     );
   }
 
-  /*
-   * Dados pessoais do usuário.
-   */
   const profile: ProfileUser =
     firebaseProfile || {
-      username:
-        user.username,
-
-      email:
-        user.email,
-
-      avatarUrl:
-        user.avatarUrl || '',
-
-      currentStreak:
-        user.currentStreak,
-
-      longestStreak:
-        user.longestStreak,
-
-      className:
-        user.className,
-
-      title:
-        user.title,
-
-      joinedAt:
-        normalizeDate(
-          user.joinedAt
-        ),
+      username: user.username,
+      email: user.email,
+      avatarUrl: user.avatarUrl || '',
+      currentStreak: user.currentStreak,
+      longestStreak: user.longestStreak,
+      className: user.className,
+      title: user.title,
+      joinedAt: normalizeDate(user.joinedAt),
     };
 
-  /*
-   * IMPORTANTE:
-   *
-   * XP vem exclusivamente do progresso
-   * do usuário atual.
-   *
-   * Não usamos user.xp.
-   * Não usamos users/{uid}.xp.
-   * Não usamos valor fixo.
-   */
-  const xp = Math.max(
-    0,
-    progress.xp
-  );
-
-  const levelData =
-    calculateLevelProgress(xp);
+  const xp = Math.max(0, progress.xp);
+  const levelData = calculateLevelProgress(xp);
 
   return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <section style={styles.hero}>
-          <div style={styles.heroGlow} />
+    <div className="w-full max-w-[1050px] mx-auto px-4 py-5 md:p-8 text-white">
+      {/* iOS Native Profile Hero Card */}
+      <section className="ios-glass relative rounded-2xl p-5 md:p-8 overflow-hidden border border-[#00D4FF]/30 shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
+        <div
+          className="absolute -right-16 -top-20 w-56 h-56 rounded-full pointer-events-none"
+          style={{ background: 'rgba(0, 212, 255, 0.08)', filter: 'blur(20px)' }}
+        />
 
-          <div style={styles.heroContent}>
-            <div style={styles.avatarWrapper}>
-              <div
-                style={{ ...styles.avatar, cursor: 'pointer' }}
-                onClick={() => setIsAvatarModalOpen(true)}
-                title="Clique para escolher seu avatar pixel art"
-              >
-                {profile.avatarUrl ? (
-                  <img
-                    src={profile.avatarUrl}
-                    alt={profile.username}
-                    style={{
-                      ...styles.avatarImage,
-                      imageRendering: 'pixelated',
-                    }}
-                  />
-                ) : (
-                  profile.username
-                    .charAt(0)
-                    .toUpperCase()
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAvatarModalOpen(true)}
-                style={styles.avatarChangeBadge}
-                title="Escolher entre 10 ícones pixelados de programação"
-              >
-                <Sparkles size={14} />
-              </button>
-            </div>
-
-            <div>
-              <div
-                style={styles.eyebrow}
-              >
-                CODEQUEST MEMBER
-              </div>
-
-              <h1 style={styles.name}>
-                {profile.username}
-              </h1>
-
-              <p style={styles.email}>
-                {profile.email}
-              </p>
-
-              <div
-                style={styles.badges}
-              >
-                <Badge>
-                  {profile.title}
-                </Badge>
-
-                <Badge>
-                  {profile.className}
-                </Badge>
-
-                <Badge>
-                  Nível{' '}
-                  {levelData.level}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 10 Opções de Ícones Pixelados de Programação */}
-        <section style={styles.pixelAvatarsSection}>
-          <div style={styles.pixelAvatarsHeader}>
-            <div>
-              <div style={styles.eyebrow}>IDENTIDADE VISUAL 8-BIT</div>
-              <h2 style={styles.pixelAvatarsTitle}>
-                Insígnias de Programação em Pixel Art
-              </h2>
-              <p style={styles.pixelAvatarsSubtitle}>
-                Escolha seu avatar temático de desenvolvedor: 10 opções exclusivas criadas para coders do Nexus.
-              </p>
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6 text-center sm:text-left">
+          <div className="relative inline-block shrink-0">
+            <div
+              onClick={() => setIsAvatarModalOpen(true)}
+              title="Clique para escolher seu avatar pixel art"
+              className="ios-press w-22 h-22 md:w-24 md:h-24 rounded-full flex items-center justify-center text-4xl font-bold overflow-hidden cursor-pointer border-2 border-[#00D4FF]/50 shadow-[0_0_30px_rgba(0,212,255,0.25)]"
+              style={{
+                width: 88,
+                height: 88,
+                background: profile.avatarUrl
+                  ? '#0B1220'
+                  : 'linear-gradient(135deg, #00D4FF, #8B5CF6)',
+                padding: profile.avatarUrl ? 6 : 0,
+              }}
+            >
+              {profile.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.username}
+                  className="w-full h-full object-contain"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              ) : (
+                profile.username.charAt(0).toUpperCase()
+              )}
             </div>
             <button
               type="button"
               onClick={() => setIsAvatarModalOpen(true)}
-              style={styles.openModalBtn}
+              className="ios-press absolute -bottom-0.5 -right-0.5 bg-[#00E5FF] text-[#0A0E1A] rounded-full w-8 h-8 flex items-center justify-center border-2 border-[#0B1220] shadow-[0_0_12px_rgba(0,229,255,0.6)] cursor-pointer"
+              title="Escolher entre 10 ícones pixelados de programação"
             >
-              <Sparkles size={15} /> Ver Catálogo Completo
+              <Sparkles size={14} />
             </button>
           </div>
 
-          <div style={styles.pixelAvatarsGrid}>
-            {PIXEL_AVATARS.map((av) => {
-              const isSelected =
-                profile.avatarUrl === av.dataUrl || profile.avatarUrl === av.id;
-              return (
-                <button
-                  key={av.id}
-                  type="button"
-                  onClick={() => handleSelectAvatar(av)}
-                  style={{
-                    ...styles.pixelAvatarItem,
-                    borderColor: isSelected
-                      ? av.accentColor
-                      : 'rgba(255, 255, 255, 0.08)',
-                    boxShadow: isSelected
-                      ? `0 0 16px ${av.accentColor}50`
-                      : 'none',
-                    background: isSelected
-                      ? 'rgba(255, 255, 255, 0.07)'
-                      : 'rgba(15, 23, 42, 0.6)',
-                  }}
-                  title={`${av.name} (${av.category}) - ${av.description}`}
-                >
-                  <div style={styles.pixelAvatarImgWrapper}>
-                    <img
-                      src={av.dataUrl}
-                      alt={av.name}
-                      style={styles.pixelAvatarImg}
-                    />
-                  </div>
-                  <span style={styles.pixelAvatarName}>{av.name}</span>
-                  <span
-                    style={{
-                      ...styles.pixelAvatarCategory,
-                      color: av.accentColor,
-                      background: `${av.accentColor}18`,
-                    }}
-                  >
-                    {av.category}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="min-w-0 flex-1">
+            <div className="text-[#00D4FF] text-[10px] md:text-[11px] tracking-[2.5px] font-bold uppercase">
+              CODEQUEST MEMBER
+            </div>
+
+            <h1 className="text-2xl md:text-3xl font-extrabold m-0 mt-1 truncate">
+              {profile.username}
+            </h1>
+
+            <p className="text-xs md:text-sm text-gray-400 m-0 mt-0.5 truncate">
+              {profile.email}
+            </p>
+
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mt-3">
+              <Badge>{profile.title}</Badge>
+              <Badge>{profile.className}</Badge>
+              <Badge>Nível {levelData.level}</Badge>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <div style={styles.statsGrid}>
-          <Stat
-            icon="⭐"
-            title="XP"
-            value={xp}
-          />
+      {/* 10 Opções de Ícones Pixelados de Programação */}
+      <section className="ios-glass rounded-2xl p-4 md:p-6 mt-4 md:mt-5 border border-[#00E5FF]/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <div className="text-[#00D4FF] text-[10px] tracking-[2px] font-bold uppercase">
+              IDENTIDADE VISUAL 8-BIT
+            </div>
+            <h2 className="text-base md:text-xl font-bold m-0 mt-0.5 text-white">
+              Insígnias de Programação em Pixel Art
+            </h2>
+            <p className="text-xs text-gray-400 m-0 mt-0.5">
+              Escolha seu avatar temático de desenvolvedor: 10 opções exclusivas.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAvatarModalOpen(true)}
+            className="ios-press inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[#0A0E1A] font-bold text-xs border-none cursor-pointer shrink-0 shadow-[0_0_15px_rgba(0,229,255,0.35)]"
+            style={{
+              background: 'linear-gradient(135deg, #00E5FF, #8B5CF6)',
+            }}
+          >
+            <Sparkles size={14} /> Ver Catálogo Completo
+          </button>
+        </div>
 
-          <Stat
-            icon="🔥"
-            title="Sequência atual"
-            value={
-              profile.currentStreak
-            }
-          />
+        {/* Horizontal scroll on mobile or compact 5-col grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          {PIXEL_AVATARS.map((av) => {
+            const isSelected =
+              profile.avatarUrl === av.dataUrl || profile.avatarUrl === av.id;
+            return (
+              <button
+                key={av.id}
+                type="button"
+                onClick={() => handleSelectAvatar(av)}
+                className="ios-press flex flex-col items-center p-3 rounded-xl border cursor-pointer transition-all"
+                style={{
+                  borderColor: isSelected
+                    ? av.accentColor
+                    : 'rgba(255, 255, 255, 0.08)',
+                  boxShadow: isSelected
+                    ? `0 0 16px ${av.accentColor}40`
+                    : 'none',
+                  background: isSelected
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(10, 16, 32, 0.7)',
+                }}
+                title={`${av.name} (${av.category}) - ${av.description}`}
+              >
+                <div className="w-11 h-11 flex items-center justify-center mb-1.5">
+                  <img
+                    src={av.dataUrl}
+                    alt={av.name}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                </div>
+                <span className="text-[11px] font-semibold text-gray-200 text-center truncate w-full">
+                  {av.name}
+                </span>
+                <span
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded mt-1"
+                  style={{
+                    color: av.accentColor,
+                    background: `${av.accentColor}18`,
+                  }}
+                >
+                  {av.category}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-          <Stat
-            icon="🏆"
-            title="Maior sequência"
-            value={
-              profile.longestStreak
-            }
-          />
+      {/* 2x2 Grid on Mobile, 4 cols on Desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-4 md:mt-5">
+        <Stat icon="⭐" title="XP Total" value={xp} />
+        <Stat icon="🔥" title="Sequência atual" value={profile.currentStreak} />
+        <Stat icon="🏆" title="Maior sequência" value={profile.longestStreak} />
+        <Stat icon="🎖️" title="Nível" value={levelData.level} />
+      </div>
 
-          <Stat
-            icon="🎖️"
-            title="Nível"
-            value={
-              levelData.level
-            }
+      {/* Progresso para o próximo nível */}
+      <section className="ios-glass rounded-2xl p-4 md:p-6 mt-4 md:mt-5">
+        <div className="flex items-start justify-between gap-3 mb-3.5">
+          <div>
+            <h2 className="m-0 text-base md:text-lg font-bold">
+              🚀 Progresso para o próximo nível
+            </h2>
+            <p className="text-xs text-gray-400 m-0 mt-1">
+              Continue estudando para ganhar mais XP.
+            </p>
+          </div>
+
+          <strong className="text-[#00D4FF] text-base md:text-lg">
+            {levelData.percent}%
+          </strong>
+        </div>
+
+        <div className="h-2.5 bg-[#1F2937] rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${levelData.percent}%`,
+              background: 'linear-gradient(90deg, #00D4FF, #8B5CF6)',
+            }}
           />
         </div>
 
-        <section
-          style={
-            styles.progressCard
-          }
-        >
-          <div
-            style={
-              styles.progressHeader
-            }
-          >
-            <div>
-              <h2
-                style={
-                  styles.sectionTitle
-                }
-              >
-                🚀 Progresso para o
-                próximo nível
-              </h2>
+        <p className="text-gray-400 text-xs m-0 mt-2">
+          {Math.floor(levelData.xpIntoLevel).toLocaleString('pt-BR')} /{' '}
+          {Math.floor(levelData.xpNeeded).toLocaleString('pt-BR')} XP para o nível{' '}
+          {levelData.level + 1}
+        </p>
+      </section>
 
-              <p
-                style={
-                  styles.muted
-                }
-              >
-                Continue estudando
-                para ganhar mais XP.
-              </p>
-            </div>
-
-            <strong
-              style={
-                styles.progressPercent
-              }
-            >
-              {levelData.percent}%
-            </strong>
-          </div>
-
-          <div
-            style={
-              styles.progressTrack
-            }
-          >
-            <div
-              style={{
-                ...styles.progressFill,
-                width: `${levelData.percent}%`,
-              }}
-            />
-          </div>
-
-          <p
-            style={
-              styles.progressCaption
-            }
-          >
-            {Math.floor(
-              levelData.xpIntoLevel
-            ).toLocaleString(
-              'pt-BR'
-            )}{' '}
-            /{' '}
-            {Math.floor(
-              levelData.xpNeeded
-            ).toLocaleString(
-              'pt-BR'
-            )}{' '}
-            XP para o nível{' '}
-            {levelData.level + 1}
-          </p>
-        </section>
-
-        <section style={styles.infoGrid}>
-          <InfoCard
-            icon="📅"
-            title="Membro desde"
-            value={new Date(
-              profile.joinedAt
-            ).toLocaleDateString(
-              'pt-BR'
-            )}
-          />
-
-          <InfoCard
-            icon="🧑‍💻"
-            title="Classe atual"
-            value={
-              profile.className
-            }
-          />
-
-          <InfoCard
-            icon="👑"
-            title="Título"
-            value={
-              profile.title
-            }
-          />
-        </section>
-
-        <AvatarSelectorModal
-          isOpen={isAvatarModalOpen}
-          onClose={() => setIsAvatarModalOpen(false)}
-          currentAvatarUrl={profile.avatarUrl}
-          onSelect={handleSelectAvatar}
+      {/* Info Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mt-4 md:mt-5">
+        <InfoCard
+          icon="📅"
+          title="Membro desde"
+          value={new Date(profile.joinedAt).toLocaleDateString('pt-BR')}
         />
-      </div>
+        <InfoCard
+          icon="🧑‍💻"
+          title="Classe atual"
+          value={profile.className}
+        />
+        <InfoCard
+          icon="👑"
+          title="Título"
+          value={profile.title}
+        />
+      </section>
+
+      <AvatarSelectorModal
+        isOpen={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+        currentAvatarUrl={profile.avatarUrl}
+        onSelect={handleSelectAvatar}
+      />
     </div>
   );
 }
 
-function Badge({
-  children,
-}: {
-  children: ReactNode;
-}) {
+function Badge({ children }: { children: ReactNode }) {
   return (
-    <span style={styles.badge}>
+    <span className="inline-block px-3 py-1 rounded-full bg-[#17233A] border border-[#29415F] text-gray-200 text-[11px] font-semibold">
       {children}
     </span>
   );
@@ -559,25 +445,11 @@ function Stat({
   value: number;
 }) {
   return (
-    <div style={styles.stat}>
-      <div
-        style={styles.statIcon}
-      >
-        {icon}
-      </div>
-
-      <div
-        style={styles.statLabel}
-      >
-        {title}
-      </div>
-
-      <strong
-        style={styles.statNumber}
-      >
-        {value.toLocaleString(
-          'pt-BR'
-        )}
+    <div className="ios-glass rounded-2xl p-4">
+      <div className="text-2xl">{icon}</div>
+      <div className="text-gray-400 text-xs mt-1.5">{title}</div>
+      <strong className="block mt-0.5 text-xl md:text-2xl font-extrabold text-white">
+        {value.toLocaleString('pt-BR')}
       </strong>
     </div>
   );
@@ -593,368 +465,12 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div style={styles.infoCard}>
-      <div
-        style={styles.infoIcon}
-      >
-        {icon}
+    <div className="ios-glass rounded-2xl p-4 flex items-center sm:block gap-3.5">
+      <div className="text-2xl shrink-0">{icon}</div>
+      <div>
+        <h3 className="text-xs font-bold text-gray-300 m-0 sm:mt-2">{title}</h3>
+        <p className="text-sm font-semibold text-white m-0 mt-0.5">{value}</p>
       </div>
-
-      <h3
-        style={styles.infoTitle}
-      >
-        {title}
-      </h3>
-
-      <p style={styles.muted}>
-        {value}
-      </p>
     </div>
   );
 }
-
-const styles: Record<
-  string,
-  CSSProperties
-> = {
-  page: {
-    minHeight: '100vh',
-    padding: 30,
-    color: 'white',
-    fontFamily: 'sans-serif',
-    background:
-      'radial-gradient(circle at top right, #182447 0%, #080D19 50%, #050811 100%)',
-    boxSizing: 'border-box',
-  },
-
-  center: {
-    minHeight: '60vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-  },
-
-  container: {
-    maxWidth: 1000,
-    margin: '0 auto',
-  },
-
-  hero: {
-    position: 'relative',
-    background:
-      'linear-gradient(135deg, #111827, #10172A)',
-    border:
-      '1px solid #273653',
-    borderRadius: 20,
-    padding: 30,
-    overflow: 'hidden',
-  },
-
-  heroGlow: {
-    position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: '50%',
-    background:
-      'rgba(0, 212, 255, 0.08)',
-    right: -80,
-    top: -100,
-  },
-
-  heroContent: {
-    position: 'relative',
-    display: 'flex',
-    gap: 25,
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-
-  avatar: {
-    width: 100,
-    height: 100,
-    flexShrink: 0,
-    borderRadius: '50%',
-    background:
-      'linear-gradient(135deg, #00D4FF, #8B5CF6)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 42,
-    fontWeight: 'bold',
-    boxShadow:
-      '0 0 35px rgba(0,212,255,.25)',
-    overflow: 'hidden',
-  },
-
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-
-  eyebrow: {
-    color: '#00D4FF',
-    fontSize: 11,
-    letterSpacing: 3,
-    fontWeight: 'bold',
-  },
-
-  name: {
-    margin: '6px 0',
-    fontSize: 32,
-  },
-
-  email: {
-    margin: 0,
-    color: '#9CA3AF',
-  },
-
-  badges: {
-    display: 'flex',
-    gap: 8,
-    flexWrap: 'wrap',
-    marginTop: 12,
-  },
-
-  badge: {
-    display: 'inline-block',
-    padding: '6px 10px',
-    borderRadius: 20,
-    background: '#17233A',
-    border:
-      '1px solid #29415F',
-    color: '#D1D5DB',
-    fontSize: 11,
-  },
-
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: 15,
-    marginTop: 20,
-  },
-
-  stat: {
-    background: '#0D1424',
-    border:
-      '1px solid #1F2937',
-    borderRadius: 14,
-    padding: 20,
-  },
-
-  statIcon: {
-    fontSize: 24,
-  },
-
-  statLabel: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    marginTop: 8,
-  },
-
-  statNumber: {
-    display: 'block',
-    marginTop: 3,
-    fontSize: 24,
-  },
-
-  progressCard: {
-    background: '#0D1424',
-    border:
-      '1px solid #1F2937',
-    borderRadius: 16,
-    padding: 25,
-    marginTop: 20,
-  },
-
-  progressHeader: {
-    display: 'flex',
-    justifyContent:
-      'space-between',
-    gap: 10,
-    alignItems: 'flex-start',
-    marginBottom: 15,
-  },
-
-  sectionTitle: {
-    margin: 0,
-    fontSize: 18,
-  },
-
-  muted: {
-    color: '#9CA3AF',
-    marginTop: 8,
-  },
-
-  progressPercent: {
-    color: '#00D4FF',
-    fontSize: 18,
-  },
-
-  progressTrack: {
-    height: 12,
-    background: '#1F2937',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-
-  progressFill: {
-    height: '100%',
-    background:
-      'linear-gradient(90deg, #00D4FF, #8B5CF6)',
-    borderRadius: 20,
-  },
-
-  progressCaption: {
-    color: '#6B7280',
-    fontSize: 12,
-    marginBottom: 0,
-  },
-
-  infoGrid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: 15,
-    marginTop: 20,
-  },
-
-  infoCard: {
-    background: '#0D1424',
-    border:
-      '1px solid #1F2937',
-    borderRadius: 14,
-    padding: 20,
-  },
-
-  infoIcon: {
-    fontSize: 28,
-  },
-
-  infoTitle: {
-    marginBottom: 0,
-  },
-
-  avatarWrapper: {
-    position: 'relative',
-    display: 'inline-block',
-  },
-
-  avatarChangeBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    background: '#00E5FF',
-    color: '#0A0E1A',
-    borderRadius: '50%',
-    width: 32,
-    height: 32,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '2px solid #0B1220',
-    boxShadow: '0 0 12px rgba(0, 229, 255, 0.6)',
-    cursor: 'pointer',
-  },
-
-  pixelAvatarsSection: {
-    background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(15, 23, 42, 0.9))',
-    border: '1px solid rgba(0, 229, 255, 0.2)',
-    borderRadius: 18,
-    padding: '24px 28px',
-    marginTop: 20,
-    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
-  },
-
-  pixelAvatarsHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
-
-  pixelAvatarsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: '4px 0',
-    color: '#FFFFFF',
-    letterSpacing: '0.5px',
-  },
-
-  pixelAvatarsSubtitle: {
-    fontSize: 13,
-    color: '#94A3B8',
-    margin: 0,
-  },
-
-  openModalBtn: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 16px',
-    borderRadius: 10,
-    background: 'linear-gradient(135deg, #00E5FF, #8B5CF6)',
-    color: '#0A0E1A',
-    fontWeight: 'bold',
-    fontSize: 13,
-    border: 'none',
-    cursor: 'pointer',
-    boxShadow: '0 0 15px rgba(0, 229, 255, 0.4)',
-  },
-
-  pixelAvatarsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
-    gap: 12,
-  },
-
-  pixelAvatarItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '12px 8px',
-    borderRadius: 12,
-    border: '1px solid',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  },
-
-  pixelAvatarImgWrapper: {
-    width: 48,
-    height: 48,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-
-  pixelAvatarImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-    imageRendering: 'pixelated',
-  },
-
-  pixelAvatarName: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: '#E2E8F0',
-    textAlign: 'center',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: '100%',
-  },
-
-  pixelAvatarCategory: {
-    fontSize: 9,
-    fontFamily: 'monospace',
-    padding: '2px 6px',
-    borderRadius: 4,
-    marginTop: 4,
-  },
-};

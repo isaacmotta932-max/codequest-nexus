@@ -585,144 +585,65 @@ export function Settings() {
   }
 
   return (
-    <div
-      style={styles.page}
-    >
-      <div
-        style={
-          styles.container
-        }
-      >
-        <div
-          style={styles.header}
-        >
-          <div>
-            <div
-              style={
-                styles.eyebrow
-              }
-            >
-              CODEQUEST NEXUS
-            </div>
-
-            <h1
-              style={
-                styles.title
-              }
-            >
-              ⚙️ Configurações
-            </h1>
-
-            <p
-              style={
-                styles.subtitle
-              }
-            >
-              Personalize sua
-              experiência na
-              plataforma.
-            </p>
-          </div>
+    <div className="w-full max-w-[1100px] mx-auto px-4 py-5 md:p-8 text-white">
+      <div className="mb-5 md:mb-6">
+        <div className="text-[#00D4FF] text-[10px] md:text-[11px] tracking-[2.5px] font-bold uppercase">
+          CODEQUEST NEXUS
         </div>
+        <h1 className="text-2xl md:text-3xl font-extrabold m-0 mt-1">
+          ⚙️ Configurações
+        </h1>
+        <p className="text-xs md:text-sm text-gray-400 m-0 mt-1">
+          Personalize sua experiência na plataforma.
+        </p>
+      </div>
 
-        <div
-          style={styles.layout}
-        >
-          <aside
-            style={
-              styles.sidebar
-            }
-          >
-            <MenuButton
-              icon="🎨"
-              label="Aparência"
-              active={
-                activeSection ===
-                'appearance'
-              }
-              onClick={() =>
-                setActiveSection(
-                  'appearance'
-                )
-              }
-            />
+      <div className="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-4 md:gap-5 items-start">
+        <aside className="ios-glass rounded-2xl p-2 flex flex-row md:flex-col gap-1.5 overflow-x-auto no-scrollbar">
+          <MenuButton
+            icon="🎨"
+            label="Aparência"
+            active={activeSection === 'appearance'}
+            onClick={() => setActiveSection('appearance')}
+          />
 
-            <MenuButton
-              icon="🔔"
-              label="Notificações"
-              active={
-                activeSection ===
-                'notifications'
-              }
-              onClick={() =>
-                setActiveSection(
-                  'notifications'
-                )
-              }
-            />
+          <MenuButton
+            icon="🔔"
+            label="Notificações"
+            active={activeSection === 'notifications'}
+            onClick={() => setActiveSection('notifications')}
+          />
 
-            <MenuButton
-              icon="🔊"
-              label="Som"
-              active={
-                activeSection ===
-                'sound'
-              }
-              onClick={() =>
-                setActiveSection(
-                  'sound'
-                )
-              }
-            />
+          <MenuButton
+            icon="🔊"
+            label="Som"
+            active={activeSection === 'sound'}
+            onClick={() => setActiveSection('sound')}
+          />
 
-            <MenuButton
-              icon="🌎"
-              label="Preferências"
-              active={
-                activeSection ===
-                'preferences'
-              }
-              onClick={() =>
-                setActiveSection(
-                  'preferences'
-                )
-              }
-            />
+          <MenuButton
+            icon="🌎"
+            label="Preferências"
+            active={activeSection === 'preferences'}
+            onClick={() => setActiveSection('preferences')}
+          />
 
-            <MenuButton
-              icon="⭐"
-              label="Avaliações"
-              active={
-                activeSection ===
-                'ratings'
-              }
-              onClick={() =>
-                setActiveSection(
-                  'ratings'
-                )
-              }
-            />
+          <MenuButton
+            icon="⭐"
+            label="Avaliações"
+            active={activeSection === 'ratings'}
+            onClick={() => setActiveSection('ratings')}
+          />
 
-            <MenuButton
-              icon="🔐"
-              label="Conta"
-              active={
-                activeSection ===
-                'account'
-              }
-              onClick={() =>
-                setActiveSection(
-                  'account'
-                )
-              }
-            />
-          </aside>
+          <MenuButton
+            icon="🔐"
+            label="Conta"
+            active={activeSection === 'account'}
+            onClick={() => setActiveSection('account')}
+          />
+        </aside>
 
-          <main
-            style={
-              styles.content
-            }
-          >
+        <main style={styles.content}>
             {activeSection ===
               'appearance' && (
               <AppearanceSection
@@ -826,9 +747,8 @@ export function Settings() {
           </main>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 function MenuButton({
   icon,
@@ -844,25 +764,14 @@ function MenuButton({
   return (
     <button
       onClick={onClick}
-      style={{
-        ...styles.menuButton,
-
-        ...(active
-          ? styles.menuButtonActive
-          : {}),
-      }}
+      className={`ios-press flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap cursor-pointer transition-all md:w-full ${
+        active
+          ? 'bg-[#17233A] border border-[#00D4FF]/50 text-[#00D4FF] shadow-[0_0_12px_rgba(0,212,255,0.18)]'
+          : 'bg-transparent border border-transparent text-gray-400 hover:text-white'
+      }`}
     >
-      <span
-        style={
-          styles.menuIcon
-        }
-      >
-        {icon}
-      </span>
-
-      <span>
-        {label}
-      </span>
+      <span className="text-base">{icon}</span>
+      <span>{label}</span>
     </button>
   );
 }
@@ -1969,79 +1878,70 @@ const styles: Record<
   },
 
   card: {
-    background: '#0D1424',
-    border:
-      '1px solid #1F2937',
+    background: 'rgba(13, 20, 36, 0.85)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
     borderRadius: 18,
-    padding: 25,
+    padding: 18,
   },
 
   sectionHeader: {
     display: 'flex',
-    gap: 15,
-    alignItems:
-      'center',
-    paddingBottom: 20,
-    borderBottom:
-      '1px solid #1F2937',
+    gap: 12,
+    alignItems: 'center',
+    paddingBottom: 16,
+    borderBottom: '1px solid #1F2937',
     marginBottom: 5,
   },
 
   sectionIcon: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
+    flexShrink: 0,
     borderRadius: 12,
     background: '#17233A',
     display: 'flex',
-    alignItems:
-      'center',
-    justifyContent:
-      'center',
-    fontSize: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 22,
   },
 
   sectionTitle: {
     margin: 0,
-    fontSize: 20,
+    fontSize: 18,
   },
 
   sectionDescription: {
-    margin:
-      '5px 0 0',
+    margin: '4px 0 0',
     color: '#9CA3AF',
-    fontSize: 13,
+    fontSize: 12,
   },
 
   settingRow: {
-    minHeight: 70,
+    minHeight: 64,
     display: 'flex',
-    justifyContent:
-      'space-between',
-    alignItems:
-      'center',
-    gap: 20,
-    borderBottom:
-      '1px solid #1F2937',
-    padding:
-      '15px 0',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+    borderBottom: '1px solid #1F2937',
+    padding: '14px 0',
   },
 
   settingText: {
     display: 'flex',
-    flexDirection:
-      'column',
-    gap: 5,
+    flexDirection: 'column',
+    gap: 4,
+    flex: '1 1 180px',
   },
 
   select: {
     background: '#111827',
-    border:
-      '1px solid #374151',
+    border: '1px solid #374151',
     color: 'white',
-    borderRadius: 8,
-    padding:
-      '9px 12px',
-    minWidth: 150,
+    borderRadius: 10,
+    padding: '9px 12px',
+    minWidth: 135,
     outline: 'none',
   },
 
