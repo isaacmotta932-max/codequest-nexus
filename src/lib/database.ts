@@ -1,10 +1,44 @@
 // Camada unificada de dados (Supabase + fallback local)
 import { supabase, isSupabaseConfigured } from './supabase';
 import { COURSES } from '@/data/courses';
+import { resolveAvatarUrl, normalizeAvatarId } from '@/constants/pixelAvatars';
 import type { User, UserRole } from '@/types';
 import type { ProgressData } from '@/hooks/useProgress';
 
 export { supabase, isSupabaseConfigured };
+
+// ============================================================================
+// CACHE LOCAL DE AVATAR (GARANTE PERSISTÊNCIA MESMO APÓS LOGOUT/LOGIN)
+// ============================================================================
+
+const AVATAR_CACHE_KEY = 'codequest_user_avatars';
+
+export function getCachedAvatar(userId?: string, email?: string): string {
+  try {
+    const raw = localStorage.getItem(AVATAR_CACHE_KEY);
+    if (!raw) return '';
+    const map = JSON.parse(raw) as Record<string, string>;
+    const byId = userId ? map[userId] : '';
+    const byEmail = email ? map[email.toLowerCase()] : '';
+    return resolveAvatarUrl(byId || byEmail || '');
+  } catch {
+    return '';
+  }
+}
+
+export function setCachedAvatar(avatarUrlOrId: string, userId?: string, email?: string): void {
+  if (!avatarUrlOrId) return;
+  try {
+    const raw = localStorage.getItem(AVATAR_CACHE_KEY);
+    const map: Record<string, string> = raw ? JSON.parse(raw) : {};
+    const shortId = normalizeAvatarId(avatarUrlOrId);
+    if (userId) map[userId] = shortId;
+    if (email) map[email.toLowerCase()] = shortId;
+    localStorage.setItem(AVATAR_CACHE_KEY, JSON.stringify(map));
+  } catch {
+    // Ignora erro de storage
+  }
+}
 
 // ============================================================================
 // 1. USUÁRIOS
@@ -21,11 +55,19 @@ export async function dbGetUser(id: string): Promise<User | null> {
 
     if (error || !data) return null;
 
+    const rawAvatar = data.avatar_url || data.avatarUrl || '';
+    const resolvedAvatar =
+      resolveAvatarUrl(rawAvatar) || getCachedAvatar(data.id, data.email);
+
+    if (resolvedAvatar) {
+      setCachedAvatar(resolvedAvatar, data.id, data.email);
+    }
+
     return {
       id: data.id,
       username: data.username || 'Coder',
       email: data.email || '',
-      avatarUrl: data.avatar_url || '',
+      avatarUrl: resolvedAvatar,
       role: (data.role as UserRole) || 'student',
       level: data.level || 1,
       xp: data.xp || 0,
@@ -42,6 +84,9 @@ export async function dbGetUser(id: string): Promise<User | null> {
 }
 
 export async function dbSaveUser(user: Partial<User> & { id: string }): Promise<boolean> {
+  if (user.avatarUrl) {
+    setCachedAvatar(user.avatarUrl, user.id, user.email);
+  }
   if (!isSupabaseConfigured) return false;
   try {
     const payload: Record<string, unknown> = {
@@ -50,7 +95,10 @@ export async function dbSaveUser(user: Partial<User> & { id: string }): Promise<
     };
     if (user.email !== undefined) payload.email = user.email;
     if (user.username !== undefined) payload.username = user.username;
-    if (user.avatarUrl !== undefined) payload.avatar_url = user.avatarUrl;
+    if (user.avatarUrl !== undefined) {
+      // Salva o ID compacto ('pixel-hacker') para evitar erro de limite de VARCHAR no banco
+      payload.avatar_url = normalizeAvatarId(user.avatarUrl);
+    }
     if (user.role !== undefined) payload.role = user.role;
     if (user.level !== undefined) payload.level = user.level;
     if (user.xp !== undefined) payload.xp = user.xp;
@@ -59,6 +107,18 @@ export async function dbSaveUser(user: Partial<User> & { id: string }): Promise<
     if (user.className !== undefined) payload.class_name = user.className;
     if (user.title !== undefined) payload.title = user.title;
     if (user.joinedAt !== undefined) payload.joined_at = user.joinedAt;
+
+    // Se for apenas atualização parcial (ex.: trocar avatar), tenta update primeiro
+    // para não falhar em colunas NOT NULL caso a linha já exista
+    const isPartialUpdate = !user.email && !user.username;
+    if (isPartialUpdate) {
+      const { error: updateErr } = await supabase
+        .from('users')
+        .update(payload)
+        .eq('id', user.id);
+
+      if (!updateErr) return true;
+    }
 
     const { error } = await supabase.from('users').upsert(payload, { onConflict: 'id' });
     if (error) {

@@ -405,13 +405,31 @@ export const PIXEL_AVATARS_MAP: Record<string, PixelAvatar> = Object.fromEntries
   PIXEL_AVATARS.map((av) => [av.id, av])
 );
 
+export const PIXEL_AVATARS_DATAURL_TO_ID: Record<string, string> = Object.fromEntries(
+  PIXEL_AVATARS.map((av) => [av.dataUrl, av.id])
+);
+
 export const DEFAULT_PIXEL_AVATAR = PIXEL_AVATARS[0];
 
 /**
- * Retorna o dataUrl ou resolve o ID de um avatar pixelado.
+ * Converte um dataUrl ou ID de avatar para o ID curto ('pixel-hacker', etc.)
+ * caso pertença ao catálogo oficial.
+ */
+export function normalizeAvatarId(avatarUrlOrId?: string | null): string {
+  if (!avatarUrlOrId) return '';
+  if (PIXEL_AVATARS_MAP[avatarUrlOrId]) return avatarUrlOrId;
+  if (PIXEL_AVATARS_DATAURL_TO_ID[avatarUrlOrId]) {
+    return PIXEL_AVATARS_DATAURL_TO_ID[avatarUrlOrId];
+  }
+  return avatarUrlOrId;
+}
+
+/**
+ * Retorna o dataUrl renderizável a partir de um ID ('pixel-hacker') ou dataUrl.
+ * Se estiver vazio, retorna string vazia (ou resolve o ID caso seja válido).
  */
 export function resolveAvatarUrl(avatarUrlOrId?: string | null): string {
-  if (!avatarUrlOrId) return DEFAULT_PIXEL_AVATAR.dataUrl;
+  if (!avatarUrlOrId) return '';
   if (PIXEL_AVATARS_MAP[avatarUrlOrId]) {
     return PIXEL_AVATARS_MAP[avatarUrlOrId].dataUrl;
   }

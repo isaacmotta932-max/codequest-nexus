@@ -8,7 +8,14 @@ import {
   dbGetUser,
   dbSaveUser,
   dbSaveTeacherApplication,
+  getCachedAvatar,
+  setCachedAvatar,
 } from '@/lib/database';
+import {
+  resolveAvatarUrl,
+  normalizeAvatarId,
+  DEFAULT_PIXEL_AVATAR,
+} from '@/constants/pixelAvatars';
 
 interface TeacherApplicationData {
   name: string;
@@ -100,9 +107,24 @@ export const useAuthStore = create<AuthState>()(
         // Listener de sessão do Supabase
         supabase.auth.getSession().then(({ data: { session } }) => {
           if (session?.user) {
+            const metaAvatar =
+              (session.user.user_metadata?.avatar_url as string | undefined) ||
+              (session.user.user_metadata?.avatar_id as string | undefined) ||
+              '';
+            const cached = getCachedAvatar(session.user.id, session.user.email);
+
             dbGetUser(session.user.id).then((profile) => {
               if (profile) {
-                set({ user: profile, initialized: true });
+                const finalAvatar =
+                  resolveAvatarUrl(profile.avatarUrl) ||
+                  resolveAvatarUrl(metaAvatar) ||
+                  cached ||
+                  resolveAvatarUrl(get().user?.avatarUrl) ||
+                  DEFAULT_PIXEL_AVATAR.dataUrl;
+
+                const hydrated = { ...profile, avatarUrl: finalAvatar };
+                setCachedAvatar(finalAvatar, hydrated.id, hydrated.email);
+                set({ user: hydrated, initialized: true });
               } else {
                 set({ initialized: true });
               }
@@ -114,9 +136,24 @@ export const useAuthStore = create<AuthState>()(
 
         supabase.auth.onAuthStateChange(async (_event, session) => {
           if (session?.user) {
+            const metaAvatar =
+              (session.user.user_metadata?.avatar_url as string | undefined) ||
+              (session.user.user_metadata?.avatar_id as string | undefined) ||
+              '';
+            const cached = getCachedAvatar(session.user.id, session.user.email);
+
             const profile = await dbGetUser(session.user.id);
             if (profile) {
-              set({ user: profile });
+              const finalAvatar =
+                resolveAvatarUrl(profile.avatarUrl) ||
+                resolveAvatarUrl(metaAvatar) ||
+                cached ||
+                resolveAvatarUrl(get().user?.avatarUrl) ||
+                DEFAULT_PIXEL_AVATAR.dataUrl;
+
+              const hydrated = { ...profile, avatarUrl: finalAvatar };
+              setCachedAvatar(finalAvatar, hydrated.id, hydrated.email);
+              set({ user: hydrated });
             }
           }
         });
@@ -140,19 +177,48 @@ export const useAuthStore = create<AuthState>()(
               throw new Error('Usuário não encontrado.');
             }
 
+            const metaAvatar =
+              (data.user.user_metadata?.avatar_url as string | undefined) ||
+              (data.user.user_metadata?.avatar_id as string | undefined) ||
+              '';
+            const cached = getCachedAvatar(data.user.id, data.user.email || email);
+
             // Buscar perfil no banco
             let profile = await dbGetUser(data.user.id);
 
             if (!profile) {
-              // Se não existir perfil, cria um novo
+              // Se não existir perfil, cria um novo preservando o avatar dos metadados ou cache
               profile = criarUsuario(
                 data.user.id,
-                email.split('@')[0],
+                (data.user.user_metadata?.username as string) || email.split('@')[0],
                 email,
-                'student'
+                ((data.user.user_metadata?.role as UserRole) || 'student')
               );
+              profile.avatarUrl =
+                resolveAvatarUrl(metaAvatar) ||
+                cached ||
+                DEFAULT_PIXEL_AVATAR.dataUrl;
               await dbSaveUser(profile);
+            } else {
+              const resolved =
+                resolveAvatarUrl(profile.avatarUrl) ||
+                resolveAvatarUrl(metaAvatar) ||
+                cached ||
+                DEFAULT_PIXEL_AVATAR.dataUrl;
+
+              if (resolved !== profile.avatarUrl) {
+                profile = { ...profile, avatarUrl: resolved };
+                // Sincroniza de volta no banco se estava faltando na tabela users
+                void dbSaveUser({
+                  id: profile.id,
+                  email: profile.email,
+                  username: profile.username,
+                  avatarUrl: resolved,
+                });
+              }
             }
+
+            setCachedAvatar(profile.avatarUrl, profile.id, profile.email);
 
             set({
               user: profile,
@@ -165,8 +231,10 @@ export const useAuthStore = create<AuthState>()(
 
           // Mock fallback
           await new Promise((resolve) => setTimeout(resolve, 500));
+          const cachedMockAvatar =
+            getCachedAvatar(MOCK_USER.id, email) || DEFAULT_PIXEL_AVATAR.dataUrl;
           set({
-            user: { ...MOCK_USER, email },
+            user: { ...MOCK_USER, email, avatarUrl: cachedMockAvatar },
             loading: false,
             error: null,
           });
@@ -200,6 +268,13 @@ export const useAuthStore = create<AuthState>()(
           }
 
           if (isSupabaseConfigured) {
+            const shortAvatarId = normalizeAvatarId(
+              data.avatarUrl || DEFAULT_PIXEL_AVATAR.dataUrl
+            );
+            const resolvedAvatar = resolveAvatarUrl(
+              data.avatarUrl || DEFAULT_PIXEL_AVATAR.dataUrl
+            );
+
             const { data: authData, error } = await supabase.auth.signUp({
               email: data.email,
               password: data.password,
@@ -207,6 +282,8 @@ export const useAuthStore = create<AuthState>()(
                 data: {
                   username: data.username,
                   role: data.role,
+                  avatar_id: shortAvatarId,
+                  avatar_url: shortAvatarId,
                 },
               },
             });
@@ -220,9 +297,9 @@ export const useAuthStore = create<AuthState>()(
               data.email,
               data.role
             );
-            if (data.avatarUrl) {
-              newUser.avatarUrl = data.avatarUrl;
-            }
+            newUser.avatarUrl = resolvedAvatar;
+
+            setCachedAvatar(resolvedAvatar, newUser.id, newUser.email);
 
             // Salva dados na tabela users
             await dbSaveUser(newUser);
@@ -268,9 +345,12 @@ export const useAuthStore = create<AuthState>()(
             data.email,
             data.role
           );
-          if (data.avatarUrl) {
-            localUser.avatarUrl = data.avatarUrl;
+          if ( data.avatarUrl ) {
+            localUser.avatarUrl = resolveAvatarUrl(data.avatarUrl);
+          } else {
+            localUser.avatarUrl = DEFAULT_PIXEL_AVATAR.dataUrl;
           }
+          setCachedAvatar(localUser.avatarUrl, localUser.id, localUser.email);
 
           try {
             const stored = JSON.parse(localStorage.getItem('codequest_registered_users') || '[]');
@@ -341,12 +421,37 @@ export const useAuthStore = create<AuthState>()(
         const currentUser = get().user;
         if (!currentUser) return;
 
-        const updatedUser = { ...currentUser, avatarUrl };
+        const resolved = resolveAvatarUrl(avatarUrl);
+        const shortId = normalizeAvatarId(avatarUrl);
+
+        const updatedUser = { ...currentUser, avatarUrl: resolved };
         set({ user: updatedUser });
 
+        // 1. Salva no cache persistente por ID e e-mail (sobrevive ao logout)
+        setCachedAvatar(resolved, currentUser.id, currentUser.email);
+
         if (isSupabaseConfigured && currentUser.id) {
+          // 2. Salva nos metadados do Supabase Auth (sempre persiste na sessão da conta)
           try {
-            await dbSaveUser({ id: currentUser.id, avatarUrl });
+            await supabase.auth.updateUser({
+              data: {
+                avatar_id: shortId,
+                avatar_url: shortId,
+              },
+            });
+          } catch (e) {
+            console.error('Erro ao salvar avatar no Auth metadata:', e);
+          }
+
+          // 3. Salva na tabela users passando os campos completos para funcionar tanto em update quanto upsert
+          try {
+            await dbSaveUser({
+              id: currentUser.id,
+              email: currentUser.email,
+              username: currentUser.username,
+              role: currentUser.role,
+              avatarUrl: shortId,
+            });
           } catch (e) {
             console.error('Erro ao salvar avatar no Supabase:', e);
           }
