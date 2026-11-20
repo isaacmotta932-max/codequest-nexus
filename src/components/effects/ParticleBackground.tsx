@@ -23,7 +23,8 @@ export function ParticleBackground() {
     let animationId: number;
     let particles: Particle[] = [];
 
-    const colors = ['#00D4FF', '#8B5CF6', '#FF0080', '#00FF88'];
+    // Paleta sutil e limpa para não gerar poluição visual
+    const colors = ['#00D4FF', '#8B5CF6', '#94A3B8'];
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -31,14 +32,14 @@ export function ParticleBackground() {
     };
 
     const initParticles = () => {
-      const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 20000));
+      const count = Math.min(32, Math.floor((window.innerWidth * window.innerHeight) / 42000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 1.5 + 0.5,
-        opacity: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: (Math.random() - 0.5) * 0.18,
+        size: Math.random() * 1.4 + 0.5,
+        opacity: Math.random() * 0.28 + 0.08,
         color: colors[Math.floor(Math.random() * colors.length)],
       }));
     };
@@ -46,7 +47,7 @@ export function ParticleBackground() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((p, i) => {
+      particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
 
@@ -58,23 +59,6 @@ export function ParticleBackground() {
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.opacity;
         ctx.fill();
-
-        // Conectar partículas próximas
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = p.color;
-            ctx.globalAlpha = (1 - dist / 120) * 0.15;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
       });
 
       ctx.globalAlpha = 1;
@@ -85,21 +69,23 @@ export function ParticleBackground() {
     initParticles();
     animate();
 
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       resize();
       initParticles();
-    });
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-0"
+      className="pointer-events-none fixed inset-0 z-0 opacity-75"
       aria-hidden="true"
     />
   );

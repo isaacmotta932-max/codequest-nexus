@@ -1,46 +1,19 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Zap,
   Sparkles,
   Trophy,
   Code2,
-  Cpu,
   ArrowRight,
-  Star,
-  BookOpen,
   CheckCircle2,
-  Terminal,
-  ChevronRight,
-  Play,
-  Layers,
 } from 'lucide-react';
-import { ParticleBackground } from '@/components/effects/ParticleBackground';
+import { SpaceBackground } from '@/components/effects/SpaceBackground';
+import { SolarSystemShowcase } from '@/components/landing/SolarSystemShowcase';
 import { COURSES } from '@/data/courses';
 import { dbGetPlatformStats, PlatformStats } from '@/lib/database';
 
-type SectorFilter = 'all' | 'frontend' | 'backend' | 'data-devops';
-
-function getCourseSector(slug: string): Exclude<SectorFilter, 'all'> {
-  const s = slug.toLowerCase();
-  if (['html', 'css', 'javascript', 'typescript', 'react'].includes(s)) {
-    return 'frontend';
-  }
-  if (['nodejs', 'python', 'java', 'golang', 'rust', 'graphql'].includes(s)) {
-    return 'backend';
-  }
-  return 'data-devops';
-}
-
-const SECTOR_LABELS: Record<SectorFilter, { label: string; icon: string }> = {
-  all: { label: 'Todos (15)', icon: '🌌' },
-  frontend: { label: 'Front-End & UI', icon: '🌐' },
-  backend: { label: 'Back-End & IA', icon: '⚙️' },
-  'data-devops': { label: 'Dados, Cloud & Sec', icon: '🛡️' },
-};
-
-// Mini desafio rápido para o visitante experimentar na própria Landing Page
 const MINI_CHALLENGES = [
   {
     id: 'demo-html',
@@ -52,31 +25,31 @@ const MINI_CHALLENGES = [
     codeSuffix: '>Bem-vindo ao Nexus</h1>',
     options: ['h1', 'title', 'head', 'p'],
     correct: 'h1',
-    feedback: 'Perfeito! A tag <h1> cria o título principal visível da página (+50 XP).',
+    feedback: 'Perfeito! A tag <h1> define o título principal da página (+50 XP).',
   },
   {
     id: 'demo-js',
     lang: 'JavaScript',
     planet: 'Cyber Core',
-    color: '#FFD700',
-    question: 'Qual comando exibe uma mensagem no console do navegador?',
+    color: '#FACC15',
+    question: 'Qual comando exibe uma mensagem no console?',
     codePrefix: '',
     codeSuffix: '("Iniciando propulsores...");',
     options: ['console.log', 'print.screen', 'system.out', 'echo.text'],
     correct: 'console.log',
-    feedback: 'Excelente! console.log() é a ferramenta essencial de todo desenvolvedor JS (+75 XP).',
+    feedback: 'Excelente! console.log() registra mensagens no console (+75 XP).',
   },
   {
     id: 'demo-py',
     lang: 'Python',
     planet: 'AI Planet',
-    color: '#00FF88',
-    question: 'Como definimos uma função em Python?',
+    color: '#34D399',
+    question: 'Como declaramos uma função em Python?',
     codePrefix: '',
     codeSuffix: ' ativar_ia():\n    return "IA Online"',
     options: ['def', 'function', 'fn', 'func'],
     correct: 'def',
-    feedback: 'Correto! Em Python usamos a palavra-chave "def" para declarar funções (+80 XP).',
+    feedback: 'Correto! Em Python usamos "def" para definir funções (+80 XP).',
   },
 ];
 
@@ -87,10 +60,6 @@ export function Landing() {
     coders: 0,
   });
 
-  const [sectorFilter, setSectorFilter] = useState<SectorFilter>('all');
-  const [selectedSlug, setSelectedSlug] = useState<string>(COURSES[0]?.slug || 'html');
-
-  // Estado do Mini Desafio Interativo para visitantes
   const [demoIndex, setDemoIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
@@ -106,67 +75,38 @@ export function Landing() {
     };
   }, []);
 
-  const filteredCourses = useMemo(() => {
-    if (sectorFilter === 'all') return COURSES;
-    return COURSES.filter((c) => getCourseSector(c.slug) === sectorFilter);
-  }, [sectorFilter]);
-
-  const activeCourse = useMemo(() => {
-    return (
-      COURSES.find((c) => c.slug === selectedSlug) ||
-      filteredCourses[0] ||
-      COURSES[0]
-    );
-  }, [selectedSlug, filteredCourses]);
-
-  // Quando troca de filtro de setor, seleciona automaticamente o primeiro planeta daquele setor
-  const handleSectorChange = (sector: SectorFilter) => {
-    setSectorFilter(sector);
-    const list =
-      sector === 'all'
-        ? COURSES
-        : COURSES.filter((c) => getCourseSector(c.slug) === sector);
-    if (list.length > 0 && !list.some((c) => c.slug === selectedSlug)) {
-      setSelectedSlug(list[0].slug);
-    }
-  };
-
   const currentDemo = MINI_CHALLENGES[demoIndex];
   const isDemoCorrect = selectedAnswer === currentDemo.correct;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#050816] text-white">
-      <ParticleBackground />
+    <div className="relative min-h-screen overflow-x-hidden bg-[#040712] text-white selection:bg-[#00D4FF]/30">
+      {/* Tema de universo sutil + astronauta flutuando em segundo plano */}
+      <SpaceBackground />
 
       {/* =====================================================================
-          NAVBAR ESTILO iOS TRANSLÚCIDA
+          NAVBAR MINIMALISTA
          ===================================================================== */}
-      <nav className="sticky top-0 z-30 border-b border-white/10 bg-[#070C1E]/85 backdrop-blur-2xl">
-        <div className="mx-auto flex h-15 max-w-6xl items-center justify-between px-3.5 py-2.5 sm:px-6 gap-2">
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6] shadow-[0_0_14px_rgba(0,212,255,0.4)]">
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="white" />
+      <nav className="sticky top-0 z-30 border-b border-white/[0.06] bg-[#040712]/75 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#00D4FF] to-[#8B5CF6]">
+              <Zap className="h-4 w-4 text-[#040712]" fill="#040712" />
             </div>
-            <div>
-              <h1 className="font-display text-xs sm:text-base font-black leading-none tracking-wider m-0">
-                CODEQUEST
-              </h1>
-              <p className="font-display text-[8px] sm:text-[9px] font-bold tracking-[0.28em] text-[#00D4FF] m-0 mt-0.5">
-                NEXUS
-              </p>
-            </div>
+            <span className="font-display text-sm sm:text-base font-bold tracking-wider text-white">
+              CODEQUEST <span className="text-[#00D4FF] font-normal">NEXUS</span>
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3">
             <Link
               to="/auth/login"
-              className="ios-press no-underline px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white whitespace-nowrap transition-colors"
+              className="ios-press no-underline px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium text-gray-300 hover:text-white transition-colors"
             >
               Entrar
             </Link>
             <Link
               to="/auth/register"
-              className="ios-press no-underline px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-[#050816] text-xs sm:text-sm font-extrabold whitespace-nowrap shadow-[0_4px_15px_rgba(0,212,255,0.35)] border border-white/25"
+              className="ios-press no-underline px-4 py-2 rounded-xl bg-white text-[#040712] hover:bg-gray-100 text-xs sm:text-sm font-bold transition-colors"
             >
               Começar grátis
             </Link>
@@ -175,83 +115,80 @@ export function Landing() {
       </nav>
 
       {/* =====================================================================
-          HERO SECTION — LIMPA, FOCADA E RESPONSIVA NO CELULAR
+          HERO SECTION
          ===================================================================== */}
-      <section className="relative z-10 px-4 pt-9 pb-12 md:pt-16 md:pb-20 md:px-6">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className="relative z-10 px-4 pt-14 pb-16 md:pt-24 md:pb-20 sm:px-6">
+        <div className="mx-auto max-w-3xl text-center">
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFD700]/10 border border-[#FFD700]/35 text-[#FFD700] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider mb-5 shadow-[0_0_20px_rgba(255,215,0,0.12)]">
-              <Star className="h-3.5 w-3.5 fill-[#FFD700] shrink-0" />
-              <span>Academia Gamificada de Programação</span>
-            </div>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-gray-300 text-xs font-medium mb-6">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#00D4FF]" />
+              Plataforma interativa de programação
+            </span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className="font-display text-3xl sm:text-5xl md:text-6xl font-black leading-[1.14] tracking-tight m-0"
+            transition={{ duration: 0.45, delay: 0.05 }}
+            className="font-display text-3xl sm:text-5xl md:text-6xl font-black leading-[1.12] tracking-tight m-0 text-white"
           >
-            Aprenda a programar
-            <br />
-            explorando a{' '}
-            <span className="text-gradient">GALÁXIA DO CÓDIGO</span>
+            Domine programação{' '}
+            <span className="bg-gradient-to-r from-[#00D4FF] to-[#A78BFA] bg-clip-text text-transparent">
+              na prática
+            </span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="mx-auto mt-4 max-w-2xl text-sm sm:text-base md:text-lg text-gray-300/90 leading-relaxed"
+            transition={{ duration: 0.45, delay: 0.12 }}
+            className="mx-auto mt-5 max-w-xl text-sm sm:text-base md:text-lg text-gray-400 leading-relaxed font-normal"
           >
-            Cada linguagem é um planeta com teoria direta ao ponto, editor de código ao vivo, caça aos bugs, missões diárias e insígnias em Pixel Art que evoluem com você.
+            Aulas diretas ao ponto, editor de código no navegador e desafios interativos organizados em um universo de aprendizado.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="mt-7 flex flex-row flex-wrap items-center justify-center gap-3"
+            transition={{ duration: 0.45, delay: 0.2 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-3.5"
           >
             <Link
               to="/auth/register"
-              className="ios-press no-underline inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-[#050816] font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-[0_4px_15px_rgba(0,212,255,0.35)] border border-white/25"
+              className="ios-press no-underline inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#00D4FF] hover:bg-[#33DDFF] text-[#040712] font-bold text-sm transition-colors shadow-[0_0_25px_rgba(0,212,255,0.25)]"
             >
-              <span>Criar Conta Grátis</span>
+              <span>Criar conta gratuita</span>
               <ArrowRight className="h-4 w-4 stroke-[2.5px]" />
             </Link>
 
             <a
-              href="#explorar-planetas"
-              className="ios-press no-underline inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white whitespace-nowrap transition-colors"
+              href="#trilhas"
+              className="ios-press no-underline inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium text-gray-200 hover:text-white transition-colors"
             >
-              <span>Explorar os {stats.planets} Planetas</span>
+              <span>Explorar planetas</span>
             </a>
           </motion.div>
 
-          {/* Barra Compacta de Estatísticas estilo iOS Widget */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="mx-auto mt-10 grid max-w-xl grid-cols-3 gap-2.5 sm:gap-4 rounded-2xl bg-white/[0.04] border border-white/10 p-3.5 backdrop-blur-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-12 pt-8 border-t border-white/[0.06] flex items-center justify-center gap-8 sm:gap-14"
           >
             {[
-              { v: stats.planets, l: 'Planetas' },
-              { v: stats.lessons, l: 'Aulas Práticas' },
-              { v: stats.coders, l: 'Coders Ativos' },
-            ].map((s, i) => (
+              { value: stats.planets, label: 'Planetas' },
+              { value: stats.lessons, label: 'Aulas Práticas' },
+              { value: '100%', label: 'No Navegador' },
+            ].map((item, i) => (
               <div key={i} className="text-center">
-                <p className="font-display text-2xl sm:text-3xl font-black text-gradient m-0">
-                  {s.v}
-                </p>
-                <p className="mt-0.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-400 m-0">
-                  {s.l}
-                </p>
+                <div className="font-display text-xl sm:text-2xl font-bold text-white">
+                  {item.value}
+                </div>
+                <div className="text-xs text-gray-500 mt-0.5">{item.label}</div>
               </div>
             ))}
           </motion.div>
@@ -259,331 +196,33 @@ export function Landing() {
       </section>
 
       {/* =====================================================================
-          EXPLORADOR INTERATIVO DE PLANETAS (COM DESCRIÇÃO COMPLETA E ZERO POLUIÇÃO!)
-          Em vez de 15 cards vazios empilhados, o visitante escolhe um planeta e vê
-          sua descrição detalhada, nível, XP, aulas e pode clicar para começar!
+          SISTEMA SOLAR INTERATIVO DOS PLANETAS
          ===================================================================== */}
-      <section id="explorar-planetas" className="relative z-10 px-4 py-12 md:py-16 md:px-6">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[#00D4FF]">
-              CATÁLOGO INTERATIVO DE TECNOLOGIAS
-            </span>
-            <h2 className="font-display text-2xl sm:text-4xl font-black mt-1 m-0">
-              EXPLORE A <span className="text-gradient">GALÁXIA</span>
+      <SolarSystemShowcase />
+
+      {/* =====================================================================
+          DESAFIO RÁPIDO — TERMINAL LIMPO ESTILO IDE
+         ===================================================================== */}
+      <section className="relative z-10 px-4 py-14 md:py-20 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <div className="text-center mb-8">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white m-0">
+              Teste na prática agora
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-gray-400 m-0">
-              Toque em qualquer planeta abaixo para inspecionar o que você vai aprender, sua descrição completa, nível e cronograma de aulas.
+            <p className="mt-1.5 text-sm text-gray-400 m-0">
+              Complete a lacuna de código abaixo para ver como funcionam as atividades rápidas.
             </p>
           </div>
 
-          {/* 1. Pílulas de Filtro de Setor */}
-          <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-5 -mx-4 px-4 sm:mx-0 sm:px-0">
-            {(Object.keys(SECTOR_LABELS) as SectorFilter[]).map((key) => {
-              const active = sectorFilter === key;
-              const item = SECTOR_LABELS[key];
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handleSectorChange(key)}
-                  className={`ios-press flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer border transition-all ${
-                    active
-                      ? 'bg-[#00D4FF] text-black border-[#00D4FF] shadow-[0_0_15px_rgba(0,212,255,0.35)]'
-                      : 'bg-[#0D1426]/90 text-gray-300 border-white/10 hover:text-white'
-                  }`}
-                >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 2. Seletor Horizontal de Planetas (Dock Estilo iOS) */}
-          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-2 mb-6 -mx-4 px-4 md:mx-0 md:px-0 snap-x">
-            {filteredCourses.map((course) => {
-              const isSelected = activeCourse.slug === course.slug;
-              return (
-                <button
-                  key={course.id}
-                  type="button"
-                  onClick={() => setSelectedSlug(course.slug)}
-                  className={`ios-press snap-center shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-white/15 scale-[1.03]'
-                      : 'bg-[#0B1222]/85 hover:bg-white/[0.07] border-white/10 opacity-80 hover:opacity-100'
-                  }`}
-                  style={{
-                    borderColor: isSelected ? course.color : undefined,
-                    boxShadow: isSelected ? `0 0 20px ${course.color}35` : undefined,
-                  }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-                    style={{
-                      backgroundColor: `${course.color}22`,
-                      border: `1px solid ${course.color}45`,
-                    }}
-                  >
-                    {course.icon}
-                  </div>
-                  <div className="text-left">
-                    <div
-                      className="text-xs font-extrabold leading-tight"
-                      style={{ color: isSelected ? course.color : '#FFFFFF' }}
-                    >
-                      {course.name}
-                    </div>
-                    <div className="text-[10px] text-gray-400 leading-tight mt-0.5">
-                      {course.planetName}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 3. Painel de Inspeção do Planeta Selecionado (Com Descrição Completa & Aulas!) */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCourse.slug}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="rounded-3xl border bg-[#0B1222]/90 backdrop-blur-xl p-5 sm:p-7 md:p-8 shadow-2xl overflow-hidden relative"
-              style={{
-                borderColor: `${activeCourse.color}55`,
-                boxShadow: `0 12px 40px -10px ${activeCourse.color}25`,
-              }}
-            >
-              {/* Brilho radial suave do planeta ativo */}
-              <div
-                className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-3xl"
-                style={{ background: activeCourse.color }}
-              />
-
-              <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                {/* Coluna Esquerda: Identidade do Planeta + Descrição */}
-                <div className="lg:col-span-7 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-3.5 mb-4">
-                      <div
-                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center text-4xl sm:text-5xl shrink-0 border"
-                        style={{
-                          background: `radial-gradient(circle at 30% 30%, ${activeCourse.color}45, #080E1C 80%)`,
-                          borderColor: `${activeCourse.color}70`,
-                          boxShadow: `0 0 28px ${activeCourse.color}40`,
-                        }}
-                      >
-                        {activeCourse.icon}
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span
-                            className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border"
-                            style={{
-                              backgroundColor: `${activeCourse.color}18`,
-                              borderColor: `${activeCourse.color}45`,
-                              color: activeCourse.color,
-                            }}
-                          >
-                            🪐 Planeta {activeCourse.planetName}
-                          </span>
-                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">
-                            Nível {activeCourse.level}
-                          </span>
-                        </div>
-
-                        <h3 className="font-display text-2xl sm:text-3xl font-black text-white m-0 mt-1.5">
-                          {activeCourse.name}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* Descrição clara do Planeta */}
-                    <p className="text-sm sm:text-base text-gray-200 leading-relaxed m-0 mb-5">
-                      {activeCourse.description}
-                    </p>
-
-                    {/* Metadados do Curso */}
-                    <div className="grid grid-cols-3 gap-2.5 mb-6">
-                      <div className="rounded-2xl bg-[#070B16]/80 border border-white/10 p-3">
-                        <span className="text-[10px] uppercase tracking-wider text-gray-400 block">
-                          Módulos
-                        </span>
-                        <strong className="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5 mt-0.5">
-                          <BookOpen size={14} style={{ color: activeCourse.color }} />
-                          {activeCourse.lessons.length} Aulas
-                        </strong>
-                      </div>
-
-                      <div className="rounded-2xl bg-[#070B16]/80 border border-white/10 p-3">
-                        <span className="text-[10px] uppercase tracking-wider text-gray-400 block">
-                          Recompensa
-                        </span>
-                        <strong className="text-sm sm:text-base font-extrabold text-[#FFD700] flex items-center gap-1.5 mt-0.5">
-                          <Zap size={14} />+{activeCourse.totalXp} XP
-                        </strong>
-                      </div>
-
-                      <div className="rounded-2xl bg-[#070B16]/80 border border-white/10 p-3">
-                        <span className="text-[10px] uppercase tracking-wider text-gray-400 block">
-                          Prática
-                        </span>
-                        <strong className="text-sm sm:text-base font-extrabold text-[#00FF88] flex items-center gap-1.5 mt-0.5">
-                          <Terminal size={14} />
-                          Live Code
-                        </strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <Link
-                      to="/auth/register"
-                      className="ios-press no-underline py-3.5 px-6 rounded-2xl font-extrabold text-sm text-black text-center flex items-center justify-center gap-2 shadow-lg"
-                      style={{ background: activeCourse.color }}
-                    >
-                      <Play size={15} fill="black" />
-                      <span>Começar {activeCourse.name} Grátis</span>
-                    </Link>
-                    <span className="text-xs text-gray-400 text-center sm:text-left">
-                      Desbloqueie o Guardião 24-Bit deste planeta ao concluir!
-                    </span>
-                  </div>
-                </div>
-
-                {/* Coluna Direita: Amostra das Aulas deste Planeta */}
-                <div className="lg:col-span-5 rounded-2xl bg-[#070B16]/90 border border-white/10 p-4">
-                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-1.5">
-                      <Layers size={14} style={{ color: activeCourse.color }} />
-                      O que você vai dominar em {activeCourse.name}
-                    </span>
-                    <span className="text-[11px] font-semibold text-gray-400">
-                      {activeCourse.lessons.length} etapas
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    {activeCourse.lessons.slice(0, 4).map((lesson, idx) => (
-                      <div
-                        key={lesson.id}
-                        className="rounded-xl bg-white/[0.03] border border-white/5 px-3 py-2.5 flex items-start gap-2.5"
-                      >
-                        <span
-                          className="w-5 h-5 rounded-lg text-[10px] font-extrabold flex items-center justify-center shrink-0 mt-0.5"
-                          style={{
-                            backgroundColor: `${activeCourse.color}22`,
-                            color: activeCourse.color,
-                          }}
-                        >
-                          {idx + 1}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-white truncate">
-                            {lesson.title.replace(/^\d+\.\s*/, '')}
-                          </div>
-                          <p className="text-[11px] text-gray-400 m-0 mt-0.5 line-clamp-1">
-                            {lesson.description}
-                          </p>
-                        </div>
-                        <span className="text-[10px] font-bold text-[#FFD700] shrink-0">
-                          +{lesson.xpReward} XP
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {activeCourse.lessons.length > 4 && (
-                    <div className="mt-2.5 text-center text-[11px] text-gray-400">
-                      + {activeCourse.lessons.length - 4} aulas práticas e desafios interativos
-                    </div>
-                  )}
-                </div>
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0B101E]/90 backdrop-blur-md overflow-hidden shadow-xl">
+            <div className="flex items-center justify-between px-4 py-3 bg-[#070B14]/90 border-b border-white/[0.06]">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
               </div>
 
-              {/* 4. Visão Geral Compacta de Todos os Planetas do Setor (para troca rápida) */}
-              <div className="mt-6 pt-5 border-t border-white/10">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">
-                  Todos os planetas deste quadrante (toque para ver a descrição):
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  {filteredCourses.map((planet) => {
-                    const isCurrent = planet.slug === activeCourse.slug;
-                    return (
-                      <button
-                        key={planet.id}
-                        type="button"
-                        onClick={() => setSelectedSlug(planet.slug)}
-                        className={`ios-press text-left p-3 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
-                          isCurrent
-                            ? 'bg-white/10'
-                            : 'bg-[#070B16]/60 hover:bg-white/[0.05] border-white/5'
-                        }`}
-                        style={{
-                          borderColor: isCurrent ? planet.color : undefined,
-                        }}
-                      >
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 mt-0.5"
-                          style={{
-                            backgroundColor: `${planet.color}20`,
-                            border: `1px solid ${planet.color}40`,
-                          }}
-                        >
-                          {planet.icon}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className="text-xs font-extrabold truncate"
-                              style={{ color: planet.color }}
-                            >
-                              {planet.name}
-                            </span>
-                            <span className="text-[10px] text-gray-400 shrink-0">
-                              {planet.planetName}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-gray-300/90 m-0 mt-1 line-clamp-2 leading-snug">
-                            {planet.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </section>
-
-      {/* =====================================================================
-          SIMULADOR INTERATIVO AO VIVO PARA VISITANTES ("EXPERIMENTE AGORA")
-         ===================================================================== */}
-      <section className="relative z-10 px-4 py-12 md:py-16 md:px-6">
-        <div className="mx-auto max-w-4xl">
-          <div className="rounded-3xl border border-[#00D4FF]/30 bg-gradient-to-br from-[#0D162E] via-[#091020] to-[#060A14] p-5 sm:p-8 shadow-2xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div>
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[#00FF88] bg-[#00FF88]/10 border border-[#00FF88]/30 px-2.5 py-1 rounded-full">
-                  <Sparkles size={11} /> Teste Interativo Instantâneo
-                </span>
-                <h2 className="font-display text-xl sm:text-2xl font-black text-white m-0 mt-2">
-                  Experimente resolver uma missão agora
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-400 m-0 mt-0.5">
-                  Veja como funcionam os desafios práticos do CodeQuest Nexus antes mesmo de criar sua conta:
-                </p>
-              </div>
-
-              {/* Abas de linguagem do simulador */}
-              <div className="flex items-center gap-1.5 bg-[#060913] p-1 rounded-xl border border-white/10 self-start">
+              <div className="flex items-center gap-1">
                 {MINI_CHALLENGES.map((ch, idx) => (
                   <button
                     key={ch.id}
@@ -592,14 +231,11 @@ export function Landing() {
                       setDemoIndex(idx);
                       setSelectedAnswer(null);
                     }}
-                    className={`ios-press px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer border-none transition-all ${
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer border-none transition-colors ${
                       demoIndex === idx
-                        ? 'bg-white/15 text-white'
-                        : 'bg-transparent text-gray-400 hover:text-white'
+                        ? 'bg-white/10 text-white'
+                        : 'bg-transparent text-gray-500 hover:text-gray-300'
                     }`}
-                    style={{
-                      color: demoIndex === idx ? ch.color : undefined,
-                    }}
                   >
                     {ch.lang}
                   </button>
@@ -607,39 +243,32 @@ export function Landing() {
               </div>
             </div>
 
-            {/* Pergunta + Terminal */}
-            <div className="rounded-2xl bg-[#060913] border border-white/10 p-4 sm:p-5">
-              <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
-                <span>🪐 Planeta: <strong style={{ color: currentDemo.color }}>{currentDemo.planet}</strong></span>
-                <span className="font-mono text-[11px] text-[#FFD700]">Recompensa: +50 XP</span>
-              </div>
-
-              <p className="text-sm sm:text-base font-bold text-white m-0 mb-3">
+            <div className="p-5 sm:p-6">
+              <p className="text-sm sm:text-base font-medium text-gray-200 m-0 mb-4">
                 {currentDemo.question}
               </p>
 
-              {/* Bloco de Código com lacuna interativa */}
-              <div className="rounded-xl bg-[#0B1220] border border-white/10 p-3.5 font-mono text-xs sm:text-sm text-gray-200 overflow-x-auto mb-4">
+              <div className="rounded-xl bg-[#060913] border border-white/[0.06] p-4 font-mono text-xs sm:text-sm text-gray-200 overflow-x-auto mb-5">
                 <code>
                   {currentDemo.codePrefix}
                   <span
-                    className="inline-block px-2.5 py-0.5 mx-1 rounded-md font-bold border"
+                    className="inline-block px-2.5 py-0.5 mx-1 rounded font-bold border transition-colors"
                     style={{
                       backgroundColor: selectedAnswer
                         ? isDemoCorrect
-                          ? 'rgba(0, 255, 136, 0.2)'
-                          : 'rgba(239, 68, 68, 0.2)'
-                        : `${currentDemo.color}20`,
+                          ? 'rgba(52, 211, 153, 0.15)'
+                          : 'rgba(239, 68, 68, 0.15)'
+                        : 'rgba(0, 212, 255, 0.12)',
                       borderColor: selectedAnswer
                         ? isDemoCorrect
-                          ? '#00FF88'
+                          ? '#34D399'
                           : '#EF4444'
-                        : currentDemo.color,
+                        : '#00D4FF',
                       color: selectedAnswer
                         ? isDemoCorrect
-                          ? '#00FF88'
+                          ? '#34D399'
                           : '#FCA5A5'
-                        : currentDemo.color,
+                        : '#00D4FF',
                     }}
                   >
                     {selectedAnswer || ' ? '}
@@ -648,33 +277,22 @@ export function Landing() {
                 </code>
               </div>
 
-              {/* Botões de Opção */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {currentDemo.options.map((opt) => {
                   const chosen = selectedAnswer === opt;
+                  const correct = opt === currentDemo.correct;
                   return (
                     <button
                       key={opt}
                       type="button"
                       onClick={() => setSelectedAnswer(opt)}
-                      className="ios-press py-2.5 px-3 rounded-xl font-mono text-xs sm:text-sm font-bold border cursor-pointer transition-all"
-                      style={{
-                        backgroundColor: chosen
-                          ? opt === currentDemo.correct
-                            ? 'rgba(0, 255, 136, 0.18)'
-                            : 'rgba(239, 68, 68, 0.18)'
-                          : '#111A2E',
-                        borderColor: chosen
-                          ? opt === currentDemo.correct
-                            ? '#00FF88'
-                            : '#EF4444'
-                          : 'rgba(255,255,255,0.1)',
-                        color: chosen
-                          ? opt === currentDemo.correct
-                            ? '#00FF88'
-                            : '#FCA5A5'
-                          : '#FFFFFF',
-                      }}
+                      className={`ios-press py-2.5 px-3 rounded-xl font-mono text-xs sm:text-sm font-semibold border cursor-pointer transition-all ${
+                        chosen
+                          ? correct
+                            ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
+                            : 'bg-red-500/15 border-red-500/50 text-red-300'
+                          : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08] text-gray-200'
+                      }`}
                     >
                       {opt}
                     </button>
@@ -682,33 +300,32 @@ export function Landing() {
                 })}
               </div>
 
-              {/* Feedback instantâneo */}
               {selectedAnswer && (
                 <div
-                  className={`mt-4 p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  className={`mt-4 px-4 py-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm ${
                     isDemoCorrect
-                      ? 'bg-[#00FF88]/10 border-[#00FF88]/40 text-[#A7F3D0]'
-                      : 'bg-red-500/10 border-red-500/40 text-red-200'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                      : 'bg-red-500/10 border-red-500/30 text-red-200'
                   }`}
                 >
-                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <div className="flex items-center gap-2">
                     <CheckCircle2
-                      size={18}
-                      className={isDemoCorrect ? 'text-[#00FF88] shrink-0' : 'text-red-400 shrink-0'}
+                      size={16}
+                      className={isDemoCorrect ? 'text-emerald-400 shrink-0' : 'text-red-400 shrink-0'}
                     />
                     <span>
                       {isDemoCorrect
                         ? currentDemo.feedback
-                        : 'Quase lá! Toque em outra opção acima para testar.'}
+                        : 'Resposta incorreta. Tente outra opção acima.'}
                     </span>
                   </div>
 
                   {isDemoCorrect && (
                     <Link
                       to="/auth/register"
-                      className="ios-press no-underline px-4 py-2 rounded-xl bg-[#00FF88] text-black font-extrabold text-xs shrink-0 text-center"
+                      className="no-underline font-bold text-emerald-300 hover:text-emerald-200 shrink-0"
                     >
-                      Salvar meu XP →
+                      Continuar aprendendo →
                     </Link>
                   )}
                 </div>
@@ -719,53 +336,41 @@ export function Landing() {
       </section>
 
       {/* =====================================================================
-          RECURSOS DE ELITE — 3 PILARES DIRETOS E SEM POLUIÇÃO
+          DIFERENCIAIS — 3 CARDS SIMPLES E ELEGANTES
          ===================================================================== */}
-      <section className="relative z-10 px-4 py-10 md:py-14 md:px-6">
-        <div className="mx-auto max-w-6xl">
+      <section className="relative z-10 px-4 py-12 md:py-16 sm:px-6">
+        <div className="mx-auto max-w-5xl">
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
                 icon: Code2,
-                title: '4 Tipos de Desafios Práticos',
-                desc: 'Quizzes inteligentes, Editor de Código com Live Preview, Caça aos Bugs e Preenchimento de Sintaxe.',
-                accent: '#00D4FF',
+                title: 'Prática no Navegador',
+                desc: 'Resolva quizzes, caça aos bugs e escreva código com feedback imediato sem precisar instalar nada.',
               },
               {
                 icon: Trophy,
-                title: 'Gamificação & 20 Avatares Pixel Art',
-                desc: 'Suba de nível, cumpra missões diárias e desbloqueie Guardiões 24-Bit que mudam a paleta da sua interface.',
-                accent: '#FFD700',
+                title: 'Progressão Gamificada',
+                desc: 'Ganhe XP a cada aula, cumpra missões diárias e desbloqueie insígnias conforme evolui.',
               },
               {
                 icon: Sparkles,
-                title: 'Apostilas PDF & Modo Mobile iOS',
-                desc: 'Estude no celular com layout de app nativo ou baixe as aulas em PDF para revisar offline.',
-                accent: '#8B5CF6',
+                title: 'Material para Consulta',
+                desc: 'Acesse a teoria formatada a qualquer momento ou baixe apostilas em PDF para estudar offline.',
               },
-            ].map((f, i) => (
+            ].map((item, i) => (
               <div
                 key={i}
-                className="ios-glass rounded-2xl p-5 border border-white/10 flex flex-col justify-between"
+                className="rounded-2xl bg-[#0B101E]/80 backdrop-blur-sm border border-white/[0.07] p-6"
               >
-                <div>
-                  <div
-                    className="mb-3.5 inline-flex h-11 w-11 items-center justify-center rounded-xl"
-                    style={{
-                      backgroundColor: `${f.accent}18`,
-                      color: f.accent,
-                      border: `1px solid ${f.accent}35`,
-                    }}
-                  >
-                    <f.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-display text-base sm:text-lg font-bold text-white m-0">
-                    {f.title}
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-gray-400 m-0 leading-relaxed">
-                    {f.desc}
-                  </p>
+                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#00D4FF]">
+                  <item.icon className="h-5 w-5" />
                 </div>
+                <h3 className="font-display text-base font-bold text-white m-0">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-gray-400 m-0 leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -773,40 +378,34 @@ export function Landing() {
       </section>
 
       {/* =====================================================================
-          CHAMADA FINAL (CTA)
+          CTA FINAL & RODAPÉ
          ===================================================================== */}
-      <section className="relative z-10 px-4 py-12 md:py-16 md:px-6">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-3xl border border-[#00D4FF]/40 bg-[#0B1222]/90 backdrop-blur-xl p-7 sm:p-10 text-center shadow-[0_0_40px_rgba(0,212,255,0.15)]">
-            <Cpu className="mx-auto mb-3 h-10 w-10 text-[#00D4FF]" />
-            <h2 className="font-display text-2xl sm:text-4xl font-black m-0">
-              Pronto para iniciar sua <span className="text-gradient">jornada</span>?
-            </h2>
-            <p className="mt-3 text-xs sm:text-sm text-gray-300 max-w-lg mx-auto">
-              Escolha seu avatar em Pixel Art, embarque no primeiro planeta e domine a programação passo a passo.
+      <footer className="relative z-10 border-t border-white/[0.06] mt-8 px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="text-center sm:text-left">
+            <h3 className="font-display text-lg font-bold text-white m-0">
+              Comece sua jornada no CodeQuest Nexus
+            </h3>
+            <p className="text-xs text-gray-500 m-0 mt-1">
+              © 2026 CodeQuest Nexus • Plataforma gratuita de aprendizado prático.
             </p>
-            <div className="mt-6 flex flex-row flex-wrap items-center justify-center gap-3">
-              <Link
-                to="/auth/register"
-                className="ios-press no-underline inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-[#050816] font-extrabold text-xs sm:text-sm whitespace-nowrap shadow-[0_4px_15px_rgba(0,212,255,0.35)] border border-white/25"
-              >
-                <span>Criar Conta Grátis</span>
-                <ChevronRight className="h-4 w-4 stroke-[2.5px]" />
-              </Link>
-              <Link
-                to="/auth/login"
-                className="ios-press no-underline inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white whitespace-nowrap transition-colors"
-              >
-                Já tenho uma conta
-              </Link>
-            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/auth/login"
+              className="ios-press no-underline px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-semibold text-gray-300 hover:text-white transition-colors"
+            >
+              Já tenho conta
+            </Link>
+            <Link
+              to="/auth/register"
+              className="ios-press no-underline px-5 py-2.5 rounded-xl bg-[#00D4FF] hover:bg-[#33DDFF] text-[#040712] text-xs font-bold transition-colors"
+            >
+              Criar conta grátis
+            </Link>
           </div>
         </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-6 text-center text-xs text-gray-500 px-4">
-        <p className="m-0">© 2026 CodeQuest Nexus. Feito com ⚡ para a próxima geração de devs.</p>
       </footer>
     </div>
   );

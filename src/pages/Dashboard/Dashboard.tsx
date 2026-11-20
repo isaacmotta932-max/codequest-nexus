@@ -442,15 +442,6 @@ export function Dashboard() {
     [courses, completedSet]
   );
 
-  const coursesInProgress =
-    coursesWithProgress
-      .filter(
-        (course) =>
-          course.progress.percent > 0 &&
-          course.progress.percent < 100
-      )
-      .slice(0, 3);
-
   const activeCoursesCount =
     coursesWithProgress.filter(
       (course) =>
@@ -1037,62 +1028,6 @@ export function Dashboard() {
                   </Link>
                 );
               })}
-            </div>
-          )}
-
-          {coursesInProgress.length > 0 && (
-            <div className="mt-6 pt-5 border-t border-white/10">
-              <h3 className="text-sm font-bold m-0 mb-3.5">
-                🚀 Seus cursos em progresso
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {coursesInProgress.map((course) => {
-                  const next =
-                    course.lessons.find((lesson) => !completedSet.has(lesson.id)) ||
-                    course.lessons[0];
-
-                  if (!next) {
-                    return null;
-                  }
-
-                  return (
-                    <Link
-                      key={`progress-${course.id}`}
-                      to={`/lesson/${course.slug}/${next.id}`}
-                      className="ios-press no-underline text-inherit block"
-                    >
-                      <div
-                        className="bg-[#0A1020] border rounded-xl p-3.5 h-full"
-                        style={{
-                          borderColor: `${course.color}80`,
-                        }}
-                      >
-                        <div className="flex items-center gap-2.5 mb-2.5">
-                          <span className="text-2xl">{course.icon}</span>
-                          <strong className="text-sm truncate" style={{ color: course.color }}>
-                            {course.name}
-                          </strong>
-                        </div>
-
-                        <div className="bg-[#1F2937] rounded-full h-1.5 overflow-hidden">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${course.progress.percent}%`,
-                              background: course.color,
-                            }}
-                          />
-                        </div>
-
-                        <p className="text-[11px] text-gray-400 m-0 mt-1.5">
-                          {course.progress.percent}% completo
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
             </div>
           )}
         </section>

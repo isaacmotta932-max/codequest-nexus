@@ -749,40 +749,17 @@ function App() {
   }, [user?.id]);
 
   /**
-   * Verificação da Conexão com o Supabase.
+   * Verificação silenciosa da Conexão com o Supabase.
    */
   useEffect(() => {
     const checkDb = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
+      if (!isSupabaseConfigured) return;
       try {
-        if (!isSupabaseConfigured) {
-          showNotification(
-            'warning',
-            '💾 Modo Local',
-            'Supabase não configurado. Os dados serão salvos no navegador.'
-          );
-          return;
-        }
-
-        const ok = await checkSupabaseHealth();
-        if (ok) {
-          showNotification(
-            'success',
-            '☁️ Supabase Conectado!',
-            'Seus dados serão salvos no banco de dados em tempo real.'
-          );
-        } else {
-          showNotification(
-            'warning',
-            '⏳ Supabase',
-            'Aguardando sincronização com o banco de dados.'
-          );
-        }
+        await checkSupabaseHealth();
       } catch {
         showNotification(
           'error',
-          '❌ Erro no Banco',
+          'Erro no Banco',
           'Verifique as variáveis de ambiente do Supabase.'
         );
       }
